@@ -30,10 +30,13 @@
 	CGPoint point;
 	BOOL sendMouseEvent;
 	BOOL isPressedBButton, isPressedAButton, isPressedHomeButton, isPressedUpButton, isPressedDownButton, isPressedLeftButton, isPressedRightButton, isPressedOneButton, isPressedTwoButton, isPressedPlusButton, isPressedMinusButton;
+	
+	WiiCalibrationData calibrationData;
 }
 - (IBAction)setForceFeedbackEnabled:(id)sender;
 - (IBAction)setIRSensorEnabled:(id)sender;
 - (IBAction)setLEDEnabled:(id)sender;
 - (IBAction)setMotionSensorsEnabled:(id)sender;
 - (IBAction)setMouseModeEnabled:(id)sender;
+- (IBAction)doCalibration:(id)sender;
 @end

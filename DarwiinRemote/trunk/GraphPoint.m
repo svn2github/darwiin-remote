@@ -1,9 +1,9 @@
 //
 //  GraphPoint.m
-//  OscilloscopePatch
+//  DarwiinRemote
 //
 //  Created by KIMURA Hiroaki on 06/05/29.
-//  Copyright 2006 __MyCompanyName__. All rights reserved.
+//  Copyright 2006 KIMURA Hiroaki. All rights reserved.
 //
 
 #import "GraphPoint.h"
