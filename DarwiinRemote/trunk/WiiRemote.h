@@ -14,10 +14,6 @@
 
 
 typedef struct {
-	unsigned char x1, x2, x3, y1, y2, y3, z1, z2, z3;
-} WiiCalibrationData;
-
-typedef struct {
 	int x, y, s;
 } IRData;
 
@@ -36,12 +32,6 @@ enum {
 	kWiiRemotePlusButton	= 0x1000
 };
 
-typedef UInt8 WiiCalibrationType;
-enum {
-	kWiiAButtonIsFacingUp		= 0x01,
-	kWiiExpansionPortIsFacingUp	= 0x02,
-	kWiiLeftSideIsFacingUp		= 0x03
-};
 
 @interface WiiRemote : NSObject {
 	
@@ -62,12 +52,12 @@ enum {
 	int orientation;
 	int leftPoint; // is point 0 or 1 on the left. -1 when not tracking.
 	
-	WiiCalibrationData calibData;
 	IRData	irData[4];
 
 	
 	BOOL isMotionSensorEnabled, isIRSensorEnabled, isVibrationEnabled;
 	BOOL isConnecting;
+	
 
 }
 
@@ -81,10 +71,8 @@ enum {
 - (BOOL)setMotionSensorEnabled:(BOOL)enabled;
 - (BOOL)setLEDEnabled1:(BOOL)enabled1 enabled2:(BOOL)enabled2 enabled3:(BOOL)enabled3 enabled4:(BOOL)enabled4;
 - (BOOL)writeData:(const unsigned char*)data at:(unsigned long)address length:(size_t)length;
-- (void)doCalibration:(WiiCalibrationType)type;
 - (BOOL)sendCommand:(const unsigned char*)data length:(size_t)length;
 
-- (WiiCalibrationData)calibrationData;
 - (IOReturn)inquiry;
 
 
@@ -95,7 +83,6 @@ enum {
 
 - (void) wiiRemoteInquiryCompleted:(BOOL)isFound;
 - (void) dataChanged:(unsigned short)buttonData accX:(unsigned char)accX accY:(unsigned char)accY accZ:(unsigned char)accZ mouseX:(float)mx mouseY:(float)my;
-- (void) calibrationEnded:(WiiCalibrationType)calibrationType;
 - (void) wiiRemoteDisconnected;
 
 

@@ -2,6 +2,7 @@
     IBClasses = (
         {
             ACTIONS = {
+                doCalibration = id; 
                 setForceFeedbackEnabled = id; 
                 setIRSensorEnabled = id; 
                 setLEDEnabled = id; 
@@ -22,6 +23,7 @@
                 led3 = NSButton; 
                 led4 = NSButton; 
                 leftButton = NSButton; 
+                mainWindow = NSWindow; 
                 minusButton = NSButton; 
                 oneButton = NSButton; 
                 plusButton = NSButton; 

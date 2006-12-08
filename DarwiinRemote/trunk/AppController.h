@@ -13,6 +13,7 @@
 	IBOutlet NSButton* led2;
 	IBOutlet NSButton* led3;
 	IBOutlet NSButton* led4;
+	IBOutlet NSWindow* mainWindow;
 	
 	IBOutlet NSButton* upButton;
 	IBOutlet NSButton* downButton;
@@ -31,8 +32,13 @@
 	BOOL sendMouseEvent;
 	BOOL isPressedBButton, isPressedAButton, isPressedHomeButton, isPressedUpButton, isPressedDownButton, isPressedLeftButton, isPressedRightButton, isPressedOneButton, isPressedTwoButton, isPressedPlusButton, isPressedMinusButton;
 	
-	WiiCalibrationData calibrationData;
+	int mouseEventMode;
+	double x1, x2, x3, y1, y2, y3, z1, z2, z3;
+	double x0, y0, z0;
+	unsigned char tmpAccX, tmpAccY, tmpAccZ;
+
 }
+- (IBAction)doCalibration:(id)sender;
 - (IBAction)setForceFeedbackEnabled:(id)sender;
 - (IBAction)setIRSensorEnabled:(id)sender;
 - (IBAction)setLEDEnabled:(id)sender;

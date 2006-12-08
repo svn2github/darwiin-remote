@@ -35,11 +35,6 @@
 	isVibrationEnabled = NO;
 	
 	
-	//initialized calibration data
-	calibData.x1 = calibData.x2 =  calibData.y1 = calibData.y3 = calibData.z2 = calibData.z3 = (unsigned char)128;	
-	calibData.x3 = calibData.y2 = calibData.z1 = (unsigned char)154;
-
-	
 	IOReturn ret = [self inquiry];
 	if (ret == kIOReturnSuccess){
 		[inquiry retain];
@@ -129,7 +124,7 @@
 	}
 	
 	//sensor enable...
-	[self setMotionSensorEnabled:YES];
+	[self setMotionSensorEnabled:NO];
 	[self setIRSensorEnabled:NO];
 	//stop force feedback
 	[self setForceFeedbackEnabled:NO];
@@ -145,36 +140,6 @@
 	
 	[_delegate wiiRemoteDisconnected];
 	
-}
-
-
-- (void)setCalibrationData:(WiiCalibrationData)data{
-	calibData = data;
-}
-
-- (WiiCalibrationData)calibrationData{
-	return calibData;
-}
-
-- (void)doCalibration:(WiiCalibrationType)type{
-
-	switch (type){
-		case kWiiAButtonIsFacingUp:
-			calibData.x1 = accX;
-			calibData.y1 = accY;
-			calibData.z1 = accZ;
-			break;
-		case kWiiExpansionPortIsFacingUp:
-			calibData.x2 = accX;
-			calibData.y2 = accY;
-			calibData.z2 = accZ;
-			break;
-		case kWiiLeftSideIsFacingUp:
-			calibData.x3 = accX;
-			calibData.y3 = accY;
-			calibData.z3 = accZ;
-		break;
-	}
 }
 
 - (BOOL)sendCommand:(const unsigned char*)data length:(size_t)length{

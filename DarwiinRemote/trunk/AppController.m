@@ -38,12 +38,29 @@
 
 
 - (IBAction)doCalibration:(id)sender{
-	if ([sender tag] == 0)
-		[wii doCalibration:kWiiAButtonIsFacingUp];
-	if ([sender tag] == 1)
-		[wii doCalibration:kWiiExpansionPortIsFacingUp];
-	if ([sender tag] == 2)
-		[wii doCalibration:kWiiLeftSideIsFacingUp];
+	NSLog(@"x: %d  y: %d  z: %d", tmpAccX, tmpAccY, tmpAccZ);
+	if ([sender tag] == 0){
+		x1 = tmpAccX;
+		y1 = tmpAccY;
+		z1 = tmpAccZ;
+	}
+	
+	if ([sender tag] == 1){
+		x2 = tmpAccX;
+		y2 = tmpAccY;
+		z2 = tmpAccZ;
+	}
+	if ([sender tag] == 2){
+		x3 = tmpAccX;
+		y3 = tmpAccY;
+		z3 = tmpAccZ;
+	}
+	x0 = (x1 + x2) / 2.0;
+	y0 = (y1 + y3) / 2.0;
+	z0 = (z2 + z3) / 2.0;
+	
+	[textView setString:[NSString stringWithFormat:@"%@\n===== x0: %f  y0: %f  z0: %f =====", [textView string], x0, y0, z0]];
+
 }
 
 -(void)awakeFromNib{
@@ -54,15 +71,10 @@
 	[textView setString:@"Please press 1 button and 2 button simultaneously"];
 	point.x = 0;
 	point.y = 0;
-}
-
-
-- (void)doCalibrationWithType:(WiiCalibrationType)type{
-	[wii doCalibration:type];
-}
-
-- (void)getCalibrationData{
-	calibrationData = [wii calibrationData];
+	
+	//initialize calibrationdata
+	x1 = x2 = y1 = y3 = z2 = z3 = 128;
+	x3 = y2 = z1 = 154;
 }
 
 //delegats implementation
@@ -77,6 +89,8 @@
 			[wii setDelegate:self];
 			return;
 		}
+		[wii setMotionSensorEnabled:YES];
+		
 		[textView setString:[NSString stringWithFormat:@"%@\n===== connected to WiiRemote! =====", [textView string]]];
 		[graphView startTimer];
 	}else{
@@ -100,65 +114,71 @@
 - (void) dataChanged:(unsigned short)buttonData accX:(unsigned char)accX accY:(unsigned char)accY accZ:(unsigned char)accZ mouseX:(float)mx mouseY:(float)my{
 	[graphView setData:accX y:accY z:accZ];
 
-	//calibration...
-	double x0 = (126 + 127) / 2.0;
-	double y0 = (128 + 128) / 2.0;
-	double z0 = (128 + 129) / 2.0;
-	double ax = (double)(accX - x0) / (154 - x0);
-	double ay = (double)(accY - y0) / (154 - y0);
-	double az = (double)(accZ - z0) / (154 - z0);
+	tmpAccX = accX;
+	tmpAccY = accY;
+	tmpAccZ = accZ;
+	
+	
+	double ax = (double)(accX - x0) / (x3 - x0);
+	double ay = (double)(accY - y0) / (y2 - y0);
+	double az = (double)(accZ - z0) / (z1 - z0);
 
 	
 	double roll = atan(ax) * 180.0 / 3.14 * 2;
 	double pitch = atan(ay) * 180.0 / 3.14 * 2;
-	
-	
-/**
-	if (roll < -15)
-		point.x -= 2;
-	if (roll < -45)
-		point.x -= 4;
-	if (roll < -75)
-		point.x -= 6;
-	
-	if (roll > 15)
-		point.x += 2;
-	if (roll > 45)
-		point.x += 4;
-	if (roll > 75)
-		point.x += 6;
-	
-	
-	if (pitch < -50)
-		point.y -= 2;
-	if (pitch < -60)
-		point.y -= 4;
-	if (pitch < -80)
-		point.y -= 6;
-	
-	if (pitch > -15)
-		point.y += 2;
-	if (pitch > -5)
-		point.y += 4;
-	if (pitch > 15)
-		point.y += 6; 
-	
-	
-	if (point.x < 0)
-		point.x = 0;
-	if (point.y < 0)
-		point.y = 0;
-**/
-	
 	int dispWidth = CGDisplayPixelsWide(kCGDirectMainDisplay);
 	int dispHeight = CGDisplayPixelsHigh(kCGDirectMainDisplay);
 	
 	
+	NSPoint p = [mainWindow mouseLocationOutsideOfEventStream];
+	NSRect p2 = [mainWindow frame];
+	
+	point.x = p.x + p2.origin.x;
+	point.y = dispHeight - p.y - p2.origin.y;
+	//NSLog(@"width: %d, height: %d,  point.y: %f p.y: %f p2.origin.y: %f p2.size.height: %f", dispWidth, dispHeight, point.y, p.y, p2.origin.y, p2.size.height);
+
+	
+	if (mouseEventMode == 1){
+		if (roll < -15)
+			point.x -= 2;
+		if (roll < -45)
+			point.x -= 4;
+		if (roll < -75)
+			point.x -= 6;
+		
+		if (roll > 15)
+			point.x += 2;
+		if (roll > 45)
+			point.x += 4;
+		if (roll > 75)
+			point.x += 6;
+		
+		
+		if (pitch < -50)
+			point.y -= 2;
+		if (pitch < -60)
+			point.y -= 4;
+		if (pitch < -80)
+			point.y -= 6;
+		
+		if (pitch > -15)
+			point.y += 2;
+		if (pitch > -5)
+			point.y += 4;
+		if (pitch > 15)
+			point.y += 6; 
+		
+		
+		if (point.x < 0)
+			point.x = 0;
+		if (point.y < 0)
+			point.y = 0;
+	}
+
+	
 	BOOL haveMouse = (mx > -2)?YES:NO;
 	
-	if (sendMouseEvent && !haveMouse) {
-		CGPostMouseEvent(point, NO, 1, NO);
-	} else if (haveMouse) {
+	if (mouseEventMode == 2 && haveMouse) {
 		// the 1 in the next two lines is the screen scaling factor.  1 seems to work
 		// pretty good.  smaller values will result in wider movement, but not as much
 		// give at the edges or be able to get to the corners of the screen when rotated
@@ -208,16 +228,16 @@
 		
 		if (!isPressedAButton){
 			isPressedAButton = YES;
-			if (sendMouseEvent)
+			if (mouseEventMode != 0)
 				CGPostMouseEvent(point, TRUE, 1, TRUE);
 		}else{
-			if (sendMouseEvent)	//dragging...
+			if (mouseEventMode != 0)	//dragging...
 				CGPostMouseEvent(point, TRUE, 1, TRUE);
 		}
 	}else{
 		
 		[aButton setEnabled:NO];
-		if (sendMouseEvent)
+		if (mouseEventMode != 0)
 			CGPostMouseEvent(point, TRUE, 1, FALSE);
 		
 		if (isPressedAButton){
@@ -372,7 +392,8 @@
 		
 		if (!isPressedOneButton){
 			isPressedOneButton = YES;
-			CGPostKeyboardEvent((CGCharCode)0, (CGKeyCode)116, true);
+			
+			//CGPostKeyboardEvent((CGCharCode)0, (CGKeyCode)116, true);
 		}
 		
 	}else{
@@ -380,8 +401,17 @@
 		
 		if (isPressedOneButton){
 			isPressedOneButton = NO;
-			CGPostKeyboardEvent((CGCharCode)0, (CGKeyCode)116, false);
-
+			if (mouseEventMode != 1){
+				mouseEventMode = 1;
+				[textView setString:[NSString stringWithFormat:@"%@\n===== Acceleration Sensor Mouse Mode =====", [textView string]]];
+			}else{
+				mouseEventMode = 0;
+				CGPostMouseEvent(point, TRUE, 1, FALSE);
+				isPressedAButton = NO;
+				[textView setString:[NSString stringWithFormat:@"%@\n===== Mouse Mode off =====", [textView string]]];
+			}
+			//CGPostKeyboardEvent((CGCharCode)0, (CGKeyCode)116, false);
+			
 		}
 	}
 	
@@ -391,14 +421,24 @@
 		
 		if (!isPressedTwoButton){
 			isPressedTwoButton = YES;
-			CGPostKeyboardEvent((CGCharCode)0, (CGKeyCode)121, true);
+			//CGPostKeyboardEvent((CGCharCode)0, (CGKeyCode)121, true);
 		}
 	}else{
 		[twoButton setEnabled:NO];
 		
 		if (isPressedTwoButton){
 			isPressedTwoButton = NO;
-			CGPostKeyboardEvent((CGCharCode)0, (CGKeyCode)121, false);
+			if (mouseEventMode != 2){
+				mouseEventMode = 2;
+				[textView setString:[NSString stringWithFormat:@"%@\n===== IR Sensor Mouse Mode =====", [textView string]]];
+				
+			}else{
+				mouseEventMode = 0;
+				CGPostMouseEvent(point, TRUE, 1, FALSE);
+				isPressedAButton = NO;
+				[textView setString:[NSString stringWithFormat:@"%@\n===== Mouse Mode Off =====", [textView string]]];
+			}
+			//CGPostKeyboardEvent((CGCharCode)0, (CGKeyCode)121, false);
 		}
 	}
 	
