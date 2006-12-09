@@ -21,6 +21,8 @@
 
 
 - (IBAction)setMouseModeEnabled:(id)sender{
+
+	
 	if ([sender state]){
 		sendMouseEvent = YES;
 	}else{
@@ -38,7 +40,6 @@
 
 
 - (IBAction)doCalibration:(id)sender{
-	NSLog(@"x: %d  y: %d  z: %d", tmpAccX, tmpAccY, tmpAccZ);
 	if ([sender tag] == 0){
 		x1 = tmpAccX;
 		y1 = tmpAccY;
@@ -59,7 +60,7 @@
 	y0 = (y1 + y3) / 2.0;
 	z0 = (z2 + z3) / 2.0;
 	
-	[textView setString:[NSString stringWithFormat:@"%@\n===== x0: %f  y0: %f  z0: %f =====", [textView string], x0, y0, z0]];
+	[textView setString:[NSString stringWithFormat:@"%@\n===== x: %d  y: %d  z: %d =====", [textView string], tmpAccX, tmpAccY, tmpAccZ]];
 
 }
 
@@ -72,9 +73,49 @@
 	point.x = 0;
 	point.y = 0;
 	
-	//initialize calibrationdata
-	x1 = x2 = y1 = y3 = z2 = z3 = 128;
-	x3 = y2 = z1 = 154;
+	//User defaults settings...
+	{
+        NSMutableDictionary *defaultValues = [NSMutableDictionary dictionary];
+		
+		NSNumber* num = [[NSNumber alloc] initWithDouble:128.0];
+		NSNumber* num2 = [[NSNumber alloc] initWithDouble:154.0];
+
+        //NSData *num = [NSArchiver archivedDataWithRootObject:[[NSNumber alloc]initWithInt:0]];
+        //NSData *check = [NSArchiver archivedDataWithRootObject:[[NSNumber alloc]initWithInt:NSOffState]];
+		[defaultValues setObject:num forKey:@"x1"];
+		[defaultValues setObject:num forKey:@"y1"];
+		[defaultValues setObject:num2 forKey:@"z1"];
+
+		[defaultValues setObject:num forKey:@"x2"];
+		[defaultValues setObject:num2 forKey:@"y2"];
+		[defaultValues setObject:num forKey:@"z2"];
+		
+		[defaultValues setObject:num2 forKey:@"x3"];
+		[defaultValues setObject:num forKey:@"y3"];
+		[defaultValues setObject:num forKey:@"z3"];
+
+        [[NSUserDefaults standardUserDefaults] registerDefaults: defaultValues];
+    }
+	
+	NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
+	x1 = [[defaults objectForKey:@"x1"] doubleValue];
+	y1 = [[defaults objectForKey:@"y1"] doubleValue];
+	z1 = [[defaults objectForKey:@"z1"] doubleValue];
+
+	x2 = [[defaults objectForKey:@"x2"] doubleValue];
+	y2 = [[defaults objectForKey:@"y2"] doubleValue];
+	z2 = [[defaults objectForKey:@"z2"] doubleValue];
+	
+	x3 = [[defaults objectForKey:@"x3"] doubleValue];
+	y3 = [[defaults objectForKey:@"y3"] doubleValue];
+	z3 = [[defaults objectForKey:@"z3"] doubleValue];
+
+
+	NSLog(@"%f, %f, %f, %f, %f, %f, %f, %f, %f", x1, y1, z1, x2, y2, z2, x3, y3, z3);
+
+	x0 = (x1 + x2) / 2.0;
+	y0 = (y1 + y3) / 2.0;
+	z0 = (z2 + z3) / 2.0;
 }
 
 //delegats implementation
@@ -185,6 +226,8 @@
 		float newx = (mx*1)*dispWidth + dispWidth/2;
 		float newy = -(my*1)*dispWidth + dispHeight/2;
 		
+		[graphView setIRPointX:mx Y:my];
+		
 		if (newx < 0) newx = 0;
 		if (newy < 0) newy = 0;
 		if (newx >= dispWidth) newx = dispWidth-1;
@@ -208,6 +251,8 @@
 		}
 		
 		//	printf("%4d %4d    %4d %4d\n", (int)newx, (int)newy, (int)point.x, (int)point.y);
+	}else{
+		[graphView setIRPointX:-2 Y:-2];
 	}
 	
 	
@@ -447,6 +492,22 @@
 
 
 - (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication *)sender{
+	
+	NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
+	
+	[defaults setObject:[[NSNumber alloc] initWithDouble:x1] forKey:@"x1"];
+	[defaults setObject:[[NSNumber alloc] initWithDouble:y1] forKey:@"y1"];
+	[defaults setObject:[[NSNumber alloc] initWithDouble:z1] forKey:@"z1"];
+	
+	[defaults setObject:[[NSNumber alloc] initWithDouble:x2] forKey:@"x2"];
+	[defaults setObject:[[NSNumber alloc] initWithDouble:y2] forKey:@"y2"];
+	[defaults setObject:[[NSNumber alloc] initWithDouble:z2] forKey:@"z2"];
+	
+	[defaults setObject:[[NSNumber alloc] initWithDouble:x3] forKey:@"x3"];
+	[defaults setObject:[[NSNumber alloc] initWithDouble:y3] forKey:@"y3"];
+	[defaults setObject:[[NSNumber alloc] initWithDouble:z3] forKey:@"z3"];
+	
+	
 	[graphView stopTimer];
 	[wii close];
 	return NSTerminateNow;

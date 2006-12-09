@@ -87,7 +87,7 @@
 		trycount++;
 	}
 	
-	//[wiiDevice registerForDisconnectNotification:self selector:@selector(disconnected:fromDevice:)];
+	[wiiDevice registerForDisconnectNotification:self selector:@selector(disconnected:fromDevice:)];
 	
 	
 	trycount = 0;
@@ -135,8 +135,7 @@
 
 - (void)disconnected: (IOBluetoothUserNotification*)note fromDevice: (IOBluetoothDevice*)device {
 	NSLog(@"disconnected.");
-	[wiiDevice release];
-	wiiDevice = nil;
+	//[self close];
 	
 	[_delegate wiiRemoteDisconnected];
 	
@@ -279,6 +278,7 @@
 			trycount++;
 		}while(ret != kIOReturnSuccess && trycount < 10);
 	}
+	cchan = nil;
 
 	
 	trycount = 0;
@@ -289,6 +289,7 @@
 			trycount++;
 		}while(ret != kIOReturnSuccess && trycount < 10);
 	}
+	ichan = nil;
 
 	
 	trycount = 0;
@@ -299,14 +300,15 @@
 			trycount++;
 		}while(ret != kIOReturnSuccess && trycount < 10 && [wiiDevice isConnected]);
 		[wiiDevice release];
-		wiiDevice = nil;
+		//wiiDevice = nil;
 	}
 }
 
 
 // thanks to Ian!
 -(void)l2capChannelData:(IOBluetoothL2CAPChannel*)l2capChannel data:(void *)dataPointer length:(size_t)dataLength{
-	
+	if (!wiiDevice)
+		return;
 	unsigned char* dp = (unsigned char*)dataPointer;
 	
 	/*	printf ("wiidata%3d:", dataLength);

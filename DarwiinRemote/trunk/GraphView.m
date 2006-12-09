@@ -21,7 +21,14 @@
 
 } 
 
+- (void)setIRPointX:(float)x Y:(float)y{
+	_x = x;
+	_y = y;
+}
+
 - (id) initWithFrame : (NSRect) frameRect{
+	
+	_x = _y = -2;
 	
 	NSOpenGLPixelFormatAttribute attr[] = { 
 		NSOpenGLPFADoubleBuffer, 
@@ -122,6 +129,13 @@
 		
 	}
 	glEnd();
+	
+	if (_x > -2){
+		glColor4f(1.0, 1.0, 0.0, 1.0);
+		glRectf( _x - 0.05* (rect.size.height / rect.size.width), _y - 0.05, _x + 0.05 * (rect.size.height / rect.size.width), _y + 0.05 );
+	}
+
+	
 	glFinish();
 	[[self openGLContext] flushBuffer];
 	
