@@ -87,7 +87,7 @@
 		trycount++;
 	}
 	
-	[wiiDevice registerForDisconnectNotification:self selector:@selector(disconnected:fromDevice:)];
+	//[wiiDevice registerForDisconnectNotification:self selector:@selector(disconnected:fromDevice:)];
 	
 	
 	trycount = 0;
@@ -278,7 +278,6 @@
 			trycount++;
 		}while(ret != kIOReturnSuccess && trycount < 10);
 	}
-	cchan = nil;
 
 	
 	trycount = 0;
@@ -289,7 +288,6 @@
 			trycount++;
 		}while(ret != kIOReturnSuccess && trycount < 10);
 	}
-	ichan = nil;
 
 	
 	trycount = 0;
@@ -427,11 +425,11 @@
 	for (i = 0; i < [[inquiry foundDevices] count]; i++){
 		if ([[[[inquiry foundDevices] objectAtIndex:i] getName] isEqualToString:@"Nintendo RVL-CNT-01"]){
 			wiiDevice = [[inquiry foundDevices] objectAtIndex:i];
-			[_delegate wiiRemoteInquiryCompleted:YES];
+			[_delegate wiiRemoteInquiryComplete:YES];
 			return;
 		}
 	}
-	[_delegate wiiRemoteInquiryCompleted:NO];
+	[_delegate wiiRemoteInquiryComplete:NO];
 }
 
 @end

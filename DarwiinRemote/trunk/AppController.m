@@ -120,7 +120,7 @@
 
 //delegats implementation
 
-- (void) wiiRemoteInquiryCompleted:(BOOL)isFound{
+- (void) wiiRemoteInquiryComplete:(BOOL)isFound{
 	if (isFound){
 		[textView setString:[NSString stringWithFormat:@"%@\n===== WiiRemote is found! =====", [textView string]]];
 		if (![wii connect]){
@@ -144,7 +144,7 @@
 
 - (void) wiiRemoteDisconnected {
 	[textView setString:[NSString stringWithFormat:@"%@\n===== lost connection with WiiRemote =====", [textView string]]];
-	[wii release];
+	//[wii close];
 	wii = [[WiiRemote alloc] init];
 	[wii setDelegate:self];
 	[textView setString:[NSString stringWithFormat:@"%@\nPlease press the synchronize button", [textView string]]];

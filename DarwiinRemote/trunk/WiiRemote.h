@@ -81,7 +81,7 @@ enum {
 
 @interface NSObject( WiiRemoteDelegate )
 
-- (void) wiiRemoteInquiryCompleted:(BOOL)isFound;
+- (void) wiiRemoteInquiryComplete:(BOOL)isFound;
 - (void) dataChanged:(unsigned short)buttonData accX:(unsigned char)accX accY:(unsigned char)accY accZ:(unsigned char)accZ mouseX:(float)mx mouseY:(float)my;
 - (void) wiiRemoteDisconnected;
 
