@@ -18,131 +18,144 @@ typedef unsigned char darr[];
 	// unfortunately this shouldn't be required, but it keeps it from crashing.
 	[self retain];
 	
-	accX = 0x10;
-	accY = 0x10;
-	accZ = 0x10;
-	buttonData = 0;
-	leftPoint = -1;
-
 	
-	_delegate = nil;
 	wiiDevice = nil;
-	
 	ichan = nil;
 	cchan = nil;
+	disconnectNotification = nil;
 	
-	isIRSensorEnabled = NO;
-	isMotionSensorEnabled = NO;
+	btaddress = @"";
+	forceFeedbackDisableTimer = nil;
+	
+	delegate = nil;
+	rawDelegate = nil;
+	
+	isAccelerometerEnabled = NO;
 	isVibrationEnabled = NO;
+	irSensorMode = 0;
+	
+	xlrZero[0] = xlrZero[1] = xlrZero[2] = 128;
+	
+	buttons = 0;
+	acceleration.x = acceleration.y = acceleration.z = 0;
+	accelerationRaw[0] = accelerationRaw[1] = accelerationRaw[2] = 128;
+	irPoints[0].x = irPoints[1].x = irPoints[2].x = irPoints[3].x = 0;
+	irPoints[0].y = irPoints[1].y = irPoints[2].y = irPoints[3].y = 0;
+	irPoints[0].s = irPoints[1].s = irPoints[2].s = irPoints[3].s = 0;
+	irPoints[0].set = irPoints[1].set = irPoints[2].set = irPoints[3].set = NO;
+	
+	extensionType = kWiiExtensionNone;
 	
 	return self;
 }
 
 - (void)dealloc{
-	[self close];
+	[self disconnect];
 	[super dealloc];
 }
 
-- (void)setDelegate:(id)delegate{
-	_delegate = delegate;
+- (void)setDelegate:(id)inDelegate{
+	delegate = inDelegate;
 }
 
-- (BOOL)available{
-	if (wiiDevice != nil)
-		return YES;
-	
-	return NO;
+- (void)setRawDelegate:(id)inRawDelegate{
+	rawDelegate = inRawDelegate;
+}
+
+- (BOOL)connected{
+	return (wiiDevice != nil) && [wiiDevice isConnected];
 }
 
 - (IOReturn)connectTo:(IOBluetoothDevice*)device{
 	
 	wiiDevice = device;
+	ichan = nil;
+	cchan = nil;
+	disconnectNotification = nil;
 	
-	int trycount = 0;
 	IOReturn ret;
 	
 	if (wiiDevice == nil){
 		return kIOReturnBadArgument;
 	}
 	
-	trycount = 0;
-	while ((ret = [wiiDevice openConnection]) != kIOReturnSuccess){
-		if (trycount >= 10){
-			NSLog(@"could not open the connection (%d)...", ret);
-			return ret;
+	btaddress = [device getAddressString];
+	
+	do { //  not a loop, just a simple way of dropping to the bottom
+		ret = [wiiDevice openConnection];
+		if (kIOReturnSuccess != ret) {
+			NSLog(@"could not open the connection (%08X)...", ret);
+			break;
 		}
-		trycount++;
-		usleep(10000); //  wait 10ms
+		
+		disconnectNotification = [wiiDevice registerForDisconnectNotification:self
+			selector:@selector(disconnected:fromDevice:)];
+		
+		ret = [wiiDevice performSDPQuery:self];
+		if (kIOReturnSuccess != ret) {
+			NSLog(@"could not perform SDP Query (%08X)...", ret);
+			break;
+		}
+		
+		NSLog(@"Waiting for SDP query to complete");
+	} while(0);
+	
+	if (kIOReturnSuccess != ret) {
+		[wiiDevice closeConnection];
+		wiiDevice = nil;
 	}
-	
-	[self retain];
-	
-	disconnectNotification = [wiiDevice registerForDisconnectNotification:self selector:@selector(disconnected:fromDevice:)];
-	
-	trycount = 0;
-	while ((ret = [wiiDevice performSDPQuery:nil]) != kIOReturnSuccess){
-		if (trycount == 10){
-			NSLog(@"could not perform SDP Query (%d)...", ret);
-			[wiiDevice closeConnection];
-			return ret;
-		}
-		trycount++;
-		usleep(10000); //  wait 10ms
-	}
-	
-	trycount = 0;
-	while ((ret = [wiiDevice openL2CAPChannelSync:&cchan withPSM:17 delegate:self]) != kIOReturnSuccess){
-		if (trycount == 10){
-			NSLog(@"could not open L2CAP channel cchan (%d)", ret);
-			cchan = nil;
-			[wiiDevice closeConnection];
-			return ret;			
-		}
-		trycount++;
-		usleep(10000); //  wait 10ms
-	}	
-	[cchan retain];
-	
-	trycount = 0;
-	while ((ret = [wiiDevice openL2CAPChannelSync:&ichan withPSM:19 delegate:self]) != kIOReturnSuccess){	// this "19" is magic number ;-)
-		if (trycount == 10){
-			NSLog(@"could not open L2CAP channel ichan");
-			ichan = nil;
-			[cchan closeChannel];
-			[wiiDevice closeConnection];
-			
-			return ret;			
-		}
-		trycount++;
-		usleep(10000); //  wait 10ms
-	}
-	[ichan retain];
-	
-	trycount = 0;
-	
-	//sensor enable...
-	ret = [self setMotionSensorEnabled:NO];
-	if (kIOReturnSuccess == ret)
-		ret = [self setIRSensorEnabled:NO];
-	//stop force feedback
-	if (kIOReturnSuccess == ret)
-		ret = [self setForceFeedbackEnabled:NO];
-	//turn LEDs off
-	if (kIOReturnSuccess == ret)
-		ret = [self setLEDEnabled1:NO enabled2:NO enabled3:NO enabled4:NO];
-	
-	if (kIOReturnSuccess != ret)
-		[self close];
 	
 	return ret;
 }
 
+- (void)sdpQueryComplete:(IOBluetoothDevice *)device status:(IOReturn)status {
+	IOReturn ret;
+	
+	do { //  not a loop, just a simple way of dropping to the bottom
+		if (kIOReturnSuccess != status) {
+			NSLog(@"SDP Query failed (%08X)", ret);
+			break;
+		} else {
+			NSLog(@"SDP Query complete");
+		}
+		
+		ret = [wiiDevice openL2CAPChannelSync:&cchan withPSM:17 delegate:self];
+		if (kIOReturnSuccess != ret) {
+			NSLog(@"could not open channel 17 (%08X)...", ret);
+			break;
+		}
+		
+		ret = [wiiDevice openL2CAPChannelSync:&ichan withPSM:19 delegate:self];
+		if (kIOReturnSuccess != ret) {
+			NSLog(@"could not open channel 19 (%08X)...", ret);
+			break;
+		}
+		
+		// initialize the Wii Remote
+		
+		ret = [self setAccelerometerEnabled:NO];
+		if (kIOReturnSuccess != ret) break;
+		
+		ret = [self setIRSensorMode:kWiiRemoteIRModeOff];
+		if (kIOReturnSuccess != ret) break;
+		
+		ret = [self setForceFeedbackEnabled:NO];
+		if (kIOReturnSuccess != ret) break;
+		
+		ret = [self setLEDs:0];
+		if (kIOReturnSuccess != ret) break;
+	} while (0);
+	
+	if (kIOReturnSuccess != ret)
+		[self disconnect];
+}
+
 - (void)disconnected: (IOBluetoothUserNotification*)note fromDevice: (IOBluetoothDevice*)device {
 	NSLog(@"disconnected.");
-	[self close];
+	[self disconnect];
 	
-	if (nil != _delegate)
-		[_delegate wiiRemoteDisconnected];
+	if (nil != delegate)
+		[delegate wiiRemoteDisconnected:self withError:kIOReturnError];
 	
 }
 
@@ -178,16 +191,22 @@ typedef unsigned char darr[];
 	return ret;
 }
 
-- (IOReturn)setMotionSensorEnabled:(BOOL)enabled{
+- (IOReturn)setAccelerometerEnabled:(BOOL)enabled{
 	// these variables indicate a desire, and should be updated regardless of the sucess of sending the command
-	isMotionSensorEnabled = enabled;
+	isAccelerometerEnabled = enabled;
 	
 	unsigned char cmd[] = {0x12, 0x00, 0x30};
 	if (isVibrationEnabled)	cmd[1] |= 0x01;
-	if (isMotionSensorEnabled)	cmd[2] |= 0x01;
-	if (isIRSensorEnabled)	cmd[2] |= 0x02;
+	if (isAccelerometerEnabled)	cmd[2] |= 0x01;
+	if (kWiiRemoteIRModeSimple == irSensorMode) cmd[2] |= 0x02;
 	
 	return [self sendCommand:cmd length:3];
+}
+
+- (void)setAccelerometerZeroPoint:(unsigned char[3])zero {
+	xlrZero[0] = zero[0];
+	xlrZero[1] = zero[1];
+	xlrZero[2] = zero[2];
 }
 
 
@@ -197,18 +216,18 @@ typedef unsigned char darr[];
 	
 	unsigned char cmd[] = {0x13, 0x00};
 	if (isVibrationEnabled)	cmd[1] |= 0x01;
-	if (isIRSensorEnabled)	cmd[1] |= 0x04;
+	if (kWiiRemoteIRModeOff != irSensorMode) cmd[1] |= 0x04;
 	
 	return [self sendCommand:cmd length:2];
 }
 
-- (IOReturn)setLEDEnabled1:(BOOL)enabled1 enabled2:(BOOL)enabled2 enabled3:(BOOL)enabled3 enabled4:(BOOL)enabled4{
+- (IOReturn)setLEDs:(unsigned int)leds{
 	unsigned char cmd[] = {0x11, 0x00};
 	if (isVibrationEnabled)	cmd[1] |= 0x01;
-	if (enabled1)	cmd[1] |= 0x10;
-	if (enabled2)	cmd[1] |= 0x20;
-	if (enabled3)	cmd[1] |= 0x40;
-	if (enabled4)	cmd[1] |= 0x80;
+	if (leds & kWiiRemoteLED1)	cmd[1] |= 0x10;
+	if (leds & kWiiRemoteLED2)	cmd[1] |= 0x20;
+	if (leds & kWiiRemoteLED3)	cmd[1] |= 0x40;
+	if (leds & kWiiRemoteLED4)	cmd[1] |= 0x80;
 	
 	
 	return 	[self sendCommand:cmd length:2];
@@ -216,23 +235,24 @@ typedef unsigned char darr[];
 
 
 //based on Ian's codes. thanks!
-- (IOReturn)setIRSensorEnabled:(BOOL)enabled{
+- (IOReturn)setIRSensorMode:(int)mode{
 	IOReturn ret;
 	
-	isIRSensorEnabled = enabled;
+	irSensorMode = mode;
 
 	// set register 0x12 (report type)
-	if (ret = [self setMotionSensorEnabled:isMotionSensorEnabled]) return ret;
+	if (ret = [self setAccelerometerEnabled:isAccelerometerEnabled]) return ret;
 	
 	// set register 0x13 (ir enable/vibe)
 	if (ret = [self setForceFeedbackEnabled:isVibrationEnabled]) return ret;
 	
 	// set register 0x1a (ir enable 2)
 	unsigned char cmd[] = {0x1a, 0x00};
-	if (enabled)	cmd[1] |= 0x04;
+	if (kWiiRemoteIRModeOff != irSensorMode)	cmd[1] |= 0x04;
+	if (isVibrationEnabled)	cmd[1] |= 0x01;
 	if (ret = [self sendCommand:cmd length:2]) return ret;
 	
-	if(enabled){
+	if(kWiiRemoteIRModeOff != irSensorMode){
 		// based on marcan's method, found on wiili wiki:
 		// tweaked to include some aspects of cliff's setup procedure in the hopes
 		// of it actually turning on 100% of the time (was seeing 30-40% failure rate before)
@@ -282,51 +302,29 @@ typedef unsigned char darr[];
 	return [self sendCommand:cmd length:22];
 }
 
-- (IOReturn)close{
-	IOReturn ret;
-	int trycount = 0;
-	
-	if (nil != disconnectNotification)
+- (void)disconnect{
+	if (nil != disconnectNotification) {
 		[disconnectNotification unregister];
-	
-	if (cchan){
-		if ([wiiDevice isConnected]) do {
-			ret = [cchan closeChannel];
-			trycount++;
-		}while(ret != kIOReturnSuccess && trycount < 10);
-		[cchan release];
+		disconnectNotification = nil;
 	}
-
 	
-	trycount = 0;
-	
-	if (ichan){
-		if ([wiiDevice isConnected]) do {
-			ret = [ichan closeChannel];
-			trycount++;
-		}while(ret != kIOReturnSuccess && trycount < 10);
-		[ichan release];
-	}
-
-	
-	trycount = 0;
-	
-	if (wiiDevice){
-		if ([wiiDevice isConnected]) do{
-			ret = [wiiDevice closeConnection];
-			trycount++;
-		}while(ret != kIOReturnSuccess && trycount < 10 && [wiiDevice isConnected]);
-	//	[wiiDevice release]; // don't do this - stuff crashes if you do.
+	if (nil != wiiDevice) {
+		if (nil != cchan) {
+			[cchan closeChannel];
+			[cchan release];
+		}
 		
+		if (nil != ichan) {
+			[ichan closeChannel];
+			[ichan release];
+		}
+		
+		[wiiDevice closeConnection];
+		[wiiDevice release];
 	}
 	
 	ichan = cchan = nil;
 	wiiDevice = nil;
-	
-	// no longer a delegate
-	[self release];
-	
-	return ret;
 }
 
 
@@ -336,6 +334,10 @@ typedef unsigned char darr[];
 		return;
 	unsigned char* dp = (unsigned char*)dataPointer;
 	
+	if (nil != rawDelegate)
+		[rawDelegate wiiRemoteRawData:self withData:dp withLength:dataLength];
+	
+#if 0
 /*	if ((dp[1]&0xF0) != 0x30) {
 		printf ("recv%3d:", dataLength);
 		int i;
@@ -431,6 +433,7 @@ typedef unsigned char darr[];
 	if (nil != _delegate)
 		[_delegate dataChanged:buttonData accX:accX accY:accY accZ:accZ mouseX:ox mouseY:oy];
 	//[_delegate dataChanged:buttonData accX:irData[0].x/4 accY:irData[0].y/3 accZ:irData[0].s*16];
+#endif
 }
 
 

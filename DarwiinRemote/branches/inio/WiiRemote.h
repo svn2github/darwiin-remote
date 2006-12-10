@@ -9,7 +9,7 @@
 #import <Cocoa/Cocoa.h>
 #import <IOBluetooth/objc/IOBluetoothDevice.h>
 #import <IOBluetooth/objc/IOBluetoothL2CAPChannel.h>
-
+#import <Foundation/NSTimer.h>
 
 typedef struct {
 	BOOL set;
@@ -38,25 +38,26 @@ enum {
 	kWiiRemoteButtonUp		= 0x0800,
 	kWiiRemoteButtonPlus	= 0x1000,
 	
-	kWiiRemoteLED1          = 0x01;
-	kWiiRemoteLED2          = 0x02;
-	kWiiRemoteLED3          = 0x04;
-	kWiiRemoteLED4          = 0x08;
+	kWiiRemoteLED1          = 0x01,
+	kWiiRemoteLED2          = 0x02,
+	kWiiRemoteLED3          = 0x04,
+	kWiiRemoteLED4          = 0x08,
 	
-	kWiiRemoteIRModeSimple   = 1;
-	kWiiRemoteIRModeExtended = 2;
+	kWiiRemoteIRModeOff      = 0,
+	kWiiRemoteIRModeSimple   = 1,
+	kWiiRemoteIRModeExtended = 2,
 	
-	kWiiRemoteHaveButtons      = 0x01;
-	kWiiRemoteHaveAcelleration = 0x02;
-	kWiiRemoteHaveIRSimple     = 0x04;
-	kWiiRemoteHaveIRComplex    = 0x08;
-	kWiiRemoteHaveExtension    = 0x01;
+	kWiiRemoteHaveButtons      = 0x01,
+	kWiiRemoteHaveAcceleration = 0x02,
+	kWiiRemoteHaveIRSimple     = 0x04,
+	kWiiRemoteHaveIRComplex    = 0x08,
+	kWiiRemoteHaveExtension    = 0x10,
 	
 	// for future use
 	kWiiExtensionNone       = 0x00,
-	kWiiExtensionNunchaku   = 0x00,
-	kWiiExtensionClassic    = 0x00,
-	kWiiExtensionZapper     = 0x00,
+	kWiiExtensionNunchaku   = 0x01,
+	kWiiExtensionClassic    = 0x02,
+	kWiiExtensionZapper     = 0x03,
 	
 	kWiiNunchakuButtonC     = 0x00,
 	kWiiNunchakuButtonZ     = 0x00,
@@ -78,60 +79,68 @@ enum {
 
 
 @interface WiiRemote : NSObject {
+	IOBluetoothDevice* wiiDevice;
+	IOBluetoothL2CAPChannel *ichan;
+	IOBluetoothL2CAPChannel *cchan;
+	IOBluetoothUserNotification *disconnectNotification;
 	
-	private IOBluetoothDevice* wiiDevice;
-	private IOBluetoothL2CAPChannel *ichan;
-	private IOBluetoothL2CAPChannel *cchan;
-	private IOBluetoothUserNotification *disconnectNotification;
-	private NSString *address;
-	private NSTimer forceFeedbackDisableTimer;
+	NSString *btaddress;
+	NSTimer *forceFeedbackDisableTimer;
 	
-	private id _delegate;
-	private id _rawDelegate;
+	id delegate;
+	id rawDelegate;
 
-	private BOOL isMotionSensorEnabled, isVibrationEnabled;
-	private int irSensorMode; //  0 = off, 1 = simple,  2 = extended?
+	BOOL isAccelerometerEnabled, isVibrationEnabled;
+	int irSensorMode; //  0 = off, 1 = simple,  2 = extended?
 	
-	WiiRemoteButtonData    buttons; // bitwise or of kWiiRemoteButton codes above
-	WiiRemoteFloatVector3  acelleration; // measured in m/s^2.  +x right, +y backwards, +z up
-	WiiRemoteIRData        irPoints[4];
-	int                    extension;
+	unsigned char xlrZero[3];
+
+@public
+	WiiButtonData       buttons; // bitwise or of kWiiRemoteButton codes above
+	WiiFloatVector3     acceleration; // measured in m/s^2.  +x right, +y backwards, +z up
+	WiiRemoteIRData     irPoints[4];
+	unsigned char       accelerationRaw[3]; // raw data
+	
+	int                 extensionType;
 	
 	// for future use
 	union {
 		struct {
 			WiiButtonData     buttons; // bitwise or of kWiiNunchakuButton codes above
-			WiiFloatVector3   acelleration; // measured in m/s^2.  mapping unknown
+			WiiFloatVector3   acceleration; // measured in m/s^2.  mapping unknown
 			WiiFloatVector2   stick; // typical range for each axis is -1 .. 1.  ?? on diagonals
+			unsigned char     accelerationRaw[3], stickRaw[2];
 		} nunchaku;
 		struct {
 			WiiButtonData     buttons; // bitwise or of kWiiClassicButton codes above
 			WiiFloatVector2   leftStick, rightStick; // typical range for each axis is -1 .. 1.  ?? on diagonals
 			float             l, r; // typical range is 0..??, then pops to ?? or more
+			unsigned char     leftStickRaw[2], rightStickRaw[2], lRaw, rRaw;
 		} classic;
 		struct {
 			WiiButtonData     buttons; // bitwise or of kWiiZapperButton codes above
 			WiiFloatVector2   stick; // typical range for each axis is -1 .. 1.  ?? on diagonals
+			unsigned char     stickRaw[2];
 		} zapper;
 	} extension;
 			
 			
 }
 
-- (IOReturn)connectTo:(IOBluetoothDevice*)device;
-
-- (BOOL)available;
-- (IOReturn)close;
-- (NSString*)getAddress; // unique identifier for each wiimote made
+- (IOReturn)  connectTo:(IOBluetoothDevice*)device;
+- (BOOL)      connected;
+- (void)  disconnect;
+- (NSString*) getAddress; // unique identifier for each wiimote made
 
 // High-level interfaces
-- (void)setDelegate:(id)delegate;
-- (IOReturn)setIRSensor:(BOOL)enabled withMode:(int)mode
-- (IOReturn)setIRSensitivity:(float)sensitivity;
-// sensitivity currently unimplemented.  0 = least sensitive, 1 = most sensitive.
-- (IOReturn)setForceFeedback:(BOOL)enabled forInterval:(NSTimeInterval)interval;
-- (IOReturn)setMotionSensor:(BOOL)enabled;
-- (IOReturn)setLEDs:(unsigned int)leds; // bitwise or of kWiiRemoteLED codes above
+- (void)      setDelegate:(id)inDelegate;
+- (IOReturn)  setIRSensorMode:(int)mode;
+- (IOReturn)  setIRSensitivity:(float)sensitivity; // currently unimplemented.  0 = least sensitive, 1 = most sensitive.
+- (IOReturn)  setForceFeedbackEnabled:(BOOL)active;
+- (IOReturn)  pulseForceFeedbackForInterval:(NSTimeInterval)interval;
+- (IOReturn)  setAccelerometerEnabled:(BOOL)enabled;
+- (void)      setAccelerometerZeroPoint:(unsigned char[3])zero;
+- (IOReturn)  setLEDs:(unsigned int)leds; // bitwise or of kWiiRemoteLED codes above
 
 // low-level interfaces
 - (void)setRawDelegate:(id)delegate;
@@ -144,15 +153,14 @@ enum {
 
 @interface NSObject( WiiRemoteDelegate )
 
-- (void) wiiRemoteUpdate:(WiiRemote*)wiimote withChanges:(unsigned int) mask;
-    // changes encoded per kWiiRemoteHave codes above
-- (void) wiiRemoteExtensionChanged:(WiiRemote*)
-- (void) wiiRemoteDisconnected:(IOReturn)errorCode;
+- (void) wiiRemoteUpdate:(WiiRemote*)wiimote withChanges:(unsigned int) mask; // see kWiiRemoteHave<foo>
+- (void) wiiRemoteExtensionChanged:(WiiRemote*)wiimote;
+- (void) wiiRemoteDisconnected:(WiiRemote*)wiimote withError:(IOReturn)errorCode;
 
 @end
 
 @interface NSObject( WiiRemoteRawDelegate )
 
-- (void) receivedPacket:(unsigned char *)data withLength:(unsigned int)len;
+- (void) wiiRemoteRawData:(WiiRemote*)wiimote withData:(unsigned char *)data withLength:(unsigned int)len;
 
 @end
