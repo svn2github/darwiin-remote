@@ -54,7 +54,7 @@ enum {
 	
 	BOOL isMotionSensorEnabled, isIRSensorEnabled, isVibrationEnabled;
 	
-	IOBluetoothUserNotification *discinnectNotification;
+	IOBluetoothUserNotification *disconnectNotification;
 }
 
 - (IOReturn)connectTo:(IOBluetoothDevice*)device;

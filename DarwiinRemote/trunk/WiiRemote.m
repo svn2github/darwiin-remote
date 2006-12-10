@@ -77,7 +77,7 @@ typedef unsigned char darr[];
 	
 	[self retain];
 	
-	discinnectNotification = [wiiDevice registerForDisconnectNotification:self selector:@selector(disconnected:fromDevice:)];
+	disconnectNotification = [wiiDevice registerForDisconnectNotification:self selector:@selector(disconnected:fromDevice:)];
 	
 	trycount = 0;
 	while ((ret = [wiiDevice performSDPQuery:nil]) != kIOReturnSuccess){
@@ -101,6 +101,7 @@ typedef unsigned char darr[];
 		trycount++;
 		usleep(10000); //  wait 10ms
 	}	
+	[cchan retain];
 	
 	trycount = 0;
 	while ((ret = [wiiDevice openL2CAPChannelSync:&ichan withPSM:19 delegate:self]) != kIOReturnSuccess){	// this "19" is magic number ;-)
@@ -115,6 +116,7 @@ typedef unsigned char darr[];
 		trycount++;
 		usleep(10000); //  wait 10ms
 	}
+	[ichan retain];
 	
 	trycount = 0;
 	
@@ -158,7 +160,7 @@ typedef unsigned char darr[];
 	
 /*	printf ("send%3d:", length);
 	for(i=0 ; i<length ; i++) {
-		printf(" %02X", data[i]);
+		printf(" %02X", buf[i]);
 	}
 	printf("\n");*/
 	
@@ -284,24 +286,26 @@ typedef unsigned char darr[];
 	IOReturn ret;
 	int trycount = 0;
 	
-	if (nil != discinnectNotification)
-		[discinnectNotification unregister];
+	if (nil != disconnectNotification)
+		[disconnectNotification unregister];
 	
-	if (cchan && [wiiDevice isConnected]){
-		do {
+	if (cchan){
+		if ([wiiDevice isConnected]) do {
 			ret = [cchan closeChannel];
 			trycount++;
 		}while(ret != kIOReturnSuccess && trycount < 10);
+		[cchan release];
 	}
 
 	
 	trycount = 0;
 	
-	if (ichan && [wiiDevice isConnected]){
-		do {
+	if (ichan){
+		if ([wiiDevice isConnected]) do {
 			ret = [ichan closeChannel];
 			trycount++;
 		}while(ret != kIOReturnSuccess && trycount < 10);
+		[ichan release];
 	}
 
 	
