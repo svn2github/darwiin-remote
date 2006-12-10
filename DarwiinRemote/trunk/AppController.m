@@ -66,8 +66,9 @@
 
 -(void)awakeFromNib{
 	sendMouseEvent = NO;
-	wii = [[WiiRemote alloc] init];
-	[wii setDelegate:self];
+	discovery = [[WiiRemoteDiscovery alloc] init];
+	[discovery setDelegate:self];
+	[discovery start];
 	[drawer open];
 	[textView setString:@"Please press 1 button and 2 button simultaneously"];
 	point.x = 0;
@@ -120,33 +121,26 @@
 
 //delegats implementation
 
-- (void) wiiRemoteInquiryComplete:(BOOL)isFound{
-	if (isFound){
-		[textView setString:[NSString stringWithFormat:@"%@\n===== WiiRemote is found! =====", [textView string]]];
-		if (![wii connect]){
-			[textView setString:[NSString stringWithFormat:@"%@\n===== could not connect to the WiiRemote. Please restart this app. =====", [textView string]]];
-			[wii release];
-			wii = [[WiiRemote alloc] init];
-			[wii setDelegate:self];
-			return;
-		}
-		[wii setMotionSensorEnabled:YES];
-		
-		[textView setString:[NSString stringWithFormat:@"%@\n===== connected to WiiRemote! =====", [textView string]]];
-		[graphView startTimer];
-	}else{
-		[textView setString:[NSString stringWithFormat:@"%@\n===== WiiRemote could not be found. Retrying... =====", [textView string]]];
-		[wii release];
-		wii = [[WiiRemote alloc] init];
-		[wii setDelegate:self];
-	}
+- (void) WiiRemoteDiscovered:(WiiRemote*)wiimote {
+	wii = wiimote;
+	[wiimote setDelegate:self];
+	[textView setString:[NSString stringWithFormat:@"%@\n===== Connected to WiiRemote =====", [textView string]]];
+	[wiimote setLEDEnabled1:YES enabled2:NO enabled3:NO enabled4:NO];
+	[wiimote setMotionSensorEnabled:YES];
+//	[wiimote setIRSensorEnabled:YES];
+	[discovery stop];
+	[graphView startTimer];
+}
+
+- (void) WiiRemoteDiscoveryError:(int)code {
+	[textView setString:[NSString stringWithFormat:@"%@\n===== WiiRemoteDiscovery error (%d) =====", [textView string], code]];
 }
 
 - (void) wiiRemoteDisconnected {
 	[textView setString:[NSString stringWithFormat:@"%@\n===== lost connection with WiiRemote =====", [textView string]]];
-	//[wii close];
-	wii = [[WiiRemote alloc] init];
-	[wii setDelegate:self];
+	[wii release];
+	wii = nil;
+	[discovery start];
 	[textView setString:[NSString stringWithFormat:@"%@\nPlease press the synchronize button", [textView string]]];
 }
 
@@ -162,7 +156,7 @@
 	
 	double ax = (double)(accX - x0) / (x3 - x0);
 	double ay = (double)(accY - y0) / (y2 - y0);
-	double az = (double)(accZ - z0) / (z1 - z0);
+//	double az = (double)(accZ - z0) / (z1 - z0);
 
 	
 	double roll = atan(ax) * 180.0 / 3.14 * 2;
@@ -219,14 +213,18 @@
 	
 	BOOL haveMouse = (mx > -2)?YES:NO;
 	
+	if (haveMouse) {
+		[graphView setIRPointX:mx Y:my];
+	} else {
+		[graphView setIRPointX:-2 Y:-2];
+	}
+	
 	if (mouseEventMode == 2 && haveMouse) {
 		// the 1 in the next two lines is the screen scaling factor.  1 seems to work
 		// pretty good.  smaller values will result in wider movement, but not as much
 		// give at the edges or be able to get to the corners of the screen when rotated
 		float newx = (mx*1)*dispWidth + dispWidth/2;
 		float newy = -(my*1)*dispWidth + dispHeight/2;
-		
-		[graphView setIRPointX:mx Y:my];
 		
 		if (newx < 0) newx = 0;
 		if (newy < 0) newy = 0;
@@ -251,8 +249,6 @@
 		}
 		
 		//	printf("%4d %4d    %4d %4d\n", (int)newx, (int)newy, (int)point.x, (int)point.y);
-	}else{
-		[graphView setIRPointX:-2 Y:-2];
 	}
 	
 	

@@ -8,10 +8,15 @@
 
 #import "WiiRemote.h"
 
+// this type is used a lot (data array):
+typedef unsigned char darr[];
 
 @implementation WiiRemote
 
 - (id) init{
+	
+	// unfortunately this shouldn't be required, but it keeps it from crashing.
+	[self retain];
 	
 	accX = 0x10;
 	accY = 0x10;
@@ -20,10 +25,6 @@
 	leftPoint = -1;
 
 	
-	inquiry = [IOBluetoothDeviceInquiry inquiryWithDelegate: self];
-	[inquiry setDelegate:self];
-	
-
 	_delegate = nil;
 	wiiDevice = nil;
 	
@@ -33,12 +34,6 @@
 	isIRSensorEnabled = NO;
 	isMotionSensorEnabled = NO;
 	isVibrationEnabled = NO;
-	
-	
-	IOReturn ret = [self inquiry];
-	if (ret == kIOReturnSuccess){
-		[inquiry retain];
-	}
 	
 	return self;
 }
@@ -59,89 +54,97 @@
 	return NO;
 }
 
-- (BOOL)connect{
+- (IOReturn)connectTo:(IOBluetoothDevice*)device{
 	
-	isConnecting = YES;
+	wiiDevice = device;
 	
 	int trycount = 0;
+	IOReturn ret;
 	
 	if (wiiDevice == nil){
-		return NO;
-	}
-	
-	while ([wiiDevice isConnected] && [wiiDevice closeConnection] != kIOReturnSuccess){
-		
-		if (trycount == 10){
-			NSLog(@"could not close existing conection...");
-			return NO;
-		}
-		trycount++;
+		return kIOReturnBadArgument;
 	}
 	
 	trycount = 0;
-	while ([wiiDevice openConnection] != kIOReturnSuccess){
-		if (trycount == 10){
-			NSLog(@"could not open the connection...");
-			return NO;
+	while ((ret = [wiiDevice openConnection]) != kIOReturnSuccess){
+		if (trycount >= 10){
+			NSLog(@"could not open the connection (%d)...", ret);
+			return ret;
 		}
 		trycount++;
+		usleep(10000); //  wait 10ms
 	}
 	
-	//[wiiDevice registerForDisconnectNotification:self selector:@selector(disconnected:fromDevice:)];
+	[self retain];
 	
+	discinnectNotification = [wiiDevice registerForDisconnectNotification:self selector:@selector(disconnected:fromDevice:)];
 	
 	trycount = 0;
-	while ([wiiDevice performSDPQuery:nil] != kIOReturnSuccess){
+	while ((ret = [wiiDevice performSDPQuery:nil]) != kIOReturnSuccess){
 		if (trycount == 10){
-			NSLog(@"could not perform SDP Query...");
-			return NO;
+			NSLog(@"could not perform SDP Query (%d)...", ret);
+			[wiiDevice closeConnection];
+			return ret;
 		}
 		trycount++;
+		usleep(10000); //  wait 10ms
 	}
 	
 	trycount = 0;
-	while ([wiiDevice openL2CAPChannelSync:&cchan withPSM:17 delegate:self] != kIOReturnSuccess){
+	while ((ret = [wiiDevice openL2CAPChannelSync:&cchan withPSM:17 delegate:self]) != kIOReturnSuccess){
 		if (trycount == 10){
-			NSLog(@"could not open L2CAP channel cchan");
+			NSLog(@"could not open L2CAP channel cchan (%d)", ret);
 			cchan = nil;
 			[wiiDevice closeConnection];
-			return NO;			
+			return ret;			
 		}
 		trycount++;
+		usleep(10000); //  wait 10ms
 	}	
 	
 	trycount = 0;
-	while ([wiiDevice openL2CAPChannelSync:&ichan withPSM:19 delegate:self] != kIOReturnSuccess){	// this "19" is magic number ;-)
+	while ((ret = [wiiDevice openL2CAPChannelSync:&ichan withPSM:19 delegate:self]) != kIOReturnSuccess){	// this "19" is magic number ;-)
 		if (trycount == 10){
 			NSLog(@"could not open L2CAP channel ichan");
 			ichan = nil;
 			[cchan closeChannel];
 			[wiiDevice closeConnection];
 			
-			return NO;			
+			return ret;			
 		}
 		trycount++;
+		usleep(10000); //  wait 10ms
 	}
 	
+	trycount = 0;
+	
 	//sensor enable...
-	[self setMotionSensorEnabled:NO];
-	[self setIRSensorEnabled:NO];
+	ret = [self setMotionSensorEnabled:NO];
+	if (kIOReturnSuccess == ret)
+		ret = [self setIRSensorEnabled:NO];
 	//stop force feedback
-	[self setForceFeedbackEnabled:NO];
+	if (kIOReturnSuccess == ret)
+		ret = [self setForceFeedbackEnabled:NO];
 	//turn LEDs off
-	[self setLEDEnabled1:NO enabled2:NO enabled3:NO enabled4:NO];
-	return YES;
+	if (kIOReturnSuccess == ret)
+		ret = [self setLEDEnabled1:NO enabled2:NO enabled3:NO enabled4:NO];
+	
+	if (kIOReturnSuccess != ret)
+		[self close];
+	
+	return ret;
 }
 
 - (void)disconnected: (IOBluetoothUserNotification*)note fromDevice: (IOBluetoothDevice*)device {
 	NSLog(@"disconnected.");
-	//[self close];
+	[self close];
 	
-	[_delegate wiiRemoteDisconnected];
+	if (nil != _delegate)
+		[_delegate wiiRemoteDisconnected];
 	
 }
 
-- (BOOL)sendCommand:(const unsigned char*)data length:(size_t)length{
+- (IOReturn)sendCommand:(const unsigned char*)data length:(size_t)length{
 	
 	
 	unsigned char buf[40];
@@ -151,53 +154,53 @@
 	if (buf[1] == 0x16) length=23;
 	else				length++;
 	
-	int i = 0;
+	int i;
+	
+/*	printf ("send%3d:", length);
+	for(i=0 ; i<length ; i++) {
+		printf(" %02X", data[i]);
+	}
+	printf("\n");*/
+	
+	IOReturn ret;
 	
 	for (i = 0; i < 10; i++){
-		if ([cchan writeSync:buf length:length] == kIOReturnSuccess)
+		ret = [cchan writeSync:buf length:length];
+		if (kIOReturnSuccess == ret)
 			break;
+		usleep(10000);
 	}
 	
-	if (i == 10)
-		return NO;
 	
-	return YES;
+	
+	return ret;
 }
 
-- (BOOL)setMotionSensorEnabled:(BOOL)enabled{
-	BOOL success = false;
+- (IOReturn)setMotionSensorEnabled:(BOOL)enabled{
+	// these variables indicate a desire, and should be updated regardless of the sucess of sending the command
+	isMotionSensorEnabled = enabled;
 	
-	if (isIRSensorEnabled)
-		success = [self sendCommand:(unsigned char[]){0x12, 0x00, 0x33} length:3];
-	else if (enabled)
-		success = [self sendCommand:(unsigned char[]){0x12, 0x00, 0x31} length:3];
-	else
-		success = [self sendCommand:(unsigned char[]){0x12, 0x00, 0x30} length:3];
+	unsigned char cmd[] = {0x12, 0x00, 0x30};
+	if (isVibrationEnabled)	cmd[1] |= 0x01;
+	if (isMotionSensorEnabled)	cmd[2] |= 0x01;
+	if (isIRSensorEnabled)	cmd[2] |= 0x02;
 	
-	if (success){
-		isMotionSensorEnabled = enabled;
-		return YES;
-	}
-	
-	return NO;
+	return [self sendCommand:cmd length:3];
 }
 
 
-- (BOOL)setForceFeedbackEnabled:(BOOL)enabled{
+- (IOReturn)setForceFeedbackEnabled:(BOOL)enabled{
+	// these variables indicate a desire, and should be updated regardless of the sucess of sending the command
+	isVibrationEnabled = enabled;
 	
 	unsigned char cmd[] = {0x13, 0x00};
-	if (enabled)	cmd[1] |= 0x01;
+	if (isVibrationEnabled)	cmd[1] |= 0x01;
 	if (isIRSensorEnabled)	cmd[1] |= 0x04;
 	
-	if ([self sendCommand:cmd length:2]){
-		isVibrationEnabled = enabled;
-		return YES;
-	}
-
-	return NO;
+	return [self sendCommand:cmd length:2];
 }
 
-- (BOOL)setLEDEnabled1:(BOOL)enabled1 enabled2:(BOOL)enabled2 enabled3:(BOOL)enabled3 enabled4:(BOOL)enabled4{
+- (IOReturn)setLEDEnabled1:(BOOL)enabled1 enabled2:(BOOL)enabled2 enabled3:(BOOL)enabled3 enabled4:(BOOL)enabled4{
 	unsigned char cmd[] = {0x11, 0x00};
 	if (isVibrationEnabled)	cmd[1] |= 0x01;
 	if (enabled1)	cmd[1] |= 0x10;
@@ -211,32 +214,41 @@
 
 
 //based on Ian's codes. thanks!
-- (void)setIRSensorEnabled:(BOOL)enabled{
+- (IOReturn)setIRSensorEnabled:(BOOL)enabled{
+	IOReturn ret;
 	
 	isIRSensorEnabled = enabled;
 
 	// set register 0x12 (report type)
-	[self setMotionSensorEnabled:isMotionSensorEnabled];
+	if (ret = [self setMotionSensorEnabled:isMotionSensorEnabled]) return ret;
 	
 	// set register 0x13 (ir enable/vibe)
-	[self setForceFeedbackEnabled:isVibrationEnabled];
+	if (ret = [self setForceFeedbackEnabled:isVibrationEnabled]) return ret;
 	
 	// set register 0x1a (ir enable 2)
 	unsigned char cmd[] = {0x1a, 0x00};
 	if (enabled)	cmd[1] |= 0x04;
-	[self sendCommand:cmd length:2];
+	if (ret = [self sendCommand:cmd length:2]) return ret;
 	
 	if(enabled){
 		// based on marcan's method, found on wiili wiki:
 		// tweaked to include some aspects of cliff's setup procedure in the hopes
 		// of it actually turning on 100% of the time (was seeing 30-40% failure rate before)
-		[self writeData:(unsigned char[]){0x01} at:0x04B00030 length:1];
-		[self writeData:(unsigned char[]){0x08} at:0x04B00030 length:1];
-		[self writeData:(unsigned char[]){0x90} at:0x04B00006 length:1];
-		[self writeData:(unsigned char[]){0xC0} at:0x04B00008 length:1];
-		[self writeData:(unsigned char[]){0x40} at:0x04B0001A length:1];
-		[self writeData:(unsigned char[]){0x33} at:0x04B00033 length:1];
-		[self writeData:(unsigned char[]){0x08} at:0x04B00030 length:1];
+		// the sleeps help it it seems
+		usleep(10000);
+		if (ret = [self writeData:(darr){0x01} at:0x04B00030 length:1]) return ret;
+		usleep(10000);
+		if (ret = [self writeData:(darr){0x08} at:0x04B00030 length:1]) return ret;
+		usleep(10000);
+		if (ret = [self writeData:(darr){0x90} at:0x04B00006 length:1]) return ret;
+		usleep(10000);
+		if (ret = [self writeData:(darr){0xC0} at:0x04B00008 length:1]) return ret;
+		usleep(10000);
+		if (ret = [self writeData:(darr){0x40} at:0x04B0001A length:1]) return ret;
+		usleep(10000);
+		if (ret = [self writeData:(darr){0x33} at:0x04B00033 length:1]) return ret;
+		usleep(10000);
+		if (ret = [self writeData:(darr){0x08} at:0x04B00030 length:1]) return ret;
 		
 	}else{
 		// probably should do some writes to power down the camera, save battery
@@ -244,11 +256,11 @@
 
 	}
 	
-
+	return kIOReturnSuccess;
 }
 
 
-- (BOOL)writeData:(const unsigned char*)data at:(unsigned long)address length:(size_t)length{
+- (IOReturn)writeData:(const unsigned char*)data at:(unsigned long)address length:(size_t)length{
 	unsigned char cmd[22];
 	int i;
 	for(i=0 ; i<length ; i++) cmd[i+6] = data[i];
@@ -259,21 +271,24 @@
 	cmd[3] = (address>> 8)&0xFF;
 	cmd[4] = (address>> 0)&0xFF;
 	cmd[5] = length;
+	
+	// and of course the vibration flag, as usual
+	if (isVibrationEnabled)	cmd[1] |= 0x01;
+	
 	data = cmd;
 	
 	return [self sendCommand:cmd length:22];
 }
 
-- (IOReturn)inquiry{
-	 return [inquiry start];
-}
-
-- (void)close{
+- (IOReturn)close{
 	IOReturn ret;
 	int trycount = 0;
 	
-	if (cchan){
-		do{
+	if (nil != discinnectNotification)
+		[discinnectNotification unregister];
+	
+	if (cchan && [wiiDevice isConnected]){
+		do {
 			ret = [cchan closeChannel];
 			trycount++;
 		}while(ret != kIOReturnSuccess && trycount < 10);
@@ -282,8 +297,8 @@
 	
 	trycount = 0;
 	
-	if (ichan){
-		do{
+	if (ichan && [wiiDevice isConnected]){
+		do {
 			ret = [ichan closeChannel];
 			trycount++;
 		}while(ret != kIOReturnSuccess && trycount < 10);
@@ -292,14 +307,22 @@
 	
 	trycount = 0;
 	
-	if (wiiDevice && [wiiDevice isConnected]){
-		do{
+	if (wiiDevice){
+		if ([wiiDevice isConnected]) do{
 			ret = [wiiDevice closeConnection];
 			trycount++;
 		}while(ret != kIOReturnSuccess && trycount < 10 && [wiiDevice isConnected]);
-		[wiiDevice release];
-		//wiiDevice = nil;
+	//	[wiiDevice release]; // don't do this - stuff crashes if you do.
+		
 	}
+	
+	ichan = cchan = nil;
+	wiiDevice = nil;
+	
+	// no longer a delegate
+	[self release];
+	
+	return ret;
 }
 
 
@@ -309,12 +332,14 @@
 		return;
 	unsigned char* dp = (unsigned char*)dataPointer;
 	
-	/*	printf ("wiidata%3d:", dataLength);
-	int i;
-	for(i=0 ; i<dataLength ; i++) {
-		printf(" %02X", dp[i]);
-	}
-	printf("\n");*/
+/*	if ((dp[1]&0xF0) != 0x30) {
+		printf ("recv%3d:", dataLength);
+		int i;
+		for(i=0 ; i<dataLength ; i++) {
+			printf(" %02X", dp[i]);
+		}
+		printf("\n");
+	}*/
 	
 	if ((dp[1]&0xF0) == 0x30) {
 		buttonData = ((short)dp[2] << 8) + dp[3];
@@ -399,37 +424,11 @@
 		}
 	}
 	
-	[_delegate dataChanged:buttonData accX:accX accY:accY accZ:accZ mouseX:ox mouseY:oy];
+	if (nil != _delegate)
+		[_delegate dataChanged:buttonData accX:accX accY:accY accZ:accZ mouseX:ox mouseY:oy];
 	//[_delegate dataChanged:buttonData accX:irData[0].x/4 accY:irData[0].y/3 accZ:irData[0].s*16];
 }
 
-/////// IOBluetoothDeviceInquiry delegates //////
 
-- (void) deviceInquiryDeviceFound:(IOBluetoothDeviceInquiry*)sender	device:(IOBluetoothDevice*)device{
-	
-	if ([[device getName] isEqualToString:@"Nintendo RVL-CNT-01"]){
-		[inquiry stop];
-	}
-}
-
-- (void)deviceInquiryDeviceNameUpdated:(IOBluetoothDeviceInquiry*)sender device:(IOBluetoothDevice*)device devicesRemaining:(int)devicesRemaining{
-	
-	if ([[device getName] isEqualToString:@"Nintendo RVL-CNT-01"]){
-		[inquiry stop];
-	}
-}
-
-- (void)deviceInquiryComplete:(IOBluetoothDeviceInquiry*)sender	error:(IOReturn)error aborted:(BOOL)aborted{
-	
-	unsigned int i;
-	for (i = 0; i < [[inquiry foundDevices] count]; i++){
-		if ([[[[inquiry foundDevices] objectAtIndex:i] getName] isEqualToString:@"Nintendo RVL-CNT-01"]){
-			wiiDevice = [[inquiry foundDevices] objectAtIndex:i];
-			[_delegate wiiRemoteInquiryComplete:YES];
-			return;
-		}
-	}
-	[_delegate wiiRemoteInquiryComplete:NO];
-}
 
 @end

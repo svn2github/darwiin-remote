@@ -20,6 +20,7 @@
 		8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C165CFE840E0CC02AAC07 /* InfoPlist.strings */; };
 		8D11072D0486CEB800E47090 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; settings = {ATTRIBUTES = (); }; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
+		8E4570820B2B390B00076567 /* WiiRemoteDiscovery.m in Sources */ = {isa = PBXBuildFile; fileRef = 8E4570810B2B390B00076567 /* WiiRemoteDiscovery.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -45,7 +46,9 @@
 		53C576F80B24999B00D36527 /* GraphPoint.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GraphPoint.m; sourceTree = "<group>"; };
 		53F79ADB0B261EBE00C74335 /* icon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = icon.icns; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
-		8D1107320486CEB800E47090 /* DarwiinRemote.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DarwiinRemote.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		8D1107320486CEB800E47090 /* WiiRemote.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WiiRemote.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		8E4570800B2B390B00076567 /* WiiRemoteDiscovery.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WiiRemoteDiscovery.h; sourceTree = "<group>"; };
+		8E4570810B2B390B00076567 /* WiiRemoteDiscovery.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WiiRemoteDiscovery.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -73,6 +76,8 @@
 				53C573540B24870B00D36527 /* GraphView.m */,
 				53C576F70B24999B00D36527 /* GraphPoint.h */,
 				53C576F80B24999B00D36527 /* GraphPoint.m */,
+				8E4570800B2B390B00076567 /* WiiRemoteDiscovery.h */,
+				8E4570810B2B390B00076567 /* WiiRemoteDiscovery.m */,
 			);
 			name = Classes;
 			sourceTree = "<group>";
@@ -98,7 +103,7 @@
 		19C28FACFE9D520D11CA2CBB /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				8D1107320486CEB800E47090 /* DarwiinRemote.app */,
+				8D1107320486CEB800E47090 /* WiiRemote.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -174,7 +179,7 @@
 			name = DarwiinRemote;
 			productInstallPath = "$(HOME)/Applications";
 			productName = WiiRemote;
-			productReference = 8D1107320486CEB800E47090 /* DarwiinRemote.app */;
+			productReference = 8D1107320486CEB800E47090 /* WiiRemote.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -217,6 +222,7 @@
 				5317449B0B240DD500579963 /* AppController.m in Sources */,
 				53C573550B24870B00D36527 /* GraphView.m in Sources */,
 				53C576F90B24999B00D36527 /* GraphPoint.m in Sources */,
+				8E4570820B2B390B00076567 /* WiiRemoteDiscovery.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

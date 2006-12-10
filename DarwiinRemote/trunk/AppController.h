@@ -2,6 +2,7 @@
 
 #import <Cocoa/Cocoa.h>
 #import "WiiRemote.h"
+#import "WiiRemoteDiscovery.h"
 #import "GraphView.h"
 
 @interface AppController : NSObject
@@ -27,6 +28,7 @@
 	IBOutlet NSButton* oneButton;
 	IBOutlet NSButton* twoButton;
 	
+	WiiRemoteDiscovery *discovery;
 	WiiRemote* wii;
 	CGPoint point;
 	BOOL sendMouseEvent;

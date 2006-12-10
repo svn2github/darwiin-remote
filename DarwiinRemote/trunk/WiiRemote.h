@@ -10,8 +10,6 @@
 #import <IOBluetooth/objc/IOBluetoothDevice.h>
 #import <IOBluetooth/objc/IOBluetoothL2CAPChannel.h>
 
-#import <IOBluetooth/objc/IOBluetoothDeviceInquiry.h> 
-
 
 typedef struct {
 	int x, y, s;
@@ -35,7 +33,6 @@ enum {
 
 @interface WiiRemote : NSObject {
 	
-	IOBluetoothDeviceInquiry* inquiry;
 	IOBluetoothDevice* wiiDevice;
 	IOBluetoothL2CAPChannel *ichan;
 	IOBluetoothL2CAPChannel *cchan;
@@ -56,24 +53,20 @@ enum {
 
 	
 	BOOL isMotionSensorEnabled, isIRSensorEnabled, isVibrationEnabled;
-	BOOL isConnecting;
 	
-
+	IOBluetoothUserNotification *discinnectNotification;
 }
 
-
+- (IOReturn)connectTo:(IOBluetoothDevice*)device;
 - (void)setDelegate:(id)delegate;
 - (BOOL)available;
-- (BOOL)connect;
-- (void)close;
-- (void)setIRSensorEnabled:(BOOL)enabled;
-- (BOOL)setForceFeedbackEnabled:(BOOL)enabled;
-- (BOOL)setMotionSensorEnabled:(BOOL)enabled;
-- (BOOL)setLEDEnabled1:(BOOL)enabled1 enabled2:(BOOL)enabled2 enabled3:(BOOL)enabled3 enabled4:(BOOL)enabled4;
-- (BOOL)writeData:(const unsigned char*)data at:(unsigned long)address length:(size_t)length;
-- (BOOL)sendCommand:(const unsigned char*)data length:(size_t)length;
-
-- (IOReturn)inquiry;
+- (IOReturn)close;
+- (IOReturn)setIRSensorEnabled:(BOOL)enabled;
+- (IOReturn)setForceFeedbackEnabled:(BOOL)enabled;
+- (IOReturn)setMotionSensorEnabled:(BOOL)enabled;
+- (IOReturn)setLEDEnabled1:(BOOL)enabled1 enabled2:(BOOL)enabled2 enabled3:(BOOL)enabled3 enabled4:(BOOL)enabled4;
+- (IOReturn)writeData:(const unsigned char*)data at:(unsigned long)address length:(size_t)length;
+- (IOReturn)sendCommand:(const unsigned char*)data length:(size_t)length;
 
 
 @end
@@ -81,7 +74,6 @@ enum {
 
 @interface NSObject( WiiRemoteDelegate )
 
-- (void) wiiRemoteInquiryComplete:(BOOL)isFound;
 - (void) dataChanged:(unsigned short)buttonData accX:(unsigned char)accX accY:(unsigned char)accY accZ:(unsigned char)accZ mouseX:(float)mx mouseY:(float)my;
 - (void) wiiRemoteDisconnected;
 
