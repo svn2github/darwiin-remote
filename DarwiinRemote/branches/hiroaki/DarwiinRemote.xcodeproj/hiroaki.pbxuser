@@ -126,8 +126,12 @@
 					PBXFileDataSource_Warnings_ColumnID,
 				);
 			};
-			PBXPerProjectTemplateStateSaveDate = 187440469;
-			PBXWorkspaceStateSaveDate = 187440469;
+			PBXPerProjectTemplateStateSaveDate = 187562765;
+			PBXWorkspaceStateSaveDate = 187562765;
+		};
+		perUserProjectItems = {
+			53F84BF40B2DFE59001C5148 /* PBXBookmark */ = 53F84BF40B2DFE59001C5148 /* PBXBookmark */;
+			53F84BFB0B2DFE6E001C5148 /* PBXTextBookmark */ = 53F84BFB0B2DFE6E001C5148 /* PBXTextBookmark */;
 		};
 		sourceControlManager = 5317445A0B240A1C00579963 /* Source Control */;
 		userBuildSettings = {
@@ -193,15 +197,13 @@
 			$xmm7 = 1;
 		};
 	};
-	531744570B240A1C00579963 /* WiiRemote.h */ = {
-		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {989, 1246}}";
-			sepNavSelRange = "{1867, 0}";
-			sepNavVisRect = "{{0, 447}, {989, 799}}";
-			sepNavWindowFrame = "{{361, 138}, {1028, 913}}";
-		};
-	};
 	531744580B240A1C00579963 /* WiiRemote.m */ = {
+		isa = PBXFileReference;
+		fileEncoding = 4;
+		lastKnownFileType = sourcecode.c.objc;
+		name = WiiRemote.m;
+		path = "/Users/hiroaki/projects/darwiin-remote/DarwiinRemote/branches/hiroaki/WiiRemote.m";
+		sourceTree = "<absolute>";
 		uiCtxt = {
 			sepNavIntBoundsRect = "{{0, 0}, {989, 6104}}";
 			sepNavSelRange = "{1315, 0}";
@@ -225,16 +227,16 @@
 	531744990B240DD500579963 /* AppController.h */ = {
 		uiCtxt = {
 			sepNavIntBoundsRect = "{{0, 0}, {1189, 743}}";
-			sepNavSelRange = "{1062, 0}";
+			sepNavSelRange = "{96, 0}";
 			sepNavVisRect = "{{0, 0}, {1189, 743}}";
 			sepNavWindowFrame = "{{296, 187}, {1228, 857}}";
 		};
 	};
 	5317449A0B240DD500579963 /* AppController.m */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {1189, 7252}}";
-			sepNavSelRange = "{4059, 0}";
-			sepNavVisRect = "{{0, 1682}, {1189, 743}}";
+			sepNavIntBoundsRect = "{{0, 0}, {1189, 7196}}";
+			sepNavSelRange = "{13093, 0}";
+			sepNavVisRect = "{{0, 5571}, {1189, 743}}";
 			sepNavWindowFrame = "{{589, -73}, {1228, 857}}";
 		};
 	};
@@ -361,6 +363,20 @@
 			sepNavVisRect = "{{0, 0}, {1189, 743}}";
 			sepNavWindowFrame = "{{38, 295}, {1228, 857}}";
 		};
+	};
+	53F84BF40B2DFE59001C5148 /* PBXBookmark */ = {
+		isa = PBXBookmark;
+		fRef = 5317449A0B240DD500579963 /* AppController.m */;
+	};
+	53F84BFB0B2DFE6E001C5148 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 5317449A0B240DD500579963 /* AppController.m */;
+		name = "AppController.m: 508";
+		rLen = 0;
+		rLoc = 13093;
+		rType = 0;
+		vrLen = 1376;
+		vrLoc = 9900;
 	};
 	8D1107260486CEB800E47090 /* DarwiinRemote */ = {
 		activeExec = 0;

@@ -505,7 +505,7 @@
 	
 	
 	[graphView stopTimer];
-	[wii close];
+	[wii closeConnection];
 	return NSTerminateNow;
 }
 

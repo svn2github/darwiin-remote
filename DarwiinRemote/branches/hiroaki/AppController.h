@@ -1,8 +1,8 @@
 /* AppController */
 
 #import <Cocoa/Cocoa.h>
-#import "WiiRemote.h"
-#import "WiiRemoteDiscovery.h"
+#import <WiiRemote/WiiRemote.h>
+#import <WiiRemote/WiiRemoteDiscovery.h>
 #import "GraphView.h"
 
 @interface AppController : NSObject
