@@ -11,13 +11,21 @@
 // this type is used a lot (data array):
 typedef unsigned char darr[];
 
+typedef struct MemoryReadCallback {
+	unsigned long address;
+	size_t size, received;
+	unsigned char *buffer;
+	id	delegate;
+	struct MemoryReadCallback *next;
+} MemoryReadCallback;
+
 @implementation WiiRemote
 
 - (id) init{
 	
 	// unfortunately this shouldn't be required, but it keeps it from crashing.
 	[self retain];
-	
+	[self retain];
 	
 	wiiDevice = nil;
 	ichan = nil;
@@ -26,6 +34,7 @@ typedef unsigned char darr[];
 	
 	btaddress = @"";
 	forceFeedbackDisableTimer = nil;
+	readList = nil;
 	
 	delegate = nil;
 	rawDelegate = nil;
@@ -62,24 +71,32 @@ typedef unsigned char darr[];
 	rawDelegate = inRawDelegate;
 }
 
+#pragma mark -
+#pragma mark Connection
+
 - (BOOL)connected{
 	return (wiiDevice != nil) && [wiiDevice isConnected];
 }
 
-- (IOReturn)connectTo:(IOBluetoothDevice*)device{
-	
+- (WiiRemote*)initWith:(IOBluetoothDevice*)device{
+	[self init];
 	wiiDevice = device;
 	ichan = nil;
 	cchan = nil;
 	disconnectNotification = nil;
 	
+	btaddress = [device getAddressString];
+	
+	return self;
+}
+
+- (IOReturn)startConnection {
 	IOReturn ret;
 	
 	if (wiiDevice == nil){
-		return kIOReturnBadArgument;
+		NSLog(@"Attempted to reconnect closed WiiRemote.");
+		return kIOReturnNotOpen;
 	}
-	
-	btaddress = [device getAddressString];
 	
 	do { //  not a loop, just a simple way of dropping to the bottom
 		ret = [wiiDevice openConnection];
@@ -131,6 +148,8 @@ typedef unsigned char darr[];
 			break;
 		}
 		
+		[self readMemory:0x20 withLength:3 withDelegate:self];
+		
 		// initialize the Wii Remote
 		
 		ret = [self setAccelerometerEnabled:NO];
@@ -144,10 +163,41 @@ typedef unsigned char darr[];
 		
 		ret = [self setLEDs:0];
 		if (kIOReturnSuccess != ret) break;
+		if (nil != delegate)
+			[delegate wiiRemoteConnected:self];
 	} while (0);
 	
-	if (kIOReturnSuccess != ret)
+	if (kIOReturnSuccess != ret) {
+		[delegate wiiRemoteDisconnected:self withError:ret];
 		[self disconnect];
+	}
+}
+
+- (void)disconnect{
+	if (nil != disconnectNotification) {
+		[disconnectNotification unregister];
+		disconnectNotification = nil;
+	}
+	
+	if (nil != wiiDevice) {
+		if (nil != cchan) {
+			if ([wiiDevice isConnected])
+				[cchan closeChannel];
+		//	[cchan release];
+		}
+		
+		if (nil != ichan) {
+			if ([wiiDevice isConnected])
+				[ichan closeChannel];
+		//	[ichan release];
+		}
+		
+		[wiiDevice closeConnection];
+	//	[wiiDevice release];
+	}
+	
+	ichan = cchan = nil;
+	wiiDevice = nil;
 }
 
 - (void)disconnected: (IOBluetoothUserNotification*)note fromDevice: (IOBluetoothDevice*)device {
@@ -156,8 +206,22 @@ typedef unsigned char darr[];
 	
 	if (nil != delegate)
 		[delegate wiiRemoteDisconnected:self withError:kIOReturnError];
-	
 }
+
+// recieves calibration data:
+- (void) wiiRemoteReadComplete:(unsigned long)address dataReturned:(unsigned char*)data dataLength:(size_t)length {
+	switch(address) {
+		case 0x20: case 0x16:
+			if (length != 3) break;
+			[self setAccelerometerZeroPoint:data];
+			return;
+		break;
+	}
+	NSLog(@"Received unexpected memory read data for 0x%08X/0x%X", address, length);
+}
+
+#pragma mark -
+#pragma mark I/O
 
 - (IOReturn)sendCommand:(const unsigned char*)data length:(size_t)length{
 	
@@ -169,7 +233,7 @@ typedef unsigned char darr[];
 	if (buf[1] == 0x16) length=23;
 	else				length++;
 	
-	int i;
+//	int i;
 	
 /*	printf ("send%3d:", length);
 	for(i=0 ; i<length ; i++) {
@@ -177,112 +241,25 @@ typedef unsigned char darr[];
 	}
 	printf("\n");*/
 	
+	if (nil != rawDelegate)
+		[rawDelegate wiiRemoteWroteData:self withData:buf withLength:length];
+	
 	IOReturn ret;
 	
-	for (i = 0; i < 10; i++){
+//	for (i = 0; i < 10; i++){
 		ret = [cchan writeSync:buf length:length];
-		if (kIOReturnSuccess == ret)
-			break;
-		usleep(10000);
-	}
+//		if (kIOReturnSuccess == ret)
+//			break;
+//		usleep(10000);
+//	}
 	
 	
 	
 	return ret;
 }
 
-- (IOReturn)setAccelerometerEnabled:(BOOL)enabled{
-	// these variables indicate a desire, and should be updated regardless of the sucess of sending the command
-	isAccelerometerEnabled = enabled;
-	
-	unsigned char cmd[] = {0x12, 0x00, 0x30};
-	if (isVibrationEnabled)	cmd[1] |= 0x01;
-	if (isAccelerometerEnabled)	cmd[2] |= 0x01;
-	if (kWiiRemoteIRModeSimple == irSensorMode) cmd[2] |= 0x02;
-	
-	return [self sendCommand:cmd length:3];
-}
 
-- (void)setAccelerometerZeroPoint:(unsigned char[3])zero {
-	xlrZero[0] = zero[0];
-	xlrZero[1] = zero[1];
-	xlrZero[2] = zero[2];
-}
-
-
-- (IOReturn)setForceFeedbackEnabled:(BOOL)enabled{
-	// these variables indicate a desire, and should be updated regardless of the sucess of sending the command
-	isVibrationEnabled = enabled;
-	
-	unsigned char cmd[] = {0x13, 0x00};
-	if (isVibrationEnabled)	cmd[1] |= 0x01;
-	if (kWiiRemoteIRModeOff != irSensorMode) cmd[1] |= 0x04;
-	
-	return [self sendCommand:cmd length:2];
-}
-
-- (IOReturn)setLEDs:(unsigned int)leds{
-	unsigned char cmd[] = {0x11, 0x00};
-	if (isVibrationEnabled)	cmd[1] |= 0x01;
-	if (leds & kWiiRemoteLED1)	cmd[1] |= 0x10;
-	if (leds & kWiiRemoteLED2)	cmd[1] |= 0x20;
-	if (leds & kWiiRemoteLED3)	cmd[1] |= 0x40;
-	if (leds & kWiiRemoteLED4)	cmd[1] |= 0x80;
-	
-	
-	return 	[self sendCommand:cmd length:2];
-}
-
-
-//based on Ian's codes. thanks!
-- (IOReturn)setIRSensorMode:(int)mode{
-	IOReturn ret;
-	
-	irSensorMode = mode;
-
-	// set register 0x12 (report type)
-	if (ret = [self setAccelerometerEnabled:isAccelerometerEnabled]) return ret;
-	
-	// set register 0x13 (ir enable/vibe)
-	if (ret = [self setForceFeedbackEnabled:isVibrationEnabled]) return ret;
-	
-	// set register 0x1a (ir enable 2)
-	unsigned char cmd[] = {0x1a, 0x00};
-	if (kWiiRemoteIRModeOff != irSensorMode)	cmd[1] |= 0x04;
-	if (isVibrationEnabled)	cmd[1] |= 0x01;
-	if (ret = [self sendCommand:cmd length:2]) return ret;
-	
-	if(kWiiRemoteIRModeOff != irSensorMode){
-		// based on marcan's method, found on wiili wiki:
-		// tweaked to include some aspects of cliff's setup procedure in the hopes
-		// of it actually turning on 100% of the time (was seeing 30-40% failure rate before)
-		// the sleeps help it it seems
-		usleep(10000);
-		if (ret = [self writeData:(darr){0x01} at:0x04B00030 length:1]) return ret;
-		usleep(10000);
-		if (ret = [self writeData:(darr){0x08} at:0x04B00030 length:1]) return ret;
-		usleep(10000);
-		if (ret = [self writeData:(darr){0x90} at:0x04B00006 length:1]) return ret;
-		usleep(10000);
-		if (ret = [self writeData:(darr){0xC0} at:0x04B00008 length:1]) return ret;
-		usleep(10000);
-		if (ret = [self writeData:(darr){0x40} at:0x04B0001A length:1]) return ret;
-		usleep(10000);
-		if (ret = [self writeData:(darr){0x33} at:0x04B00033 length:1]) return ret;
-		usleep(10000);
-		if (ret = [self writeData:(darr){0x08} at:0x04B00030 length:1]) return ret;
-		
-	}else{
-		// probably should do some writes to power down the camera, save battery
-		// but don't know how yet.
-
-	}
-	
-	return kIOReturnSuccess;
-}
-
-
-- (IOReturn)writeData:(const unsigned char*)data at:(unsigned long)address length:(size_t)length{
+- (IOReturn)writeMemory:(const unsigned char*)data at:(unsigned long)address length:(size_t)length{
 	unsigned char cmd[22];
 	int i;
 	for(i=0 ; i<length ; i++) cmd[i+6] = data[i];
@@ -302,42 +279,38 @@ typedef unsigned char darr[];
 	return [self sendCommand:cmd length:22];
 }
 
-- (void)disconnect{
-	if (nil != disconnectNotification) {
-		[disconnectNotification unregister];
-		disconnectNotification = nil;
+- (IOReturn)readMemory:(unsigned long)address withLength:(size_t)length withDelegate:(id)inDelegate {
+	MemoryReadCallback *callback = calloc(sizeof(MemoryReadCallback), 1);
+	callback->address = address;
+	callback->size = length;
+	callback->received = 0;
+	callback->buffer = calloc(length, 1);
+	callback->delegate = inDelegate;
+	callback->next = NULL;
+	if (NULL == readList) {
+		readList = callback;
+	} else {
+		MemoryReadCallback *after = readList;
+		while (NULL != after->next)
+			after = after->next;
+		after->next = callback;
 	}
 	
-	if (nil != wiiDevice) {
-		if (nil != cchan) {
-			[cchan closeChannel];
-			[cchan release];
-		}
-		
-		if (nil != ichan) {
-			[ichan closeChannel];
-			[ichan release];
-		}
-		
-		[wiiDevice closeConnection];
-		[wiiDevice release];
-	}
-	
-	ichan = cchan = nil;
-	wiiDevice = nil;
+	return [self sendCommand:(darr){0x17,
+		(address>>24)&0xFF, (address>>16)&0xFF, (address>>8)&0xFF, address&0xFF,
+		(length>>8)&0xFF, length&0xFF} length:7];
 }
 
 
 // thanks to Ian!
--(void)l2capChannelData:(IOBluetoothL2CAPChannel*)l2capChannel data:(void *)dataPointer length:(size_t)dataLength{
+-(void)l2capChannelData:(IOBluetoothL2CAPChannel*)l2capChannel data:(void *)dataPointer length:(size_t)length{
 	if (!wiiDevice)
 		return;
-	unsigned char* dp = (unsigned char*)dataPointer;
+	unsigned char* data = (unsigned char*)dataPointer;
 	
 	if (nil != rawDelegate)
-		[rawDelegate wiiRemoteRawData:self withData:dp withLength:dataLength];
+		[rawDelegate wiiRemoteReadData:self withData:data withLength:length];
 	
-#if 0
 /*	if ((dp[1]&0xF0) != 0x30) {
 		printf ("recv%3d:", dataLength);
 		int i;
@@ -347,7 +320,44 @@ typedef unsigned char darr[];
 		printf("\n");
 	}*/
 	
-	if ((dp[1]&0xF0) == 0x30) {
+	if (length > 1 && (data[1] == 0x21)) {
+		int len = (data[4]>>4)+1;
+		int addr = (data[5]<<8) | data[6];
+		MemoryReadCallback *seek = readList, *prev = NULL;
+		while (NULL != readList) {
+			if (((seek->address + seek->received)&0x0000FFFF) == addr) break;
+			seek = seek->next;
+		}
+		if (NULL != seek) {
+			if (data[4]&0x0F) {
+				// error
+				[seek->delegate wiiRemoteReadError:seek->address];
+				if (NULL == prev) readList = seek->next;
+				else prev->next = seek->next;
+				free(seek->buffer);
+				free(seek);
+			} else {
+				// data
+				if (seek->size - seek->received < len)
+					len = seek->size - seek->received;
+				memcpy(seek->buffer + seek->received, data+7, len);
+				seek->received += len;
+				if (seek->received == seek->size) {
+					[seek->delegate wiiRemoteReadComplete:seek->address 
+						dataReturned:(unsigned char*)seek->buffer dataLength:seek->size];
+					if (NULL == prev) readList = seek->next;
+					else prev->next = seek->next;
+					free(seek->buffer);
+					free(seek);
+				}
+			}
+		} else {
+			NSLog(@"Received memory read data for address not in read queue 0x%04X", addr);
+		}
+	}
+	
+#if 0
+	if (length > 1 && (dp[1]&0xF0) == 0x30) {
 		buttonData = ((short)dp[2] << 8) + dp[3];
 		
 		if (dp[1] & 0x01) {
@@ -430,11 +440,117 @@ typedef unsigned char darr[];
 		}
 	}
 	
-	if (nil != _delegate)
-		[_delegate dataChanged:buttonData accX:accX accY:accY accZ:accZ mouseX:ox mouseY:oy];
-	//[_delegate dataChanged:buttonData accX:irData[0].x/4 accY:irData[0].y/3 accZ:irData[0].s*16];
+	if (nil != delegate)
+		[delegate dataChanged:buttonData accX:accX accY:accY accZ:accZ mouseX:ox mouseY:oy];
+	//[delegate dataChanged:buttonData accX:irData[0].x/4 accY:irData[0].y/3 accZ:irData[0].s*16];
 #endif
 }
+
+#pragma mark -
+#pragma mark API
+
+- (NSString*) getAddress {
+	return btaddress;
+}
+
+- (IOReturn)setAccelerometerEnabled:(BOOL)enabled{
+	// these variables indicate a desire, and should be updated regardless of the sucess of sending the command
+	isAccelerometerEnabled = enabled;
+	
+	unsigned char cmd[] = {0x12, 0x00, 0x30};
+	if (isVibrationEnabled)	cmd[1] |= 0x01;
+	if (isAccelerometerEnabled)	cmd[2] |= 0x01;
+	if (kWiiRemoteIRModeSimple == irSensorMode) cmd[2] |= 0x02;
+	
+	return [self sendCommand:cmd length:3];
+}
+
+- (void)setAccelerometerZeroPoint:(unsigned char[3])zero {
+	xlrZero[0] = zero[0];
+	xlrZero[1] = zero[1];
+	xlrZero[2] = zero[2];
+}
+
+
+- (IOReturn)setForceFeedbackEnabled:(BOOL)enabled{
+	// these variables indicate a desire, and should be updated regardless of the sucess of sending the command
+	isVibrationEnabled = enabled;
+	
+	unsigned char cmd[] = {0x13, 0x00};
+	if (isVibrationEnabled)	cmd[1] |= 0x01;
+	if (kWiiRemoteIRModeOff != irSensorMode) cmd[1] |= 0x04;
+	
+	return [self sendCommand:cmd length:2];
+}
+
+- (IOReturn)  pulseForceFeedbackForInterval:(NSTimeInterval)interval {
+	return kIOReturnSuccess;
+}
+
+- (IOReturn)setLEDs:(unsigned int)leds{
+	unsigned char cmd[] = {0x11, 0x00};
+	if (isVibrationEnabled)	cmd[1] |= 0x01;
+	if (leds & kWiiRemoteLED1)	cmd[1] |= 0x10;
+	if (leds & kWiiRemoteLED2)	cmd[1] |= 0x20;
+	if (leds & kWiiRemoteLED3)	cmd[1] |= 0x40;
+	if (leds & kWiiRemoteLED4)	cmd[1] |= 0x80;
+	
+	
+	return 	[self sendCommand:cmd length:2];
+}
+
+
+//based on Ian's codes. thanks!
+- (IOReturn)setIRSensorMode:(int)mode{
+	IOReturn ret;
+	
+	irSensorMode = mode;
+
+	// set register 0x12 (report type)
+	if (ret = [self setAccelerometerEnabled:isAccelerometerEnabled]) return ret;
+	
+	// set register 0x13 (ir enable/vibe)
+	if (ret = [self setForceFeedbackEnabled:isVibrationEnabled]) return ret;
+	
+	// set register 0x1a (ir enable 2)
+	unsigned char cmd[] = {0x1a, 0x00};
+	if (kWiiRemoteIRModeOff != irSensorMode)	cmd[1] |= 0x04;
+	if (isVibrationEnabled)	cmd[1] |= 0x01;
+	if (ret = [self sendCommand:cmd length:2]) return ret;
+	
+	if(kWiiRemoteIRModeOff != irSensorMode){
+		// based on marcan's method, found on wiili wiki:
+		// tweaked to include some aspects of cliff's setup procedure in the hopes
+		// of it actually turning on 100% of the time (was seeing 30-40% failure rate before)
+		// the sleeps help it it seems
+		usleep(10000);
+		if (ret = [self writeMemory:(darr){0x01} at:0x04B00030 length:1]) return ret;
+		usleep(10000);
+		if (ret = [self writeMemory:(darr){0x08} at:0x04B00030 length:1]) return ret;
+		usleep(10000);
+		if (ret = [self writeMemory:(darr){0x90} at:0x04B00006 length:1]) return ret;
+		usleep(10000);
+		if (ret = [self writeMemory:(darr){0xC0} at:0x04B00008 length:1]) return ret;
+		usleep(10000);
+		if (ret = [self writeMemory:(darr){0x40} at:0x04B0001A length:1]) return ret;
+		usleep(10000);
+		if (ret = [self writeMemory:(darr){0x33} at:0x04B00033 length:1]) return ret;
+		usleep(10000);
+		if (ret = [self writeMemory:(darr){0x08} at:0x04B00030 length:1]) return ret;
+		
+	}else{
+		// probably should do some writes to power down the camera, save battery
+		// but don't know how yet.
+
+	}
+	
+	return kIOReturnSuccess;
+}
+
+- (IOReturn)  setIRSensitivity:(float)sensitivity {
+	return kIOReturnSuccess;
+}
+
 
 
 

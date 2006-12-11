@@ -86,6 +86,7 @@ enum {
 	
 	NSString *btaddress;
 	NSTimer *forceFeedbackDisableTimer;
+	struct MemoryReadCallback *readList;
 	
 	id delegate;
 	id rawDelegate;
@@ -127,9 +128,11 @@ enum {
 			
 }
 
-- (IOReturn)  connectTo:(IOBluetoothDevice*)device;
+- (WiiRemote*)initWith:(IOBluetoothDevice*)device;
+
+- (IOReturn)  startConnection;
 - (BOOL)      connected;
-- (void)  disconnect;
+- (void)      disconnect;
 - (NSString*) getAddress; // unique identifier for each wiimote made
 
 // High-level interfaces
@@ -144,8 +147,9 @@ enum {
 
 // low-level interfaces
 - (void)setRawDelegate:(id)delegate;
-- (IOReturn)writeData:(const unsigned char*)data at:(unsigned long)address length:(size_t)length;
+- (IOReturn)writeMemory:(const unsigned char*)data at:(unsigned long)address length:(size_t)length;
 - (IOReturn)sendCommand:(const unsigned char*)data length:(size_t)length;
+- (IOReturn)readMemory:(unsigned long)address withLength:(size_t)length withDelegate:(id)delegate;
 
 
 @end
@@ -153,14 +157,15 @@ enum {
 
 @interface NSObject( WiiRemoteDelegate )
 
+- (void) wiiRemoteConnected:(WiiRemote*)wiimote;
+- (void) wiiRemoteDisconnected:(WiiRemote*)wiimote withError:(IOReturn)errorCode;
 - (void) wiiRemoteUpdate:(WiiRemote*)wiimote withChanges:(unsigned int) mask; // see kWiiRemoteHave<foo>
 - (void) wiiRemoteExtensionChanged:(WiiRemote*)wiimote;
-- (void) wiiRemoteDisconnected:(WiiRemote*)wiimote withError:(IOReturn)errorCode;
 
-@end
+- (void) wiiRemoteReadComplete:(unsigned long)address dataReturned:(unsigned char*)data dataLength:(size_t)length;
+- (void) wiiRemoteReadError:(unsigned long)address;
 
-@interface NSObject( WiiRemoteRawDelegate )
-
-- (void) wiiRemoteRawData:(WiiRemote*)wiimote withData:(unsigned char *)data withLength:(unsigned int)len;
+- (void) wiiRemoteWroteData:(WiiRemote*)wiimote withData:(unsigned char *)data withLength:(unsigned int)len;
+- (void) wiiRemoteReadData:(WiiRemote*)wiimote withData:(unsigned char *)data withLength:(unsigned int)len;
 
 @end

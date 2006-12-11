@@ -10,13 +10,16 @@
 
 - (IBAction)setIRSensorEnabled:(id)sender
 {
-	[wii setIRSensorEnabled:[sender state]];
+	[wii setIRSensorMode:[sender state]?kWiiRemoteIRModeSimple:kWiiRemoteIRModeOff];
 }
 
 - (IBAction)setLEDEnabled:(id)sender
 {
 
-	[wii setLEDEnabled1:[led1 state] enabled2:[led2 state] enabled3:[led3 state] enabled4:[led4 state]];
+	[wii setLEDs: ([led1 state]?kWiiRemoteLED1:0)|
+	              ([led2 state]?kWiiRemoteLED2:0)|
+				  ([led3 state]?kWiiRemoteLED3:0)|
+				  ([led4 state]?kWiiRemoteLED4:0)];
 }
 
 
@@ -35,7 +38,7 @@
 
 - (IBAction)setMotionSensorsEnabled:(id)sender
 {
-	[wii setMotionSensorEnabled:[sender state]];
+	[wii setAccelerometerEnabled:[sender state]];
 }
 
 
@@ -123,21 +126,26 @@
 
 - (void) WiiRemoteDiscovered:(WiiRemote*)wiimote {
 	wii = wiimote;
-	[wiimote setDelegate:self];
-	[textView setString:[NSString stringWithFormat:@"%@\n===== Connected to WiiRemote =====", [textView string]]];
-	[wiimote setLEDEnabled1:YES enabled2:NO enabled3:NO enabled4:NO];
-	[wiimote setMotionSensorEnabled:YES];
-//	[wiimote setIRSensorEnabled:YES];
 	[discovery stop];
+	[wiimote setDelegate:self];
+	[wiimote startConnection];
+	[textView setString:[NSString stringWithFormat:@"%@\n===== Connecting to WiiRemote %@ =====", [textView string], [wiimote getAddress]]];
 	[graphView startTimer];
 }
 
 - (void) WiiRemoteDiscoveryError:(int)code {
-	[textView setString:[NSString stringWithFormat:@"%@\n===== WiiRemoteDiscovery error (%d) =====", [textView string], code]];
+	[textView setString:[NSString stringWithFormat:@"%@\n===== WiiRemoteDiscovery error (%08X) =====", [textView string], code]];
 }
 
-- (void) wiiRemoteDisconnected {
-	[textView setString:[NSString stringWithFormat:@"%@\n===== lost connection with WiiRemote =====", [textView string]]];
+- (void) wiiRemoteConnected:(WiiRemote *)w {
+	[textView setString:[NSString stringWithFormat:@"%@\n===== Connected to WiiRemote %@ =====", [textView string], [wii getAddress]]];
+	[wii setLEDs:kWiiRemoteLED1];
+	[wii setAccelerometerEnabled:YES];
+//	[wii setIRSensorEnabled:YES];
+}
+
+- (void) wiiRemoteDisconnected:(WiiRemote *)w withError:(IOReturn)error {
+	[textView setString:[NSString stringWithFormat:@"%@\n===== lost connection with WiiRemote %@ (%08X) =====", [textView string], [w getAddress], error]];
 	[wii release];
 	wii = nil;
 	[discovery start];
@@ -264,7 +272,7 @@
 		point.y = dispHeight - 1;
 		
 	
-	if ((buttonData & kWiiRemoteAButton)){
+	if ((buttonData & kWiiRemoteButtonA)){
 		[aButton setEnabled:YES];
 		
 		if (!isPressedAButton){
@@ -287,7 +295,7 @@
 	}
 
 	
-	if ((buttonData & kWiiRemoteBButton)){
+	if ((buttonData & kWiiRemoteButtonB)){
 		[bButton setEnabled:YES];
 		if (!isPressedBButton){
 			isPressedBButton = YES;
@@ -302,7 +310,7 @@
 		}
 	}
 	
-	if ((buttonData & kWiiRemoteUpButton)){
+	if ((buttonData & kWiiRemoteButtonUp)){
 		[upButton setEnabled:YES];
 		
 		if (!isPressedUpButton){
@@ -319,7 +327,7 @@
 		}
 	}
 	
-	if ((buttonData & kWiiRemoteDownButton)){
+	if ((buttonData & kWiiRemoteButtonDown)){
 		[downButton setEnabled:YES];
 		
 		if (!isPressedDownButton){
@@ -336,7 +344,7 @@
 		}
 	}
 	
-	if ((buttonData & kWiiRemoteLeftButton)){
+	if ((buttonData & kWiiRemoteButtonLeft)){
 		[leftButton setEnabled:YES];
 		
 		if (!isPressedLeftButton){
@@ -353,7 +361,7 @@
 		}
 	}
 	
-	if ((buttonData & kWiiRemoteRightButton)){
+	if ((buttonData & kWiiRemoteButtonRight)){
 		[rightButton setEnabled:YES];
 		
 		if (!isPressedRightButton){
@@ -371,7 +379,7 @@
 		
 	}
 	
-	if ((buttonData & kWiiRemoteMinusButton)){
+	if ((buttonData & kWiiRemoteButtonMinus)){
 		[minusButton setEnabled:YES];
 		
 		if (!isPressedMinusButton){
@@ -389,7 +397,7 @@
 		}
 	}
 	
-	if ((buttonData & kWiiRemotePlusButton)){
+	if ((buttonData & kWiiRemoteButtonPlus)){
 		[plusButton setEnabled:YES];
 		
 		if (!isPressedPlusButton){
@@ -409,7 +417,7 @@
 		
 	}
 	
-	if ((buttonData & kWiiRemoteHomeButton)){
+	if ((buttonData & kWiiRemoteButtonHome)){
 		[homeButton setEnabled:YES];
 		
 		if (!isPressedHomeButton){
@@ -428,7 +436,7 @@
 		}
 	}
 	
-	if ((buttonData & kWiiRemoteOneButton)){
+	if ((buttonData & kWiiRemoteButtonOne)){
 		[oneButton setEnabled:YES];
 		
 		if (!isPressedOneButton){
@@ -456,7 +464,7 @@
 		}
 	}
 	
-	if ((buttonData & kWiiRemoteTwoButton)){
+	if ((buttonData & kWiiRemoteButtonTwo)){
 		[twoButton setEnabled:YES];
 		
 		
@@ -505,7 +513,7 @@
 	
 	
 	[graphView stopTimer];
-	[wii close];
+	[wii disconnect];
 	return NSTerminateNow;
 }
 

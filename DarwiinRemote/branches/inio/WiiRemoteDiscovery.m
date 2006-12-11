@@ -122,16 +122,7 @@
 - (void)checkDevice:(IOBluetoothDevice*)device {
 	if ([[device getName] isEqualToString:@"Nintendo RVL-CNT-01"]){
 	
-		WiiRemote *wii = [[WiiRemote alloc] init];
-		IOReturn ret = [wii connectTo:device];
-		
-		if (ret == kIOReturnSuccess) {
-			[_delegate WiiRemoteDiscovered: wii];
-		} else {
-			[wii release];
-			// initWithDevice generated error message
-			[_delegate WiiRemoteDiscoveryError: ret];
-		}
+		[_delegate WiiRemoteDiscovered: [[WiiRemote alloc] initWith:device]];
 	}
 }
 
