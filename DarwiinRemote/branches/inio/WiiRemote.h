@@ -26,8 +26,8 @@ typedef struct {
 
 typedef UInt16 WiiButtonData;
 enum {
-	kWiiRemoteButtonTwo		= 0x0001,
-	kWiiRemoteButtonOne		= 0x0002,
+	kWiiRemoteButton2		= 0x0001,
+	kWiiRemoteButton1		= 0x0002,
 	kWiiRemoteButtonB		= 0x0004,
 	kWiiRemoteButtonA		= 0x0008,
 	kWiiRemoteButtonMinus	= 0x0010,
@@ -83,6 +83,8 @@ enum {
 	IOBluetoothL2CAPChannel *ichan;
 	IOBluetoothL2CAPChannel *cchan;
 	IOBluetoothUserNotification *disconnectNotification;
+	IOBluetoothUserNotification *ichanDisconnectNotification;
+	IOBluetoothUserNotification *cchanDisconnectNotification;
 	
 	NSString *btaddress;
 	NSTimer *forceFeedbackDisableTimer;
@@ -95,6 +97,7 @@ enum {
 	int irSensorMode; //  0 = off, 1 = simple,  2 = extended?
 	
 	unsigned char xlrZero[3];
+	unsigned char xlrOneG[3];
 
 @public
 	WiiButtonData       buttons; // bitwise or of kWiiRemoteButton codes above
@@ -134,6 +137,7 @@ enum {
 - (BOOL)      connected;
 - (void)      disconnect;
 - (NSString*) getAddress; // unique identifier for each wiimote made
+- (BOOL)      isEqual:(id)cmpObject;
 
 // High-level interfaces
 - (void)      setDelegate:(id)inDelegate;
@@ -142,7 +146,7 @@ enum {
 - (IOReturn)  setForceFeedbackEnabled:(BOOL)active;
 - (IOReturn)  pulseForceFeedbackForInterval:(NSTimeInterval)interval;
 - (IOReturn)  setAccelerometerEnabled:(BOOL)enabled;
-- (void)      setAccelerometerZeroPoint:(unsigned char[3])zero;
+- (void)      setAccelerometerZeroPoint:(unsigned char[3])zero andOneGPoint:(unsigned char[3])oneg;
 - (IOReturn)  setLEDs:(unsigned int)leds; // bitwise or of kWiiRemoteLED codes above
 
 // low-level interfaces
@@ -158,7 +162,8 @@ enum {
 @interface NSObject( WiiRemoteDelegate )
 
 - (void) wiiRemoteConnected:(WiiRemote*)wiimote;
-- (void) wiiRemoteDisconnected:(WiiRemote*)wiimote withError:(IOReturn)errorCode;
+- (void) wiiRemoteDisconnected:(WiiRemote*)wiimote;
+- (void) wiiRemoteError:(WiiRemote*)wiimote withDescription:(NSString *)error withCode:(int)code;
 - (void) wiiRemoteUpdate:(WiiRemote*)wiimote withChanges:(unsigned int) mask; // see kWiiRemoteHave<foo>
 - (void) wiiRemoteExtensionChanged:(WiiRemote*)wiimote;
 

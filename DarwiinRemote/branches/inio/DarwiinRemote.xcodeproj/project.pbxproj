@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		531744590B240A1C00579963 /* WiiRemote.m in Sources */ = {isa = PBXBuildFile; fileRef = 531744580B240A1C00579963 /* WiiRemote.m */; };
 		531744830B240A7D00579963 /* IOBluetooth.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 531744810B240A7D00579963 /* IOBluetooth.framework */; };
-		5317449B0B240DD500579963 /* AppController.m in Sources */ = {isa = PBXBuildFile; fileRef = 5317449A0B240DD500579963 /* AppController.m */; };
 		53BDDEBB0B2B22710033DB22 /* COPYRIGHT.txt in Resources */ = {isa = PBXBuildFile; fileRef = 53BDDEBA0B2B22710033DB22 /* COPYRIGHT.txt */; };
 		53BDDEBD0B2B229B0033DB22 /* HISTORY.txt in Resources */ = {isa = PBXBuildFile; fileRef = 53BDDEBC0B2B229B0033DB22 /* HISTORY.txt */; };
 		53C573550B24870B00D36527 /* GraphView.m in Sources */ = {isa = PBXBuildFile; fileRef = 53C573540B24870B00D36527 /* GraphView.m */; };
@@ -21,6 +20,9 @@
 		8D11072D0486CEB800E47090 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; settings = {ATTRIBUTES = (); }; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
 		8E4570820B2B390B00076567 /* WiiRemoteDiscovery.m in Sources */ = {isa = PBXBuildFile; fileRef = 8E4570810B2B390B00076567 /* WiiRemoteDiscovery.m */; };
+		8EFB77F60B2F3A6200F7E1C2 /* WiiWindow.nib in Resources */ = {isa = PBXBuildFile; fileRef = 8EFB77F00B2F3A6200F7E1C2 /* WiiWindow.nib */; };
+		8EFB77FC0B2F3A8100F7E1C2 /* WiiDiscoveryController.m in Sources */ = {isa = PBXBuildFile; fileRef = 8EFB77F80B2F3A8000F7E1C2 /* WiiDiscoveryController.m */; };
+		8EFB77FD0B2F3A8100F7E1C2 /* WiiRemoteController.m in Sources */ = {isa = PBXBuildFile; fileRef = 8EFB77FB0B2F3A8000F7E1C2 /* WiiRemoteController.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -35,8 +37,6 @@
 		531744570B240A1C00579963 /* WiiRemote.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WiiRemote.h; sourceTree = "<group>"; };
 		531744580B240A1C00579963 /* WiiRemote.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WiiRemote.m; sourceTree = "<group>"; };
 		531744810B240A7D00579963 /* IOBluetooth.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOBluetooth.framework; path = /System/Library/Frameworks/IOBluetooth.framework; sourceTree = "<absolute>"; };
-		531744990B240DD500579963 /* AppController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppController.h; sourceTree = "<group>"; };
-		5317449A0B240DD500579963 /* AppController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AppController.m; sourceTree = "<group>"; };
 		53BDDEBA0B2B22710033DB22 /* COPYRIGHT.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = COPYRIGHT.txt; sourceTree = "<group>"; };
 		53BDDEBC0B2B229B0033DB22 /* HISTORY.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = HISTORY.txt; sourceTree = "<group>"; };
 		53C573530B24870B00D36527 /* GraphView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GraphView.h; sourceTree = "<group>"; };
@@ -49,6 +49,11 @@
 		8D1107320486CEB800E47090 /* DarwiinRemote.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DarwiinRemote.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8E4570800B2B390B00076567 /* WiiRemoteDiscovery.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WiiRemoteDiscovery.h; sourceTree = "<group>"; };
 		8E4570810B2B390B00076567 /* WiiRemoteDiscovery.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WiiRemoteDiscovery.m; sourceTree = "<group>"; };
+		8EFB77F10B2F3A6200F7E1C2 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/WiiWindow.nib; sourceTree = "<group>"; };
+		8EFB77F80B2F3A8000F7E1C2 /* WiiDiscoveryController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = WiiDiscoveryController.m; sourceTree = "<group>"; };
+		8EFB77F90B2F3A8000F7E1C2 /* WiiDiscoveryController.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = WiiDiscoveryController.h; sourceTree = "<group>"; };
+		8EFB77FA0B2F3A8000F7E1C2 /* WiiRemoteController.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = WiiRemoteController.h; sourceTree = "<group>"; };
+		8EFB77FB0B2F3A8000F7E1C2 /* WiiRemoteController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = WiiRemoteController.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -68,16 +73,18 @@
 		080E96DDFE201D6D7F000001 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
+				8EFB77F80B2F3A8000F7E1C2 /* WiiDiscoveryController.m */,
+				8EFB77F90B2F3A8000F7E1C2 /* WiiDiscoveryController.h */,
+				8EFB77FA0B2F3A8000F7E1C2 /* WiiRemoteController.h */,
+				8EFB77FB0B2F3A8000F7E1C2 /* WiiRemoteController.m */,
+				8E4570800B2B390B00076567 /* WiiRemoteDiscovery.h */,
+				8E4570810B2B390B00076567 /* WiiRemoteDiscovery.m */,
 				531744570B240A1C00579963 /* WiiRemote.h */,
 				531744580B240A1C00579963 /* WiiRemote.m */,
-				531744990B240DD500579963 /* AppController.h */,
-				5317449A0B240DD500579963 /* AppController.m */,
 				53C573530B24870B00D36527 /* GraphView.h */,
 				53C573540B24870B00D36527 /* GraphView.m */,
 				53C576F70B24999B00D36527 /* GraphPoint.h */,
 				53C576F80B24999B00D36527 /* GraphPoint.m */,
-				8E4570800B2B390B00076567 /* WiiRemoteDiscovery.h */,
-				8E4570810B2B390B00076567 /* WiiRemoteDiscovery.m */,
 			);
 			name = Classes;
 			sourceTree = "<group>";
@@ -137,6 +144,7 @@
 				8D1107310486CEB800E47090 /* Info.plist */,
 				089C165CFE840E0CC02AAC07 /* InfoPlist.strings */,
 				29B97318FDCFA39411CA2CEA /* MainMenu.nib */,
+				8EFB77F00B2F3A6200F7E1C2 /* WiiWindow.nib */,
 			);
 			name = Resources;
 			sourceTree = "<group>";
@@ -207,6 +215,7 @@
 				53F79ADC0B261EBE00C74335 /* icon.icns in Resources */,
 				53BDDEBB0B2B22710033DB22 /* COPYRIGHT.txt in Resources */,
 				53BDDEBD0B2B229B0033DB22 /* HISTORY.txt in Resources */,
+				8EFB77F60B2F3A6200F7E1C2 /* WiiWindow.nib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -219,10 +228,11 @@
 			files = (
 				8D11072D0486CEB800E47090 /* main.m in Sources */,
 				531744590B240A1C00579963 /* WiiRemote.m in Sources */,
-				5317449B0B240DD500579963 /* AppController.m in Sources */,
 				53C573550B24870B00D36527 /* GraphView.m in Sources */,
 				53C576F90B24999B00D36527 /* GraphPoint.m in Sources */,
 				8E4570820B2B390B00076567 /* WiiRemoteDiscovery.m in Sources */,
+				8EFB77FC0B2F3A8100F7E1C2 /* WiiDiscoveryController.m in Sources */,
+				8EFB77FD0B2F3A8100F7E1C2 /* WiiRemoteController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -243,6 +253,14 @@
 				29B97319FDCFA39411CA2CEA /* English */,
 			);
 			name = MainMenu.nib;
+			sourceTree = "<group>";
+		};
+		8EFB77F00B2F3A6200F7E1C2 /* WiiWindow.nib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				8EFB77F10B2F3A6200F7E1C2 /* English */,
+			);
+			name = WiiWindow.nib;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */

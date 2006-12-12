@@ -94,14 +94,14 @@ typedef struct MemoryReadCallback {
 	IOReturn ret;
 	
 	if (wiiDevice == nil){
-		NSLog(@"Attempted to reconnect closed WiiRemote.");
+		[delegate wiiRemoteError:self withDescription:@"Attempted to reconnect closed WiiRemote." withCode:kIOReturnNotOpen];
 		return kIOReturnNotOpen;
 	}
 	
 	do { //  not a loop, just a simple way of dropping to the bottom
 		ret = [wiiDevice openConnection];
 		if (kIOReturnSuccess != ret) {
-			NSLog(@"could not open the connection (%08X)...", ret);
+			[delegate wiiRemoteError:self withDescription:@"Could not open the connection to Wii Remote." withCode:ret];
 			break;
 		}
 		
@@ -110,11 +110,11 @@ typedef struct MemoryReadCallback {
 		
 		ret = [wiiDevice performSDPQuery:self];
 		if (kIOReturnSuccess != ret) {
-			NSLog(@"could not perform SDP Query (%08X)...", ret);
+			[delegate wiiRemoteError:self withDescription:@"Could not perform SDP Query." withCode:ret];
 			break;
 		}
 		
-		NSLog(@"Waiting for SDP query to complete");
+	//	NSLog(@"Waiting for SDP query to complete");
 	} while(0);
 	
 	if (kIOReturnSuccess != ret) {
@@ -130,53 +130,93 @@ typedef struct MemoryReadCallback {
 	
 	do { //  not a loop, just a simple way of dropping to the bottom
 		if (kIOReturnSuccess != status) {
-			NSLog(@"SDP Query failed (%08X)", ret);
+			[delegate wiiRemoteError:self withDescription:@"Error while performing SDP Query." withCode:ret];
 			break;
 		} else {
-			NSLog(@"SDP Query complete");
+		//	NSLog(@"SDP Query complete");
 		}
 		
 		ret = [wiiDevice openL2CAPChannelSync:&cchan withPSM:17 delegate:self];
 		if (kIOReturnSuccess != ret) {
-			NSLog(@"could not open channel 17 (%08X)...", ret);
+			[delegate wiiRemoteError:self withDescription:@"Could not open L2CAP channel 17." withCode:ret];
 			break;
 		}
+		cchanDisconnectNotification = [cchan registerForChannelCloseNotification:self
+			selector:@selector(channelClosed:channel:)];
 		
 		ret = [wiiDevice openL2CAPChannelSync:&ichan withPSM:19 delegate:self];
 		if (kIOReturnSuccess != ret) {
-			NSLog(@"could not open channel 19 (%08X)...", ret);
+			[delegate wiiRemoteError:self withDescription:@"Could not open L2CAP channel 19." withCode:ret];
 			break;
 		}
+		ichanDisconnectNotification = [cchan registerForChannelCloseNotification:self
+			selector:@selector(channelClosed:channel:)];
 		
-		[self readMemory:0x20 withLength:3 withDelegate:self];
+		[self readMemory:0x20 withLength:8 withDelegate:self];
 		
 		// initialize the Wii Remote
 		
 		ret = [self setAccelerometerEnabled:NO];
-		if (kIOReturnSuccess != ret) break;
+		if (kIOReturnSuccess != ret) {
+			[delegate wiiRemoteError:self withDescription:
+				@"An error ocurred while configurating the Wii Remote (Accelerometer)." withCode:ret];
+			break;
+		}
 		
 		ret = [self setIRSensorMode:kWiiRemoteIRModeOff];
-		if (kIOReturnSuccess != ret) break;
+		if (kIOReturnSuccess != ret) {
+			[delegate wiiRemoteError:self withDescription:
+				@"An error ocurred while configurating the Wii Remote (Report Type)." withCode:ret];
+			break;
+		}
 		
 		ret = [self setForceFeedbackEnabled:NO];
-		if (kIOReturnSuccess != ret) break;
+		if (kIOReturnSuccess != ret) {
+			[delegate wiiRemoteError:self withDescription:
+				@"An error ocurred while configurating the Wii Remote (Force Feedback)." withCode:ret];
+			break;
+		}
 		
 		ret = [self setLEDs:0];
-		if (kIOReturnSuccess != ret) break;
+		if (kIOReturnSuccess != ret) {
+			[delegate wiiRemoteError:self withDescription:
+				@"An error ocurred while configurating the Wii Remote (LEDs)." withCode:ret];
+			break;
+		}
 		if (nil != delegate)
 			[delegate wiiRemoteConnected:self];
 	} while (0);
 	
-	if (kIOReturnSuccess != ret) {
-		[delegate wiiRemoteDisconnected:self withError:ret];
+	if (kIOReturnSuccess != ret)
 		[self disconnect];
+}
+
+- (void)channelClosed: (IOBluetoothUserNotification*)note channel: (IOBluetoothL2CAPChannel*)channel {
+	if (channel == cchan) {
+		[delegate wiiRemoteError:self withDescription:
+			@"Wii Remote L2CAP communications channel 17 closed." withCode:0];
+	} else if (channel == ichan) {
+		[delegate wiiRemoteError:self withDescription:
+			@"Wii Remote L2CAP communications channel 19 closed." withCode:0];
+	} else {
+		[delegate wiiRemoteError:self withDescription:
+			@"Unknown Wii Remote L2CAP communications channel closed." withCode:0];
 	}
+	[self disconnect];
 }
 
 - (void)disconnect{
 	if (nil != disconnectNotification) {
 		[disconnectNotification unregister];
 		disconnectNotification = nil;
+	}
+	if (nil != ichanDisconnectNotification) {
+		[ichanDisconnectNotification unregister];
+		ichanDisconnectNotification = nil;
+	}
+	if (nil != cchanDisconnectNotification) {
+		[cchanDisconnectNotification unregister];
+		cchanDisconnectNotification = nil;
 	}
 	
 	if (nil != wiiDevice) {
@@ -205,15 +245,15 @@ typedef struct MemoryReadCallback {
 	[self disconnect];
 	
 	if (nil != delegate)
-		[delegate wiiRemoteDisconnected:self withError:kIOReturnError];
+		[delegate wiiRemoteDisconnected:self];
 }
 
 // recieves calibration data:
 - (void) wiiRemoteReadComplete:(unsigned long)address dataReturned:(unsigned char*)data dataLength:(size_t)length {
 	switch(address) {
 		case 0x20: case 0x16:
-			if (length != 3) break;
-			[self setAccelerometerZeroPoint:data];
+			if (length != 8) break;
+			[self setAccelerometerZeroPoint:data andOneGPoint:data+4];
 			return;
 		break;
 	}
@@ -356,10 +396,12 @@ typedef struct MemoryReadCallback {
 		}
 	}
 	
-#if 0
-	if (length > 1 && (dp[1]&0xF0) == 0x30) {
-		buttonData = ((short)dp[2] << 8) + dp[3];
+	unsigned int dataMask = kWiiRemoteHaveButtons;
+	
+	if (length > 1 && (data[1]&0xF0) == 0x30) {
+		buttons = ((short)data[2] << 8) + data[3];
 		
+#if 0
 		if (dp[1] & 0x01) {
 			accX = dp[4];
 			accY = dp[5];
@@ -395,8 +437,10 @@ typedef struct MemoryReadCallback {
 				irData[i].s &= 0x0F;
 			} 
 		}
+#endif
 	}
-	
+
+#if 0
 	float ox, oy;
 	
 	if (irData[0].s < 0x0F && irData[1].s < 0x0F) {
@@ -439,11 +483,12 @@ typedef struct MemoryReadCallback {
 			leftPoint = -1;
 		}
 	}
+#endif
 	
 	if (nil != delegate)
-		[delegate dataChanged:buttonData accX:accX accY:accY accZ:accZ mouseX:ox mouseY:oy];
+		[delegate wiiRemoteUpdate:self withChanges:dataMask];
 	//[delegate dataChanged:buttonData accX:irData[0].x/4 accY:irData[0].y/3 accZ:irData[0].s*16];
-#endif
+
 }
 
 #pragma mark -
@@ -451,6 +496,10 @@ typedef struct MemoryReadCallback {
 
 - (NSString*) getAddress {
 	return btaddress;
+}
+
+- (BOOL)isEqual:(id)cmpObject {
+	return [[self getAddress] isEqual:[(WiiRemote*)cmpObject getAddress]];
 }
 
 - (IOReturn)setAccelerometerEnabled:(BOOL)enabled{
@@ -465,10 +514,13 @@ typedef struct MemoryReadCallback {
 	return [self sendCommand:cmd length:3];
 }
 
-- (void)setAccelerometerZeroPoint:(unsigned char[3])zero {
+- (void)      setAccelerometerZeroPoint:(unsigned char[3])zero andOneGPoint:(unsigned char[3])oneg {
 	xlrZero[0] = zero[0];
 	xlrZero[1] = zero[1];
 	xlrZero[2] = zero[2];
+	xlrOneG[0] = oneg[0];
+	xlrOneG[1] = oneg[1];
+	xlrOneG[2] = oneg[2];
 }
 
 

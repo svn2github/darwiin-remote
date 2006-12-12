@@ -121,7 +121,6 @@
 
 - (void)checkDevice:(IOBluetoothDevice*)device {
 	if ([[device getName] isEqualToString:@"Nintendo RVL-CNT-01"]){
-	
 		[_delegate WiiRemoteDiscovered: [[WiiRemote alloc] initWith:device]];
 	}
 }

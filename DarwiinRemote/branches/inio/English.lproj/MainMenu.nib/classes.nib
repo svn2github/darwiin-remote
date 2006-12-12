@@ -1,0 +1,18 @@
+{
+    IBClasses = (
+        {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
+        {CLASS = NSLevelIndicator; LANGUAGE = ObjC; SUPERCLASS = NSControl; }, 
+        {
+            ACTIONS = {doConnectDisconnect = id; }; 
+            CLASS = WiiDiscoveryController; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {
+                actionButton = NSButton; 
+                activityIndicator = NSProgressIndicator; 
+                statusText = NSTextField; 
+            }; 
+            SUPERCLASS = NSObject; 
+        }
+    ); 
+    IBVersion = 1; 
+}
