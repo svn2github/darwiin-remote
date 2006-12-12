@@ -19,7 +19,7 @@
 			5317459E0B2426A800579963 /* WiiRemote.m:307 */,
 			53C574BB0B24911000D36527 /* WiiRemote.m:103 */,
 			534B14E50B24C84F003598E7 /* GraphView.m:39 */,
-			53440BE50B255512001AAB55 /* AppController.h:40 */,
+			53440BE50B255512001AAB55 /* AppController.h:42 */,
 			532D8E6C0B29E4290061F822 /* AppController.m:119 */,
 		);
 		breakpointsGroup = 531744DE0B24178900579963 /* XCBreakpointsBucket */;
@@ -126,12 +126,17 @@
 					PBXFileDataSource_Warnings_ColumnID,
 				);
 			};
-			PBXPerProjectTemplateStateSaveDate = 187562765;
-			PBXWorkspaceStateSaveDate = 187562765;
+			PBXPerProjectTemplateStateSaveDate = 187619171;
+			PBXWorkspaceStateSaveDate = 187619171;
 		};
 		perUserProjectItems = {
-			53F84BF40B2DFE59001C5148 /* PBXBookmark */ = 53F84BF40B2DFE59001C5148 /* PBXBookmark */;
-			53F84BFB0B2DFE6E001C5148 /* PBXTextBookmark */ = 53F84BFB0B2DFE6E001C5148 /* PBXTextBookmark */;
+			53E466B70B2ED84E003DF03F /* PBXBookmark */ = 53E466B70B2ED84E003DF03F /* PBXBookmark */;
+			53E466C70B2ED95D003DF03F /* PBXTextBookmark */ = 53E466C70B2ED95D003DF03F /* PBXTextBookmark */;
+			53E466C80B2ED95D003DF03F /* PBXTextBookmark */ = 53E466C80B2ED95D003DF03F /* PBXTextBookmark */;
+			53E466C90B2ED95D003DF03F /* PBXTextBookmark */ = 53E466C90B2ED95D003DF03F /* PBXTextBookmark */;
+			53E466CA0B2ED95D003DF03F /* PBXTextBookmark */ = 53E466CA0B2ED95D003DF03F /* PBXTextBookmark */;
+			53E466CD0B2ED95D003DF03F /* PBXTextBookmark */ = 53E466CD0B2ED95D003DF03F /* PBXTextBookmark */;
+			53E466CF0B2ED994003DF03F /* PBXTextBookmark */ = 53E466CF0B2ED994003DF03F /* PBXTextBookmark */;
 		};
 		sourceControlManager = 5317445A0B240A1C00579963 /* Source Control */;
 		userBuildSettings = {
@@ -204,12 +209,6 @@
 		name = WiiRemote.m;
 		path = "/Users/hiroaki/projects/darwiin-remote/DarwiinRemote/branches/hiroaki/WiiRemote.m";
 		sourceTree = "<absolute>";
-		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {989, 6104}}";
-			sepNavSelRange = "{1315, 0}";
-			sepNavVisRect = "{{0, 1443}, {989, 799}}";
-			sepNavWindowFrame = "{{361, 138}, {1028, 913}}";
-		};
 	};
 	5317445A0B240A1C00579963 /* Source Control */ = {
 		isa = PBXSourceControlManager;
@@ -226,28 +225,28 @@
 	};
 	531744990B240DD500579963 /* AppController.h */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {1189, 743}}";
-			sepNavSelRange = "{96, 0}";
+			sepNavIntBoundsRect = "{{0, 0}, {1189, 756}}";
+			sepNavSelRange = "{805, 0}";
 			sepNavVisRect = "{{0, 0}, {1189, 743}}";
 			sepNavWindowFrame = "{{296, 187}, {1228, 857}}";
 		};
 	};
 	5317449A0B240DD500579963 /* AppController.m */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {1189, 7196}}";
-			sepNavSelRange = "{13093, 0}";
-			sepNavVisRect = "{{0, 5571}, {1189, 743}}";
-			sepNavWindowFrame = "{{589, -73}, {1228, 857}}";
+			sepNavIntBoundsRect = "{{0, 0}, {957, 7224}}";
+			sepNavSelRange = "{199, 0}";
+			sepNavVisRect = "{{0, 27}, {957, 911}}";
+			sepNavWindowFrame = "{{253, 92}, {996, 1025}}";
 		};
 	};
 	531744DE0B24178900579963 /* XCBreakpointsBucket */ = {
 		isa = XCBreakpointsBucket;
-		name = WiiRemote;
+		name = DarwiinRemote;
 		objects = (
 			5317459E0B2426A800579963 /* WiiRemote.m:307 */,
 			53C574BB0B24911000D36527 /* WiiRemote.m:103 */,
 			534B14E50B24C84F003598E7 /* GraphView.m:39 */,
-			53440BE50B255512001AAB55 /* AppController.h:40 */,
+			53440BE50B255512001AAB55 /* AppController.h:42 */,
 			532D8E6C0B29E4290061F822 /* AppController.m:119 */,
 		);
 	};
@@ -262,8 +261,7 @@
 		functionName = "-l2capChannelData:data:length:";
 		hitCount = 1;
 		lineNumber = 307;
-		location = DarwiinRemote;
-		modificationTime = 187375836.782194;
+		modificationTime = 187610807.143983;
 		state = 1;
 	};
 	532D8E6C0B29E4290061F822 /* AppController.m:119 */ = {
@@ -278,10 +276,10 @@
 		hitCount = 1;
 		lineNumber = 119;
 		location = DarwiinRemote;
-		modificationTime = 187375836.78179;
+		modificationTime = 187610807.144315;
 		state = 1;
 	};
-	53440BE50B255512001AAB55 /* AppController.h:40 */ = {
+	53440BE50B255512001AAB55 /* AppController.h:42 */ = {
 		isa = PBXFileBreakpoint;
 		actions = (
 		);
@@ -290,8 +288,8 @@
 		delayBeforeContinue = 0;
 		fileReference = 531744990B240DD500579963 /* AppController.h */;
 		hitCount = 1;
-		lineNumber = 40;
-		modificationTime = 187375836.782375;
+		lineNumber = 42;
+		modificationTime = 187610807.143278;
 		state = 1;
 	};
 	534B14E50B24C84F003598E7 /* GraphView.m:39 */ = {
@@ -306,7 +304,7 @@
 		hitCount = 1;
 		lineNumber = 39;
 		location = DarwiinRemote;
-		modificationTime = 187375836.7815011;
+		modificationTime = 187610807.142771;
 		state = 1;
 	};
 	53BDDEBC0B2B229B0033DB22 /* HISTORY.txt */ = {
@@ -344,8 +342,7 @@
 		functionName = "-connect";
 		hitCount = 1;
 		lineNumber = 103;
-		location = DarwiinRemote;
-		modificationTime = 187375836.78199;
+		modificationTime = 187610807.143646;
 		state = 1;
 	};
 	53C576F70B24999B00D36527 /* GraphPoint.h */ = {
@@ -364,19 +361,66 @@
 			sepNavWindowFrame = "{{38, 295}, {1228, 857}}";
 		};
 	};
-	53F84BF40B2DFE59001C5148 /* PBXBookmark */ = {
+	53E466B70B2ED84E003DF03F /* PBXBookmark */ = {
 		isa = PBXBookmark;
 		fRef = 5317449A0B240DD500579963 /* AppController.m */;
 	};
-	53F84BFB0B2DFE6E001C5148 /* PBXTextBookmark */ = {
+	53E466C70B2ED95D003DF03F /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 531744990B240DD500579963 /* AppController.h */;
+		name = "AppController.h: batteryLevel";
+		rLen = 0;
+		rLoc = 805;
+		rType = 0;
+		vrLen = 1558;
+		vrLoc = 0;
+	};
+	53E466C80B2ED95D003DF03F /* PBXTextBookmark */ = {
 		isa = PBXTextBookmark;
 		fRef = 5317449A0B240DD500579963 /* AppController.m */;
-		name = "AppController.m: 508";
 		rLen = 0;
-		rLoc = 13093;
+		rLoc = "-2147483591";
 		rType = 0;
-		vrLen = 1376;
-		vrLoc = 9900;
+	};
+	53E466C90B2ED95D003DF03F /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 531744990B240DD500579963 /* AppController.h */;
+		name = "AppController.h: batteryLevel";
+		rLen = 0;
+		rLoc = 805;
+		rType = 0;
+		vrLen = 1558;
+		vrLoc = 0;
+	};
+	53E466CA0B2ED95D003DF03F /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 5317449A0B240DD500579963 /* AppController.m */;
+		name = "AppController.m: 151";
+		rLen = 0;
+		rLoc = 4361;
+		rType = 0;
+		vrLen = 1680;
+		vrLoc = 3668;
+	};
+	53E466CD0B2ED95D003DF03F /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 5317449A0B240DD500579963 /* AppController.m */;
+		name = "AppController.m: setForceFeedbackEnabled:";
+		rLen = 0;
+		rLoc = 199;
+		rType = 0;
+		vrLen = 1165;
+		vrLoc = 26;
+	};
+	53E466CF0B2ED994003DF03F /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 531744990B240DD500579963 /* AppController.h */;
+		name = "AppController.h: batteryLevel";
+		rLen = 0;
+		rLoc = 805;
+		rType = 0;
+		vrLen = 1558;
+		vrLoc = 0;
 	};
 	8D1107260486CEB800E47090 /* DarwiinRemote */ = {
 		activeExec = 0;

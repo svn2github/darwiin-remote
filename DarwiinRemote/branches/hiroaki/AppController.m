@@ -148,7 +148,7 @@
 //- (void) dataChanged:(short)buttonData accX:(unsigned char)accX accY:(unsigned char)accY accZ:(unsigned char)accZ{
 - (void) dataChanged:(unsigned short)buttonData accX:(unsigned char)accX accY:(unsigned char)accY accZ:(unsigned char)accZ mouseX:(float)mx mouseY:(float)my{
 	[graphView setData:accX y:accY z:accZ];
-
+	[batteryLevel setDoubleValue:(double)[wii batteryLevel]];
 	tmpAccX = accX;
 	tmpAccY = accY;
 	tmpAccZ = accZ;
