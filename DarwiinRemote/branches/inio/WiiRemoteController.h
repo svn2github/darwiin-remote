@@ -37,6 +37,12 @@
 	IBOutlet NSMenuItem *viewMenuIR;
 	IBOutlet NSMenuItem *viewMenuRaw;
 	
+	// key binding configuration controlls:
+	
+	IBOutlet NSWindow    *keyBindSheet;
+	IBOutlet NSTabView   *keyBindOptions;
+	IBOutlet NSTextField *keyBindHeader;
+	
 	WiiRemote *wii;
 }
 + (WiiRemoteController*)createForWiiRemote:(WiiRemote*) wii;
@@ -45,6 +51,9 @@
 - (IBAction)setLED:(id)sender;
 - (IBAction)showWindow:(id)sender;
 - (void)setWii:(WiiRemote *)wii;
+
+- (IBAction)keyBindChangeAction:(id)sender;
+- (IBAction)keyBindDismiss:(id)sender;
 
 // internal:
 - (void)saveSettings;

@@ -123,6 +123,26 @@ static NSMutableDictionary *openWindows = nil;
 
 - (IBAction)setButtonAction:(id)sender
 {
+	[keyBindHeader setStringValue:[NSString stringWithFormat:@"Binding For %@", [sender title]]];
+	[NSApp beginSheet: keyBindSheet
+            modalForWindow: [self window]
+            modalDelegate: self
+            didEndSelector: @selector(keyBindDone:returnCode:contextInfo:)
+            contextInfo: nil];
+}
+
+- (IBAction)keyBindChangeAction:(id)sender {
+	NSMenuItem *item = sender;
+	
+	[keyBindOptions selectTabViewItemAtIndex:[item tag]];
+}
+
+- (IBAction)keyBindDismiss:(id)sender {
+	[NSApp endSheet: keyBindSheet];
+}
+
+- (void)keyBindDone:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo {
+	[sheet orderOut:self];
 }
 
 - (IBAction)setLED:(id)sender

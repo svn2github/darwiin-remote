@@ -3,7 +3,14 @@
         {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
         {CLASS = NSLevelIndicator; LANGUAGE = ObjC; SUPERCLASS = NSControl; }, 
         {
-            ACTIONS = {changeView = id; setButtonAction = id; setLED = id; showWindow = id; }; 
+            ACTIONS = {
+                changeView = id; 
+                keyBindChangeAction = id; 
+                keyBindDismiss = id; 
+                setButtonAction = id; 
+                setLED = id; 
+                showWindow = id; 
+            }; 
             CLASS = WiiRemoteController; 
             LANGUAGE = ObjC; 
             OUTLETS = {
@@ -20,6 +27,9 @@
                 buttonRight = NSButton; 
                 buttonUp = NSButton; 
                 detailView = NSTabView; 
+                keyBindHeader = NSTextField; 
+                keyBindOptions = NSTabView; 
+                keyBindSheet = NSWindow; 
                 led1 = NSButton; 
                 led2 = NSButton; 
                 led3 = NSButton; 
