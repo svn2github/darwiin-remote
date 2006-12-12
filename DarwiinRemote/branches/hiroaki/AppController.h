@@ -28,6 +28,8 @@
 	IBOutlet NSButton* oneButton;
 	IBOutlet NSButton* twoButton;
 	
+	IBOutlet NSLevelIndicator* batteryLevel;
+	
 	WiiRemoteDiscovery *discovery;
 	WiiRemote* wii;
 	CGPoint point;
