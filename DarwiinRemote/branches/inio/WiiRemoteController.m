@@ -33,6 +33,7 @@ static NSMutableDictionary *openWindows = nil;
 
 - (IBAction)showWindow:(id)sender {
 	//NSWindow *win = [self window];
+	[[self window] setBackgroundColor: [NSColor colorWithDeviceWhite:.93 alpha:1]];
 	[[self window] setDelegate:self];
 	[[self window] setContentSize:[[self window] minSize]];
 	[detailView setHidden:YES];
