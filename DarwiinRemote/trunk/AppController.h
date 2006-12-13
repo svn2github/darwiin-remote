@@ -1,6 +1,7 @@
 /* AppController */
 
 #import <Cocoa/Cocoa.h>
+#import <ApplicationServices/ApplicationServices.h>
 #import <WiiRemote/WiiRemote.h>
 #import <WiiRemote/WiiRemoteDiscovery.h>
 #import "GraphView.h"
@@ -49,4 +50,6 @@
 - (IBAction)setMotionSensorsEnabled:(id)sender;
 - (IBAction)setMouseModeEnabled:(id)sender;
 - (IBAction)doCalibration:(id)sender;
+- (void)sendKeyboardEvent:(CGKeyCode)keyCode keyDown:(BOOL)keyDown;
+
 @end

@@ -278,19 +278,85 @@
 		
 		if (!isPressedAButton){
 			isPressedAButton = YES;
-			if (mouseEventMode != 0)
-				CGPostMouseEvent(point, TRUE, 1, TRUE);
+			if (mouseEventMode != 0){
+				
+				CFRelease(CGEventCreate(NULL));		
+				// this is Tiger's bug.
+				//see also: http://www.cocoabuilder.com/archive/message/cocoa/2006/10/4/172206
+				
+				
+				CGEventRef event = CGEventCreateMouseEvent(NULL, kCGEventLeftMouseDown, point, kCGMouseButtonLeft);
+				
+				
+				CGEventSetType(event, kCGEventLeftMouseDown);
+				// this is Tiger's bug.
+				// see also: http://lists.apple.com/archives/Quartz-dev/2005/Oct/msg00048.html
+				
+				
+				CGEventPost(kCGHIDEventTap, event);
+				CFRelease(event);
+				
+
+			}
 		}else{
-			if (mouseEventMode != 0)	//dragging...
-				CGPostMouseEvent(point, TRUE, 1, TRUE);
+			if (mouseEventMode != 0){				//dragging...
+				
+				CFRelease(CGEventCreate(NULL));		
+				// this is Tiger's bug.
+				//see also: http://www.cocoabuilder.com/archive/message/cocoa/2006/10/4/172206
+				
+				
+				CGEventRef event = CGEventCreateMouseEvent(NULL, kCGEventLeftMouseDragged, point, kCGMouseButtonLeft);
+				
+				CGEventSetType(event, kCGEventLeftMouseDragged);
+				// this is Tiger's bug.
+				// see also: http://lists.apple.com/archives/Quartz-dev/2005/Oct/msg00048.html
+				
+				CGEventPost(kCGHIDEventTap, event);
+				CFRelease(event);
+				
+			}
 		}
 	}else{
 		
 		[aButton setEnabled:NO];
-		if (mouseEventMode != 0)
-			CGPostMouseEvent(point, TRUE, 1, FALSE);
+		if (mouseEventMode != 0){
+			
+			CFRelease(CGEventCreate(NULL));		
+			// this is Tiger's bug.
+			// see also: http://www.cocoabuilder.com/archive/message/cocoa/2006/10/4/172206
+			
+			
+			CGEventRef event = CGEventCreateMouseEvent(NULL, kCGEventMouseMoved, point, kCGMouseButtonLeft);
+			
+			CGEventSetType(event, kCGEventMouseMoved);
+			// this is Tiger's bug.
+			// see also: http://lists.apple.com/archives/Quartz-dev/2005/Oct/msg00048.html
+
+			
+			CGEventPost(kCGHIDEventTap, event);
+			CFRelease(event);
+			
+
+		}
 		
 		if (isPressedAButton){
+			
+			CFRelease(CGEventCreate(NULL));		
+			// this is Tiger's bug.
+			// see also: http://www.cocoabuilder.com/archive/message/cocoa/2006/10/4/172206
+			
+			
+			CGEventRef event = CGEventCreateMouseEvent(NULL, kCGEventLeftMouseUp, point, kCGMouseButtonLeft);
+			
+			CGEventSetType(event, kCGEventLeftMouseUp);
+			// this is Tiger's bug.
+			// see also: http://lists.apple.com/archives/Quartz-dev/2005/Oct/msg00048.html
+			
+			
+			CGEventPost(kCGHIDEventTap, event);
+			CFRelease(event);
+			
 			isPressedAButton = NO;
 		}
 	}
@@ -300,14 +366,17 @@
 		[bButton setEnabled:YES];
 		if (!isPressedBButton){
 			isPressedBButton = YES;
-			CGPostKeyboardEvent((CGCharCode)0, (CGKeyCode)36, true);
+			
+
+			[self sendKeyboardEvent:(CGKeyCode)36 keyDown:YES];
 		}
 	}else{
 		[bButton setEnabled:NO];
 		
 		if (isPressedBButton){
 			isPressedBButton = NO;
-			CGPostKeyboardEvent((CGCharCode)0, (CGKeyCode)36, false);
+			
+			[self sendKeyboardEvent:(CGKeyCode)36 keyDown:NO];
 		}
 	}
 	
@@ -316,7 +385,8 @@
 		
 		if (!isPressedUpButton){
 			isPressedUpButton = YES;
-			CGPostKeyboardEvent((CGCharCode)0, (CGKeyCode)126, true);
+			
+			[self sendKeyboardEvent:(CGKeyCode)126 keyDown:YES];
 		}
 		
 	}else{
@@ -324,7 +394,8 @@
 		
 		if (isPressedUpButton){
 			isPressedUpButton = NO;
-			CGPostKeyboardEvent((CGCharCode)0, (CGKeyCode)126, false);
+			[self sendKeyboardEvent:(CGKeyCode)126 keyDown:NO];
+
 		}
 	}
 	
@@ -333,7 +404,8 @@
 		
 		if (!isPressedDownButton){
 			isPressedDownButton = YES;
-			CGPostKeyboardEvent((CGCharCode)0, (CGKeyCode)125, true);
+			[self sendKeyboardEvent:(CGKeyCode)125 keyDown:YES];
+
 		}
 		
 	}else{
@@ -341,7 +413,8 @@
 		
 		if (isPressedDownButton){
 			isPressedDownButton = NO;
-			CGPostKeyboardEvent((CGCharCode)0, (CGKeyCode)125, false);
+			[self sendKeyboardEvent:(CGKeyCode)125 keyDown:NO];
+
 		}
 	}
 	
@@ -350,7 +423,8 @@
 		
 		if (!isPressedLeftButton){
 			isPressedLeftButton = YES;
-			CGPostKeyboardEvent((CGCharCode)0, (CGKeyCode)123, true);
+			[self sendKeyboardEvent:(CGKeyCode)123 keyDown:YES];
+
 		}
 		
 	}else{
@@ -358,7 +432,8 @@
 		
 		if (isPressedLeftButton){
 			isPressedLeftButton = NO;
-			CGPostKeyboardEvent((CGCharCode)0, (CGKeyCode)123, false);
+			[self sendKeyboardEvent:(CGKeyCode)123 keyDown:NO];
+
 		}
 	}
 	
@@ -367,7 +442,9 @@
 		
 		if (!isPressedRightButton){
 			isPressedRightButton = YES;
-			CGPostKeyboardEvent((CGCharCode)0, (CGKeyCode)124, true);
+			
+			[self sendKeyboardEvent:(CGKeyCode)124 keyDown:YES];
+
 		}
 		
 	}else{
@@ -375,7 +452,8 @@
 		
 		if (isPressedRightButton){
 			isPressedRightButton = NO;
-			CGPostKeyboardEvent((CGCharCode)0, (CGKeyCode)124, false);
+			[self sendKeyboardEvent:(CGKeyCode)124 keyDown:NO];
+
 		}
 		
 	}
@@ -385,16 +463,22 @@
 		
 		if (!isPressedMinusButton){
 			isPressedMinusButton = YES;
-			CGPostKeyboardEvent((CGCharCode)0, (CGKeyCode)56, true);
-			CGPostKeyboardEvent((CGCharCode)0, (CGKeyCode)125, true);
+			
+			[self sendKeyboardEvent:(CGKeyCode)56 keyDown:YES];
+			[self sendKeyboardEvent:(CGKeyCode)125 keyDown:YES];
+
+			
 		}
 	}else{
 		[minusButton setEnabled:NO];
 		
 		if (isPressedMinusButton){
 			isPressedMinusButton = NO;
-			CGPostKeyboardEvent((CGCharCode)0, (CGKeyCode)56, false);
-			CGPostKeyboardEvent((CGCharCode)0, (CGKeyCode)125, false);
+			
+			[self sendKeyboardEvent:(CGKeyCode)56 keyDown:NO];
+			[self sendKeyboardEvent:(CGKeyCode)125 keyDown:NO];
+
+			
 		}
 	}
 	
@@ -403,8 +487,11 @@
 		
 		if (!isPressedPlusButton){
 			isPressedPlusButton = YES;
-			CGPostKeyboardEvent((CGCharCode)0, (CGKeyCode)56, true);
-			CGPostKeyboardEvent((CGCharCode)0, (CGKeyCode)126, true);
+			
+			[self sendKeyboardEvent:(CGKeyCode)56 keyDown:YES];
+			[self sendKeyboardEvent:(CGKeyCode)126 keyDown:YES];
+
+			
 		}
 		
 	}else{
@@ -412,8 +499,10 @@
 		
 		if (isPressedPlusButton){
 			isPressedPlusButton = NO;
-			CGPostKeyboardEvent((CGCharCode)0, (CGKeyCode)56, false);
-			CGPostKeyboardEvent((CGCharCode)0, (CGKeyCode)126, false);
+			
+			[self sendKeyboardEvent:(CGKeyCode)56 keyDown:NO];
+			[self sendKeyboardEvent:(CGKeyCode)126 keyDown:NO];
+
 		}
 		
 	}
@@ -423,8 +512,11 @@
 		
 		if (!isPressedHomeButton){
 			isPressedHomeButton = YES;
-			CGPostKeyboardEvent((CGCharCode)0, (CGKeyCode)55, true);
-			CGPostKeyboardEvent((CGCharCode)0, (CGKeyCode)53, true);
+			
+			
+			[self sendKeyboardEvent:(CGKeyCode)55 keyDown:YES];
+			[self sendKeyboardEvent:(CGKeyCode)53 keyDown:YES];
+
 		}
 		
 	}else{
@@ -432,8 +524,11 @@
 		
 		if (isPressedHomeButton){
 			isPressedHomeButton = NO;
-			CGPostKeyboardEvent((CGCharCode)0, (CGKeyCode)53, false);
-			CGPostKeyboardEvent((CGCharCode)0, (CGKeyCode)55, false);
+			
+			[self sendKeyboardEvent:(CGKeyCode)53 keyDown:NO];
+			[self sendKeyboardEvent:(CGKeyCode)55 keyDown:NO];
+
+			
 		}
 	}
 	
@@ -443,7 +538,6 @@
 		if (!isPressedOneButton){
 			isPressedOneButton = YES;
 			
-			//CGPostKeyboardEvent((CGCharCode)0, (CGKeyCode)116, true);
 		}
 		
 	}else{
@@ -456,11 +550,26 @@
 				[textView setString:[NSString stringWithFormat:@"%@\n===== Acceleration Sensor Mouse Mode =====", [textView string]]];
 			}else{
 				mouseEventMode = 0;
-				CGPostMouseEvent(point, TRUE, 1, FALSE);
+				
+				CFRelease(CGEventCreate(NULL));		
+				// this is Tiger's bug.
+				// see also: http://www.cocoabuilder.com/archive/message/cocoa/2006/10/4/172206
+				
+				
+				CGEventRef event = CGEventCreateMouseEvent(NULL, kCGEventLeftMouseUp, point, kCGMouseButtonLeft);
+				
+				CGEventSetType(event, kCGEventLeftMouseUp);
+				// this is Tiger's bug.
+				// see also: http://lists.apple.com/archives/Quartz-dev/2005/Oct/msg00048.html
+				
+				
+				CGEventPost(kCGHIDEventTap, event);
+				CFRelease(event);
+				
+				
 				isPressedAButton = NO;
 				[textView setString:[NSString stringWithFormat:@"%@\n===== Mouse Mode off =====", [textView string]]];
 			}
-			//CGPostKeyboardEvent((CGCharCode)0, (CGKeyCode)116, false);
 			
 		}
 	}
@@ -471,7 +580,6 @@
 		
 		if (!isPressedTwoButton){
 			isPressedTwoButton = YES;
-			//CGPostKeyboardEvent((CGCharCode)0, (CGKeyCode)121, true);
 		}
 	}else{
 		[twoButton setEnabled:NO];
@@ -484,11 +592,26 @@
 				
 			}else{
 				mouseEventMode = 0;
-				CGPostMouseEvent(point, TRUE, 1, FALSE);
+				
+				CFRelease(CGEventCreate(NULL));		
+				// this is Tiger's bug.
+				// see also: http://www.cocoabuilder.com/archive/message/cocoa/2006/10/4/172206
+				
+				
+				CGEventRef event = CGEventCreateMouseEvent(NULL, kCGEventLeftMouseUp, point, kCGMouseButtonLeft);
+				
+				CGEventSetType(event, kCGEventLeftMouseUp);
+				// this is Tiger's bug.
+				// see also: http://lists.apple.com/archives/Quartz-dev/2005/Oct/msg00048.html
+				
+				
+				CGEventPost(kCGHIDEventTap, event);
+				CFRelease(event);
+				
+				
 				isPressedAButton = NO;
 				[textView setString:[NSString stringWithFormat:@"%@\n===== Mouse Mode Off =====", [textView string]]];
 			}
-			//CGPostKeyboardEvent((CGCharCode)0, (CGKeyCode)121, false);
 		}
 	}
 	
@@ -516,6 +639,18 @@
 	[graphView stopTimer];
 	[wii closeConnection];
 	return NSTerminateNow;
+}
+
+
+- (void)sendKeyboardEvent:(CGKeyCode)keyCode keyDown:(BOOL)keyDown{
+	CFRelease(CGEventCreate(NULL));		
+	// this is Tiger's bug.
+	//see also: http://www.cocoabuilder.com/archive/message/cocoa/2006/10/4/172206
+	
+	
+	CGEventRef event = CGEventCreateKeyboardEvent(NULL, keyCode, keyDown);
+	CGEventPost(kCGHIDEventTap, event);
+	CFRelease(event);
 }
 
 

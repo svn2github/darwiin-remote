@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		531444FB0B2FE34D00757188 /* WiiRemote.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 531444F50B2FE34D00757188 /* WiiRemote.framework */; };
+		531447F60B3010A900757188 /* ApplicationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 531447E10B3010A900757188 /* ApplicationServices.framework */; };
 		5317449B0B240DD500579963 /* AppController.m in Sources */ = {isa = PBXBuildFile; fileRef = 5317449A0B240DD500579963 /* AppController.m */; };
 		53BDDEBB0B2B22710033DB22 /* COPYRIGHT.txt in Resources */ = {isa = PBXBuildFile; fileRef = 53BDDEBA0B2B22710033DB22 /* COPYRIGHT.txt */; };
 		53BDDEBD0B2B229B0033DB22 /* HISTORY.txt in Resources */ = {isa = PBXBuildFile; fileRef = 53BDDEBC0B2B229B0033DB22 /* HISTORY.txt */; };
@@ -31,6 +32,7 @@
 		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
 		32CA4F630368D1EE00C91783 /* WiiRemote_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WiiRemote_Prefix.pch; sourceTree = "<group>"; };
 		531444F50B2FE34D00757188 /* WiiRemote.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WiiRemote.framework; path = /Library/Frameworks/WiiRemote.framework; sourceTree = "<absolute>"; };
+		531447E10B3010A900757188 /* ApplicationServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ApplicationServices.framework; path = /System/Library/Frameworks/ApplicationServices.framework; sourceTree = "<absolute>"; };
 		531744990B240DD500579963 /* AppController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppController.h; sourceTree = "<group>"; };
 		5317449A0B240DD500579963 /* AppController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AppController.m; sourceTree = "<group>"; };
 		53BDDEBA0B2B22710033DB22 /* COPYRIGHT.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = COPYRIGHT.txt; sourceTree = "<group>"; };
@@ -53,6 +55,7 @@
 				8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */,
 				53C576B60B2497D500D36527 /* OpenGL.framework in Frameworks */,
 				531444FB0B2FE34D00757188 /* WiiRemote.framework in Frameworks */,
+				531447F60B3010A900757188 /* ApplicationServices.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -75,6 +78,7 @@
 		1058C7A0FEA54F0111CA2CBB /* Linked Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				531447E10B3010A900757188 /* ApplicationServices.framework */,
 				531444F50B2FE34D00757188 /* WiiRemote.framework */,
 				53C576B50B2497D500D36527 /* OpenGL.framework */,
 				1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */,
