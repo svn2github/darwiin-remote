@@ -1,8 +1,8 @@
 /* AppController */
 
 #import <Cocoa/Cocoa.h>
-#import "WiiRemote.h"
-#import "WiiRemoteDiscovery.h"
+#import <WiiRemote/WiiRemote.h>
+#import <WiiRemote/WiiRemoteDiscovery.h>
 #import "GraphView.h"
 
 @interface AppController : NSObject
@@ -27,6 +27,8 @@
 	IBOutlet NSButton* homeButton;
 	IBOutlet NSButton* oneButton;
 	IBOutlet NSButton* twoButton;
+	
+	IBOutlet NSLevelIndicator* batteryLevel;
 	
 	WiiRemoteDiscovery *discovery;
 	WiiRemote* wii;

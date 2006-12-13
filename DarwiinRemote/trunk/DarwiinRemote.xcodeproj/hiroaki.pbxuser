@@ -19,7 +19,7 @@
 			5317459E0B2426A800579963 /* WiiRemote.m:307 */,
 			53C574BB0B24911000D36527 /* WiiRemote.m:103 */,
 			534B14E50B24C84F003598E7 /* GraphView.m:39 */,
-			53440BE50B255512001AAB55 /* AppController.h:40 */,
+			53440BE50B255512001AAB55 /* AppController.h:42 */,
 			532D8E6C0B29E4290061F822 /* AppController.m:119 */,
 		);
 		breakpointsGroup = 531744DE0B24178900579963 /* XCBreakpointsBucket */;
@@ -47,7 +47,7 @@
 				PBXFileTableDataSourceColumnSortingKey = PBXFileDataSource_Filename_ColumnID;
 				PBXFileTableDataSourceColumnWidthsKey = (
 					20,
-					607,
+					52,
 					20,
 					48,
 					43,
@@ -62,6 +62,18 @@
 					PBXFileDataSource_Errors_ColumnID,
 					PBXFileDataSource_Warnings_ColumnID,
 					PBXFileDataSource_Target_ColumnID,
+				);
+			};
+			PBXConfiguration.PBXFileTableDataSource3.PBXFindDataSource = {
+				PBXFileTableDataSourceColumnSortingDirectionKey = "-1";
+				PBXFileTableDataSourceColumnSortingKey = PBXFindDataSource_LocationID;
+				PBXFileTableDataSourceColumnWidthsKey = (
+					200,
+					621,
+				);
+				PBXFileTableDataSourceColumnsKey = (
+					PBXFindDataSource_MessageID,
+					PBXFindDataSource_LocationID,
 				);
 			};
 			PBXConfiguration.PBXFileTableDataSource3.PBXSymbolsDataSource = {
@@ -110,7 +122,7 @@
 				PBXFileTableDataSourceColumnWidthsKey = (
 					20,
 					200,
-					427,
+					195,
 					20,
 					48,
 					43,
@@ -126,12 +138,36 @@
 					PBXFileDataSource_Warnings_ColumnID,
 				);
 			};
-			PBXPerProjectTemplateStateSaveDate = 187440469;
-			PBXWorkspaceStateSaveDate = 187440469;
+			PBXPerProjectTemplateStateSaveDate = 187689449;
+			PBXWorkspaceStateSaveDate = 187689449;
+		};
+		perUserProjectItems = {
+			5314464D0B2FE93F00757188 = 5314464D0B2FE93F00757188 /* PBXTextBookmark */;
+			5314467B0B2FE9E000757188 = 5314467B0B2FE9E000757188 /* PBXTextBookmark */;
 		};
 		sourceControlManager = 5317445A0B240A1C00579963 /* Source Control */;
 		userBuildSettings = {
 		};
+	};
+	5314464D0B2FE93F00757188 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 5317449A0B240DD500579963 /* AppController.m */;
+		name = "AppController.m: 151";
+		rLen = 0;
+		rLoc = 4303;
+		rType = 0;
+		vrLen = 1391;
+		vrLoc = 7160;
+	};
+	5314467B0B2FE9E000757188 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 5317449A0B240DD500579963 /* AppController.m */;
+		name = "AppController.m: 151";
+		rLen = 0;
+		rLoc = 4303;
+		rType = 0;
+		vrLen = 1391;
+		vrLoc = 7160;
 	};
 	5317444A0B240A0600579963 /* DarwiinRemote */ = {
 		isa = PBXExecutable;
@@ -193,21 +229,13 @@
 			$xmm7 = 1;
 		};
 	};
-	531744570B240A1C00579963 /* WiiRemote.h */ = {
-		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {989, 1246}}";
-			sepNavSelRange = "{1867, 0}";
-			sepNavVisRect = "{{0, 447}, {989, 799}}";
-			sepNavWindowFrame = "{{361, 138}, {1028, 913}}";
-		};
-	};
 	531744580B240A1C00579963 /* WiiRemote.m */ = {
-		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {989, 6104}}";
-			sepNavSelRange = "{1315, 0}";
-			sepNavVisRect = "{{0, 1443}, {989, 799}}";
-			sepNavWindowFrame = "{{361, 138}, {1028, 913}}";
-		};
+		isa = PBXFileReference;
+		fileEncoding = 4;
+		lastKnownFileType = sourcecode.c.objc;
+		name = WiiRemote.m;
+		path = "/Users/hiroaki/projects/darwiin-remote/DarwiinRemote/branches/hiroaki/WiiRemote.m";
+		sourceTree = "<absolute>";
 	};
 	5317445A0B240A1C00579963 /* Source Control */ = {
 		isa = PBXSourceControlManager;
@@ -224,28 +252,28 @@
 	};
 	531744990B240DD500579963 /* AppController.h */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {1189, 743}}";
-			sepNavSelRange = "{1062, 0}";
-			sepNavVisRect = "{{0, 0}, {1189, 743}}";
+			sepNavIntBoundsRect = "{{0, 0}, {957, 911}}";
+			sepNavSelRange = "{805, 0}";
+			sepNavVisRect = "{{0, 0}, {957, 911}}";
 			sepNavWindowFrame = "{{296, 187}, {1228, 857}}";
 		};
 	};
 	5317449A0B240DD500579963 /* AppController.m */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {1189, 7252}}";
-			sepNavSelRange = "{4059, 0}";
-			sepNavVisRect = "{{0, 1682}, {1189, 743}}";
-			sepNavWindowFrame = "{{589, -73}, {1228, 857}}";
+			sepNavIntBoundsRect = "{{0, 0}, {769, 7392}}";
+			sepNavSelRange = "{5684, 0}";
+			sepNavVisRect = "{{0, 0}, {769, 948}}";
+			sepNavWindowFrame = "{{17, 90}, {808, 1062}}";
 		};
 	};
 	531744DE0B24178900579963 /* XCBreakpointsBucket */ = {
 		isa = XCBreakpointsBucket;
-		name = WiiRemote;
+		name = DarwiinRemote;
 		objects = (
 			5317459E0B2426A800579963 /* WiiRemote.m:307 */,
 			53C574BB0B24911000D36527 /* WiiRemote.m:103 */,
 			534B14E50B24C84F003598E7 /* GraphView.m:39 */,
-			53440BE50B255512001AAB55 /* AppController.h:40 */,
+			53440BE50B255512001AAB55 /* AppController.h:42 */,
 			532D8E6C0B29E4290061F822 /* AppController.m:119 */,
 		);
 	};
@@ -260,8 +288,7 @@
 		functionName = "-l2capChannelData:data:length:";
 		hitCount = 1;
 		lineNumber = 307;
-		location = DarwiinRemote;
-		modificationTime = 187375836.782194;
+		modificationTime = 187688677.591121;
 		state = 1;
 	};
 	532D8E6C0B29E4290061F822 /* AppController.m:119 */ = {
@@ -276,10 +303,10 @@
 		hitCount = 1;
 		lineNumber = 119;
 		location = DarwiinRemote;
-		modificationTime = 187375836.78179;
+		modificationTime = 187688677.591626;
 		state = 1;
 	};
-	53440BE50B255512001AAB55 /* AppController.h:40 */ = {
+	53440BE50B255512001AAB55 /* AppController.h:42 */ = {
 		isa = PBXFileBreakpoint;
 		actions = (
 		);
@@ -288,8 +315,8 @@
 		delayBeforeContinue = 0;
 		fileReference = 531744990B240DD500579963 /* AppController.h */;
 		hitCount = 1;
-		lineNumber = 40;
-		modificationTime = 187375836.782375;
+		lineNumber = 42;
+		modificationTime = 187688677.591792;
 		state = 1;
 	};
 	534B14E50B24C84F003598E7 /* GraphView.m:39 */ = {
@@ -304,7 +331,7 @@
 		hitCount = 1;
 		lineNumber = 39;
 		location = DarwiinRemote;
-		modificationTime = 187375836.7815011;
+		modificationTime = 187688677.591337;
 		state = 1;
 	};
 	53BDDEBC0B2B229B0033DB22 /* HISTORY.txt */ = {
@@ -342,8 +369,7 @@
 		functionName = "-connect";
 		hitCount = 1;
 		lineNumber = 103;
-		location = DarwiinRemote;
-		modificationTime = 187375836.78199;
+		modificationTime = 187688677.591483;
 		state = 1;
 	};
 	53C576F70B24999B00D36527 /* GraphPoint.h */ = {

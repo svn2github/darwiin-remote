@@ -148,7 +148,7 @@
 //- (void) dataChanged:(short)buttonData accX:(unsigned char)accX accY:(unsigned char)accY accZ:(unsigned char)accZ{
 - (void) dataChanged:(unsigned short)buttonData accX:(unsigned char)accX accY:(unsigned char)accY accZ:(unsigned char)accZ mouseX:(float)mx mouseY:(float)my{
 	[graphView setData:accX y:accY z:accZ];
-
+	[batteryLevel setDoubleValue:(double)[wii batteryLevel]];
 	tmpAccX = accX;
 	tmpAccY = accY;
 	tmpAccZ = accZ;
@@ -172,6 +172,10 @@
 	point.y = dispHeight - p.y - p2.origin.y;
 	//NSLog(@"width: %d, height: %d,  point.y: %f p.y: %f p2.origin.y: %f p2.size.height: %f", dispWidth, dispHeight, point.y, p.y, p2.origin.y, p2.size.height);
 
+	// Set the mouse pointer position delta for different angles - in degrees.
+	// roll - 0 = level
+	// roll < 0 = left side down.
+	// roll > 0 = right side down.
 	
 	if (mouseEventMode == 1){
 		if (roll < -15)
@@ -188,6 +192,11 @@
 		if (roll > 75)
 			point.x += 6;
 		
+		// pitch -	-90 = vertical, IR port up
+		//			  0 = horizontal, A-button up.
+		//			 90 = vertical, IR port down
+		
+		// The "natural" hand position for the wiimote is ~ -40 up. 
 		
 		if (pitch < -50)
 			point.y -= 2;
@@ -505,7 +514,7 @@
 	
 	
 	[graphView stopTimer];
-	[wii close];
+	[wii closeConnection];
 	return NSTerminateNow;
 }
 
