@@ -1,0 +1,68 @@
+{
+    IBClasses = (
+        {
+            ACTIONS = {
+                doCalibration = id; 
+                openKeyConfiguration = id; 
+                setForceFeedbackEnabled = id; 
+                setIRSensorEnabled = id; 
+                setLEDEnabled = id; 
+                setMotionSensorsEnabled = id; 
+                setMouseModeEnabled = id; 
+            }; 
+            CLASS = AppController; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {
+                aButton = NSButton; 
+                appDelegate = "KeyConfiguration_AppDelegate"; 
+                bButton = NSButton; 
+                batteryLevel = NSLevelIndicator; 
+                downButton = NSButton; 
+                drawer = NSDrawer; 
+                graphView = GraphView; 
+                homeButton = NSButton; 
+                keyConfigWindow = KeyConfigWindow; 
+                led1 = NSButton; 
+                led2 = NSButton; 
+                led3 = NSButton; 
+                led4 = NSButton; 
+                leftButton = NSButton; 
+                mainWindow = NSWindow; 
+                minusButton = NSButton; 
+                oneButton = NSButton; 
+                plusButton = NSButton; 
+                rightButton = NSButton; 
+                textView = NSTextView; 
+                twoButton = NSButton; 
+                upButton = NSButton; 
+            }; 
+            SUPERCLASS = NSObject; 
+        }, 
+        {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
+        {CLASS = GraphView; LANGUAGE = ObjC; SUPERCLASS = NSOpenGLView; }, 
+        {CLASS = KeyCaptureField; LANGUAGE = ObjC; SUPERCLASS = NSTextField; }, 
+        {
+            ACTIONS = {cancel = id; ok = id; }; 
+            CLASS = KeyConfigWindow; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {
+                box = NSBox; 
+                command = NSButton; 
+                control = NSButton; 
+                keyField = KeyCaptureField; 
+                option = NSButton; 
+                shift = NSButton; 
+                type = NSPopUpButton; 
+            }; 
+            SUPERCLASS = NSWindow; 
+        }, 
+        {
+            ACTIONS = {saveAction = id; }; 
+            CLASS = "KeyConfiguration_AppDelegate"; 
+            LANGUAGE = ObjC; 
+            SUPERCLASS = NSObject; 
+        }, 
+        {CLASS = NSLevelIndicator; LANGUAGE = ObjC; SUPERCLASS = NSControl; }
+    ); 
+    IBVersion = 1; 
+}
