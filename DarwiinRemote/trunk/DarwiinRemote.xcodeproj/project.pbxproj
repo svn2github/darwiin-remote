@@ -7,6 +7,15 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		099830550B33363300BEFC43 /* lo.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 0998304D0B33363300BEFC43 /* lo.h */; };
+		099830560B33363300BEFC43 /* lo_endian.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 0998304E0B33363300BEFC43 /* lo_endian.h */; };
+		099830570B33363300BEFC43 /* lo_errors.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 0998304F0B33363300BEFC43 /* lo_errors.h */; };
+		099830580B33363300BEFC43 /* lo_lowlevel.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 099830500B33363300BEFC43 /* lo_lowlevel.h */; };
+		099830590B33363300BEFC43 /* lo_macros.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 099830510B33363300BEFC43 /* lo_macros.h */; };
+		0998305A0B33363300BEFC43 /* lo_osc_types.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 099830520B33363300BEFC43 /* lo_osc_types.h */; };
+		0998305B0B33363300BEFC43 /* lo_throw.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 099830530B33363300BEFC43 /* lo_throw.h */; };
+		0998305C0B33363300BEFC43 /* lo_types.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 099830540B33363300BEFC43 /* lo_types.h */; };
+		0998305E0B33364E00BEFC43 /* liblo.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 0998305D0B33364E00BEFC43 /* liblo.a */; };
 		531447F60B3010A900757188 /* ApplicationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 531447E10B3010A900757188 /* ApplicationServices.framework */; };
 		531449910B303CC600757188 /* WiiRemote.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5314498D0B303CC600757188 /* WiiRemote.framework */; };
 		531449950B303CDF00757188 /* WiiRemote.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 5314498D0B303CC600757188 /* WiiRemote.framework */; };
@@ -31,6 +40,14 @@
 			dstSubfolderSpec = 10;
 			files = (
 				531449950B303CDF00757188 /* WiiRemote.framework in CopyFiles */,
+				099830550B33363300BEFC43 /* lo.h in CopyFiles */,
+				099830560B33363300BEFC43 /* lo_endian.h in CopyFiles */,
+				099830570B33363300BEFC43 /* lo_errors.h in CopyFiles */,
+				099830580B33363300BEFC43 /* lo_lowlevel.h in CopyFiles */,
+				099830590B33363300BEFC43 /* lo_macros.h in CopyFiles */,
+				0998305A0B33363300BEFC43 /* lo_osc_types.h in CopyFiles */,
+				0998305B0B33363300BEFC43 /* lo_throw.h in CopyFiles */,
+				0998305C0B33363300BEFC43 /* lo_types.h in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -38,6 +55,15 @@
 
 /* Begin PBXFileReference section */
 		089C165DFE840E0CC02AAC07 /* English */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		0998304D0B33363300BEFC43 /* lo.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = lo.h; sourceTree = "<group>"; };
+		0998304E0B33363300BEFC43 /* lo_endian.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = lo_endian.h; sourceTree = "<group>"; };
+		0998304F0B33363300BEFC43 /* lo_errors.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = lo_errors.h; sourceTree = "<group>"; };
+		099830500B33363300BEFC43 /* lo_lowlevel.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = lo_lowlevel.h; sourceTree = "<group>"; };
+		099830510B33363300BEFC43 /* lo_macros.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = lo_macros.h; sourceTree = "<group>"; };
+		099830520B33363300BEFC43 /* lo_osc_types.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = lo_osc_types.h; sourceTree = "<group>"; };
+		099830530B33363300BEFC43 /* lo_throw.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = lo_throw.h; sourceTree = "<group>"; };
+		099830540B33363300BEFC43 /* lo_types.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = lo_types.h; sourceTree = "<group>"; };
+		0998305D0B33364E00BEFC43 /* liblo.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = liblo.a; path = lo/build/liblo.a; sourceTree = "<group>"; };
 		1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
 		13E42FB307B3F0F600E4EEF1 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = /System/Library/Frameworks/CoreData.framework; sourceTree = "<absolute>"; };
 		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
@@ -46,7 +72,7 @@
 		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
 		32CA4F630368D1EE00C91783 /* WiiRemote_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WiiRemote_Prefix.pch; sourceTree = "<group>"; };
 		531447E10B3010A900757188 /* ApplicationServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ApplicationServices.framework; path = /System/Library/Frameworks/ApplicationServices.framework; sourceTree = "<absolute>"; };
-		5314498D0B303CC600757188 /* WiiRemote.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WiiRemote.framework; path = ../../WiiRemoteFramework/trunk/build/Release/WiiRemote.framework; sourceTree = SOURCE_ROOT; };
+		5314498D0B303CC600757188 /* WiiRemote.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WiiRemote.framework; path = ../../WiiRemoteFramework/trunk/build/WiiRemote.framework; sourceTree = SOURCE_ROOT; };
 		531744990B240DD500579963 /* AppController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppController.h; sourceTree = "<group>"; };
 		5317449A0B240DD500579963 /* AppController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AppController.m; sourceTree = "<group>"; };
 		53BDDEBA0B2B22710033DB22 /* COPYRIGHT.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = COPYRIGHT.txt; sourceTree = "<group>"; };
@@ -70,6 +96,7 @@
 				53C576B60B2497D500D36527 /* OpenGL.framework in Frameworks */,
 				531447F60B3010A900757188 /* ApplicationServices.framework in Frameworks */,
 				531449910B303CC600757188 /* WiiRemote.framework in Frameworks */,
+				0998305E0B33364E00BEFC43 /* liblo.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -87,6 +114,22 @@
 				53C576F80B24999B00D36527 /* GraphPoint.m */,
 			);
 			name = Classes;
+			sourceTree = "<group>";
+		};
+		0998304C0B33363300BEFC43 /* lo */ = {
+			isa = PBXGroup;
+			children = (
+				0998304D0B33363300BEFC43 /* lo.h */,
+				0998304E0B33363300BEFC43 /* lo_endian.h */,
+				0998304F0B33363300BEFC43 /* lo_errors.h */,
+				099830500B33363300BEFC43 /* lo_lowlevel.h */,
+				099830510B33363300BEFC43 /* lo_macros.h */,
+				099830520B33363300BEFC43 /* lo_osc_types.h */,
+				099830530B33363300BEFC43 /* lo_throw.h */,
+				099830540B33363300BEFC43 /* lo_types.h */,
+			);
+			name = lo;
+			path = lo/lo;
 			sourceTree = "<group>";
 		};
 		1058C7A0FEA54F0111CA2CBB /* Linked Frameworks */ = {
@@ -121,6 +164,8 @@
 		29B97314FDCFA39411CA2CEA /* WiiRemote */ = {
 			isa = PBXGroup;
 			children = (
+				0998305D0B33364E00BEFC43 /* liblo.a */,
+				0998304C0B33363300BEFC43 /* lo */,
 				080E96DDFE201D6D7F000001 /* Classes */,
 				29B97315FDCFA39411CA2CEA /* Other Sources */,
 				53BDDEB90B2B22540033DB22 /* docs */,
@@ -273,6 +318,13 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_1)",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_2)",
+				);
+				LIBRARY_SEARCH_PATHS_QUOTED_1 = "\"$(SRCROOT)/../../../lo/build\"";
+				LIBRARY_SEARCH_PATHS_QUOTED_2 = "\"$(SRCROOT)/lo/build\"";
 				PRODUCT_NAME = WiiRemote;
 				WRAPPER_EXTENSION = app;
 				ZERO_LINK = YES;
@@ -298,6 +350,14 @@
 				GCC_MODEL_TUNING = G5;
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_1)",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_2)",
+				);
+				LIBRARY_SEARCH_PATHS_QUOTED_1 = "\"$(SRCROOT)/../../../lo/build\"";
+				LIBRARY_SEARCH_PATHS_QUOTED_2 = "\"$(SRCROOT)/lo/build\"";
+				OTHER_CFLAGS = "-D$(arch)";
 				PRODUCT_NAME = DarwiinRemote;
 				WRAPPER_EXTENSION = app;
 			};

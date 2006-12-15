@@ -1,6 +1,8 @@
 #import "AppController.h"
 
 
+
+
 @implementation AppController
 
 - (IBAction)setForceFeedbackEnabled:(id)sender
@@ -75,30 +77,107 @@
 	point.y = 0;
 	
 	//User defaults settings...
-	{
-        NSMutableDictionary *defaultValues = [NSMutableDictionary dictionary];
+	NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
+	if([defaults objectForKey:@"upTag"] == nil) {
 		
 		NSNumber* num = [[NSNumber alloc] initWithDouble:128.0];
 		NSNumber* num2 = [[NSNumber alloc] initWithDouble:154.0];
 
         //NSData *num = [NSArchiver archivedDataWithRootObject:[[NSNumber alloc]initWithInt:0]];
         //NSData *check = [NSArchiver archivedDataWithRootObject:[[NSNumber alloc]initWithInt:NSOffState]];
-		[defaultValues setObject:num forKey:@"x1"];
-		[defaultValues setObject:num forKey:@"y1"];
-		[defaultValues setObject:num2 forKey:@"z1"];
+		[defaults setObject:num forKey:@"x1"];
+		[defaults setObject:num forKey:@"y1"];
+		[defaults setObject:num2 forKey:@"z1"];
 
-		[defaultValues setObject:num forKey:@"x2"];
-		[defaultValues setObject:num2 forKey:@"y2"];
-		[defaultValues setObject:num forKey:@"z2"];
+		[defaults setObject:num forKey:@"x2"];
+		[defaults setObject:num2 forKey:@"y2"];
+		[defaults setObject:num forKey:@"z2"];
 		
-		[defaultValues setObject:num2 forKey:@"x3"];
-		[defaultValues setObject:num forKey:@"y3"];
-		[defaultValues setObject:num forKey:@"z3"];
-
-        [[NSUserDefaults standardUserDefaults] registerDefaults: defaultValues];
+		[defaults setObject:num2 forKey:@"x3"];
+		[defaults setObject:num forKey:@"y3"];
+		[defaults setObject:num forKey:@"z3"];
+		
+		NSNumber* zero = [NSNumber numberWithUnsignedChar:0];
+		NSString* empty = [NSString stringWithString:@""];
+		NSNumber* no = [NSNumber numberWithBool:NO];
+		
+		[defaults setObject:zero forKey:@"upTag"];
+		[defaults setObject:empty forKey:@"upKey"];
+		[defaults setObject:no forKey:@"upShift"];
+		[defaults setObject:no forKey:@"upControl"];
+		[defaults setObject:no forKey:@"upOption"];
+		[defaults setObject:no forKey:@"upCommand"];
+		[defaults setObject:zero forKey:@"downTag"];
+		[defaults setObject:empty forKey:@"downKey"];
+		[defaults setObject:no forKey:@"downShift"];
+		[defaults setObject:no forKey:@"downControl"];
+		[defaults setObject:no forKey:@"downOption"];
+		[defaults setObject:no forKey:@"downCommand"];
+		[defaults setObject:zero forKey:@"leftTag"];
+		[defaults setObject:empty forKey:@"leftKey"];
+		[defaults setObject:no forKey:@"leftShift"];
+		[defaults setObject:no forKey:@"leftControl"];
+		[defaults setObject:no forKey:@"leftOption"];
+		[defaults setObject:no forKey:@"leftCommand"];
+		[defaults setObject:zero forKey:@"rightTag"];
+		[defaults setObject:empty forKey:@"rightKey"];
+		[defaults setObject:no forKey:@"rightShift"];
+		[defaults setObject:no forKey:@"rightControl"];
+		[defaults setObject:no forKey:@"rightOption"];
+		[defaults setObject:no forKey:@"rightCommand"];
+		[defaults setObject:zero forKey:@"aTag"];
+		[defaults setObject:empty forKey:@"aKey"];
+		[defaults setObject:no forKey:@"aShift"];
+		[defaults setObject:no forKey:@"aControl"];
+		[defaults setObject:no forKey:@"aOption"];
+		[defaults setObject:no forKey:@"aCommand"];
+		[defaults setObject:zero forKey:@"bTag"];
+		[defaults setObject:empty forKey:@"bKey"];
+		[defaults setObject:no forKey:@"bShift"];
+		[defaults setObject:no forKey:@"bControl"];
+		[defaults setObject:no forKey:@"bOption"];
+		[defaults setObject:no forKey:@"bCommand"];
+		[defaults setObject:zero forKey:@"oneTag"];
+		[defaults setObject:empty forKey:@"oneKey"];
+		[defaults setObject:no forKey:@"oneShift"];
+		[defaults setObject:no forKey:@"oneControl"];
+		[defaults setObject:no forKey:@"oneOption"];
+		[defaults setObject:no forKey:@"oneCommand"];
+		[defaults setObject:zero forKey:@"twoTag"];
+		[defaults setObject:empty forKey:@"twoKey"];
+		[defaults setObject:no forKey:@"twoShift"];
+		[defaults setObject:no forKey:@"twoControl"];
+		[defaults setObject:no forKey:@"twoOption"];
+		[defaults setObject:no forKey:@"twoCommand"];
+		[defaults setObject:zero forKey:@"minusTag"];
+		[defaults setObject:empty forKey:@"minusKey"];
+		[defaults setObject:no forKey:@"minusShift"];
+		[defaults setObject:no forKey:@"minusControl"];
+		[defaults setObject:no forKey:@"minusOption"];
+		[defaults setObject:no forKey:@"minusCommand"];
+		[defaults setObject:zero forKey:@"plusTag"];
+		[defaults setObject:empty forKey:@"plusKey"];
+		[defaults setObject:no forKey:@"plusShift"];
+		[defaults setObject:no forKey:@"plusControl"];
+		[defaults setObject:no forKey:@"plusOption"];
+		[defaults setObject:no forKey:@"plusCommand"];
+		[defaults setObject:zero forKey:@"homeTag"];
+		[defaults setObject:empty forKey:@"homeKey"];
+		[defaults setObject:no forKey:@"homeShift"];
+		[defaults setObject:no forKey:@"homeControl"];
+		[defaults setObject:no forKey:@"homeOption"];
+		[defaults setObject:no forKey:@"homeCommand"];
+		[defaults setObject:[NSString stringWithString:@"127.0.0.1"] forKey:@"remoteOSCAddress"];
+		[defaults setObject:[NSString stringWithString:@"57120"] forKey:@"remoteOSCPort"];
+		[defaults setObject:[NSString stringWithString:@"WiiMotion"] forKey:@"wiiMotionPath"];
+		[defaults setObject:[NSString stringWithString:@"WiiButtons"] forKey:@"wiiButtonsPath"];
+		[defaults setObject:no forKey:@"sendOSCMotion"];
+		[defaults setObject:no forKey:@"sendOSCButtons"];
     }
 	
-	NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
+	remoteOSC = lo_address_new([[defaults stringForKey:@"remoteOSCAddress"] cStringUsingEncoding:NSUTF8StringEncoding], 
+								[[defaults stringForKey:@"remoteOSCPort"] cStringUsingEncoding:NSUTF8StringEncoding]);
+
 	x1 = [[defaults objectForKey:@"x1"] doubleValue];
 	y1 = [[defaults objectForKey:@"y1"] doubleValue];
 	z1 = [[defaults objectForKey:@"z1"] doubleValue];
@@ -112,7 +191,7 @@
 	z3 = [[defaults objectForKey:@"z3"] doubleValue];
 
 
-	NSLog(@"%f, %f, %f, %f, %f, %f, %f, %f, %f", x1, y1, z1, x2, y2, z2, x3, y3, z3);
+//	NSLog(@"%f, %f, %f, %f, %f, %f, %f, %f, %f", x1, y1, z1, x2, y2, z2, x3, y3, z3);
 
 	x0 = (x1 + x2) / 2.0;
 	y0 = (y1 + y3) / 2.0;
@@ -152,7 +231,17 @@
 	tmpAccX = accX;
 	tmpAccY = accY;
 	tmpAccZ = accZ;
-	
+	NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
+
+	if([defaults boolForKey:@"sendOSCMotion"]) {
+		const char *path = [[defaults stringForKey:@"wiiMotionPath"] cStringUsingEncoding:NSUTF8StringEncoding];
+		#ifdef i386
+		lo_send(remoteOSC, path, "iii", lo_swap32(accX), lo_swap32(accY), lo_swap32(accZ));
+		#endif
+		#ifdef ppc
+		lo_send(remoteOSC, path, "iii", accX, accY, accZ);
+		#endif
+	}
 	
 	double ax = (double)(accX - x0) / (x3 - x0);
 	double ay = (double)(accY - y0) / (y2 - y0);
@@ -272,7 +361,7 @@
 	if (point.y > dispHeight)
 		point.y = dispHeight - 1;
 		
-	
+/*
 	if ((buttonData & kWiiRemoteAButton)){
 		[aButton setEnabled:YES];
 		
@@ -417,7 +506,7 @@
 
 		}
 	}
-	
+
 	if ((buttonData & kWiiRemoteLeftButton)){
 		[leftButton setEnabled:YES];
 		
@@ -457,8 +546,101 @@
 		}
 		
 	}
+*/	
+
+	BOOL booltmp;
+
+	if ((buttonData & kWiiRemoteUpButton) != isPressedUpButton) {
+		if(isPressedUpButton = (buttonData & kWiiRemoteUpButton)) booltmp = YES;
+			else booltmp = NO;
+		[upButton setEnabled:booltmp];
+		[self handleButtonEvent:defaults action:booltmp tag:@"upTag" key:@"upKey" shift:@"upShift" control:@"upControl" option:@"upOption" command:@"upCommand"];
+	} 
 	
-	if ((buttonData & kWiiRemoteMinusButton)){
+/*	if ((buttonData & kWiiRemoteUpButton)) {
+		if(!isPressedUpButton) {
+			isPressedUpButton = YES;
+			[upButton setEnabled:isPressedUpButton];
+		}
+		[self handleButtonEvent:defaults action:isPressedUpButton tag:@"upTag" key:@"upKey" shift:@"upShift" control:@"upControl" option:@"upOption" command:@"upCommand"];
+	} else {
+		if(isPressedUpButton) {
+			isPressedUpButton = NO;
+			[upButton setEnabled:isPressedUpButton];
+			[self handleButtonEvent:defaults action:isPressedUpButton tag:@"upTag" key:@"upKey" shift:@"upShift" control:@"upControl" option:@"upOption" command:@"upCommand"];
+		}	
+	}
+*/
+	if ((buttonData & kWiiRemoteDownButton) != isPressedDownButton) {
+		if(isPressedDownButton = (buttonData & kWiiRemoteDownButton)) booltmp = YES;
+			else booltmp = NO;
+		[downButton setEnabled:booltmp];
+		[self handleButtonEvent:defaults action:booltmp tag:@"downTag" key:@"downKey" shift:@"downShift" control:@"downControl" option:@"downOption" command:@"downCommand"];
+	}
+
+	if ((buttonData & kWiiRemoteLeftButton) != isPressedLeftButton) {
+		if(isPressedLeftButton = (buttonData & kWiiRemoteLeftButton)) booltmp = YES;
+			else booltmp = NO;
+		[leftButton setEnabled:booltmp];
+		[self handleButtonEvent:defaults action:booltmp tag:@"leftTag" key:@"leftKey" shift:@"leftShift" control:@"leftControl" option:@"leftOption" command:@"leftCommand"];
+	}
+
+	if ((buttonData & kWiiRemoteRightButton) != isPressedRightButton) {
+		if(isPressedRightButton = (buttonData & kWiiRemoteRightButton)) booltmp = YES;
+			else booltmp = NO;
+		[rightButton setEnabled:booltmp];
+		[self handleButtonEvent:defaults action:booltmp tag:@"rightTag" key:@"rightKey" shift:@"rightShift" control:@"rightControl" option:@"rightOption" command:@"rightCommand"];
+	}
+
+	if ((buttonData & kWiiRemoteMinusButton) != isPressedMinusButton) {
+		if(isPressedMinusButton = (buttonData & kWiiRemoteMinusButton)) booltmp = YES;
+			else booltmp = NO;
+		[minusButton setEnabled:booltmp];
+		[self handleButtonEvent:defaults action:booltmp tag:@"minusTag" key:@"minusKey" shift:@"minusShift" control:@"minusControl" option:@"minusOption" command:@"minusCommand"];
+	}
+	
+	if ((buttonData & kWiiRemotePlusButton) != isPressedPlusButton) {
+		if(isPressedPlusButton = (buttonData & kWiiRemotePlusButton)) booltmp = YES;
+			else booltmp = NO;
+		[plusButton setEnabled:booltmp];
+		[self handleButtonEvent:defaults action:booltmp tag:@"plusTag" key:@"plusKey" shift:@"plusShift" control:@"plusControl" option:@"plusOption" command:@"plusCommand"];
+	}
+	
+	if ((buttonData & kWiiRemoteHomeButton) != isPressedHomeButton) {
+		if(isPressedHomeButton = (buttonData & kWiiRemoteHomeButton)) booltmp = YES;
+			else booltmp = NO;
+		[homeButton setEnabled:booltmp];
+		[self handleButtonEvent:defaults action:booltmp tag:@"homeTag" key:@"homeKey" shift:@"homeShift" control:@"homeControl" option:@"homeOption" command:@"homeCommand"];
+	}
+
+	if ((buttonData & kWiiRemoteAButton) != isPressedAButton) {
+		if(isPressedAButton = (buttonData & kWiiRemoteAButton)) booltmp = YES;
+			else booltmp = NO;
+		[aButton setEnabled:booltmp];
+		[self handleButtonEvent:defaults action:booltmp tag:@"aTag" key:@"aKey" shift:@"aShift" control:@"aControl" option:@"aOption" command:@"aCommand"];
+	}
+	
+	if ((buttonData & kWiiRemoteBButton) != isPressedBButton) {
+		if(isPressedBButton = (buttonData & kWiiRemoteBButton)) booltmp = YES;
+			else booltmp = NO;
+		[bButton setEnabled:booltmp];
+		[self handleButtonEvent:defaults action:booltmp tag:@"bTag" key:@"bKey" shift:@"bShift" control:@"bControl" option:@"bOption" command:@"bCommand"];
+	}
+
+	if ((buttonData & kWiiRemoteOneButton) != isPressedOneButton) {
+		if(isPressedOneButton = (buttonData & kWiiRemoteOneButton)) booltmp = YES;
+			else booltmp = NO;
+		[oneButton setEnabled:booltmp];
+		[self handleButtonEvent:defaults action:booltmp tag:@"oneTag" key:@"oneKey" shift:@"oneShift" control:@"oneControl" option:@"oneOption" command:@"oneCommand"];
+	}
+
+	if ((buttonData & kWiiRemoteTwoButton) != isPressedTwoButton) {
+		if(isPressedTwoButton = (buttonData & kWiiRemoteTwoButton)) booltmp = YES;
+			else booltmp = NO;
+		[twoButton setEnabled:booltmp];
+		[self handleButtonEvent:defaults action:booltmp tag:@"twoTag" key:@"twoKey" shift:@"twoShift" control:@"twoControl" option:@"twoOption" command:@"twoCommand"];
+	}
+/*	if ((buttonData & kWiiRemoteMinusButton)){
 		[minusButton setEnabled:YES];
 		
 		if (!isPressedMinusButton){
@@ -531,7 +713,7 @@
 			
 		}
 	}
-	
+
 	if ((buttonData & kWiiRemoteOneButton)){
 		[oneButton setEnabled:YES];
 		
@@ -547,7 +729,7 @@
 			isPressedOneButton = NO;
 			if (mouseEventMode != 1){
 				mouseEventMode = 1;
-				[textView setString:[NSString stringWithFormat:@"%@\n===== Acceleration Sensor Mouse Mode =====", [textView string]]];
+				[textView setString:[NSString stringWithFormat:@"%@\n===== Acceleration Sensor Mouse Mode on=====", [textView string]]];
 			}else{
 				mouseEventMode = 0;
 				
@@ -568,7 +750,7 @@
 				
 				
 				isPressedAButton = NO;
-				[textView setString:[NSString stringWithFormat:@"%@\n===== Mouse Mode off =====", [textView string]]];
+				[textView setString:[NSString stringWithFormat:@"%@\n===== Acceleration Sensor Mouse Mode off =====", [textView string]]];
 			}
 			
 		}
@@ -588,7 +770,7 @@
 			isPressedTwoButton = NO;
 			if (mouseEventMode != 2){
 				mouseEventMode = 2;
-				[textView setString:[NSString stringWithFormat:@"%@\n===== IR Sensor Mouse Mode =====", [textView string]]];
+				[textView setString:[NSString stringWithFormat:@"%@\n===== IR Sensor Mouse Mode On =====", [textView string]]];
 				
 			}else{
 				mouseEventMode = 0;
@@ -610,11 +792,11 @@
 				
 				
 				isPressedAButton = NO;
-				[textView setString:[NSString stringWithFormat:@"%@\n===== Mouse Mode Off =====", [textView string]]];
+				[textView setString:[NSString stringWithFormat:@"%@\n===== IR Sensor Mouse Mode Off =====", [textView string]]];
 			}
 		}
 	}
-	
+	*/
 }
 
 
@@ -642,16 +824,204 @@
 }
 
 
-- (void)sendKeyboardEvent:(CGKeyCode)keyCode keyDown:(BOOL)keyDown{
+- (void)sendKeyboardEvent:(CGKeyCode)keyCode keyDown:(BOOL)keyDown eventFlags:(CGEventFlags)flags{
 	CFRelease(CGEventCreate(NULL));		
 	// this is Tiger's bug.
 	//see also: http://www.cocoabuilder.com/archive/message/cocoa/2006/10/4/172206
 	
 	
 	CGEventRef event = CGEventCreateKeyboardEvent(NULL, keyCode, keyDown);
+	CGEventSetFlags(event, flags);
 	CGEventPost(kCGHIDEventTap, event);
 	CFRelease(event);
 }
 
+- (void)sendKeyboardKey:(UniChar)key keyDown:(BOOL)keyDown eventFlags:(CGEventFlags)flags{
+	CFRelease(CGEventCreate(NULL));		
+	// this is Tiger's bug.
+	//see also: http://www.cocoabuilder.com/archive/message/cocoa/2006/10/4/172206
+	
+	CGKeyCode keyCode = [self keyCodeFromKey: key];
+	CGEventRef event = CGEventCreateKeyboardEvent(NULL, keyCode, keyDown);
+	CGEventSetFlags(event, flags);
+	CGEventPost(kCGHIDEventTap, event);
+	CFRelease(event);
+}
 
+- (CGKeyCode)keyCodeFromKey:(UniChar)key {
+	switch(key) {
+		case 'a': return 0;
+		case 's': return 1;
+		case 'd': return 2;
+		case 'f': return 3;
+		case 'g': return 5;
+		case 'h': return 4;
+		case 'j': return 38;
+		case 'k': return 40;
+		case 'l': return 37;
+		case 'q': return 12;
+		case 'w': return 13;
+		case 'e': return 14;
+		case 'r': return 15;
+		case 't': return 17;
+		case 'y': return 16;
+		case 'u': return 32;
+		case 'i': return 34;
+		case 'o': return 31;
+		case 'p': return 35;
+		case 'z': return 6;
+		case 'x': return 7;
+		case 'c': return 8;
+		case 'v': return 9;
+		case 'b': return 11;
+		case 'n': return 45;
+		case 'm': return 46;
+		case '1': return 18;
+		case '2': return 19;
+		case '3': return 20;
+		case '4': return 21;
+		case '5': return 23;
+		case '6': return 22;
+		case '7': return 26;
+		case '8': return 28;
+		case '9': return 25;
+		case '0': return 29;
+	}
+	return 0;
+}
+
+-(void)handleButtonEvent:(NSUserDefaults*)defaults  action:(BOOL)action tag:(NSString *)tag key:(NSString *)key shift:(NSString *)shift control:(NSString *)control option:(NSString *)option command:(NSString *)command {
+	CGEventFlags flags = 0;
+	CGEventRef event;
+	if([defaults boolForKey:shift]) flags |= kCGEventFlagMaskShift;
+	if([defaults boolForKey:control]) flags |= kCGEventFlagMaskControl;
+	if([defaults boolForKey:option]) flags |= kCGEventFlagMaskAlternate;
+	if([defaults boolForKey:command]) flags |= kCGEventFlagMaskCommand;
+
+	switch([defaults integerForKey:tag]) {
+		case 0: //nothing
+			break;
+		case 1: //return
+			[self sendKeyboardEvent:(CGKeyCode)36 keyDown:action eventFlags:flags];
+			break;
+		case 2: //delete
+			[self sendKeyboardEvent:(CGKeyCode)51 keyDown:action eventFlags:flags];
+			break;
+		case 3: //escape
+			[self sendKeyboardEvent:(CGKeyCode)53 keyDown:action eventFlags:flags];
+			break;
+		case 4: //tab
+			[self sendKeyboardEvent:(CGKeyCode)48 keyDown:action eventFlags:flags];
+			break;
+		case 5:	//left
+			[self sendKeyboardEvent:(CGKeyCode)123 keyDown:action eventFlags:flags];
+			break;
+		case 6: //right
+			[self sendKeyboardEvent:(CGKeyCode)124 keyDown:action eventFlags:flags];
+			break;
+		case 7: //up
+			[self sendKeyboardEvent:(CGKeyCode)126 keyDown:action eventFlags:flags];
+			break;
+		case 8: //down
+			[self sendKeyboardEvent:(CGKeyCode)125 keyDown:action eventFlags:flags];
+			break;
+		case 9: //key
+			[self sendKeyboardKey:[[defaults stringForKey:key] characterAtIndex:0] keyDown:action eventFlags:flags];
+			break;
+		case 10: //motion mouse
+			[self toggleMotionMouseMode];
+			break;
+		case 11: //IR mouse
+			[self toggleIRMouseMode];
+			break;
+		case 12: //left click
+			CFRelease(CGEventCreate(NULL));		
+			// this is Tiger's bug.
+			//see also: http://www.cocoabuilder.com/archive/message/cocoa/2006/10/4/172206
+
+			if(action) {
+				event = CGEventCreateMouseEvent(NULL, kCGEventLeftMouseDown, point, kCGMouseButtonLeft);
+				CGEventSetType(event, kCGEventLeftMouseDown);
+				// this is Tiger's bug.
+				// see also: http://lists.apple.com/archives/Quartz-dev/2005/Oct/msg00048.html
+			} else {
+				event = CGEventCreateMouseEvent(NULL, kCGEventLeftMouseUp, point, kCGMouseButtonLeft);
+				CGEventSetType(event, kCGEventLeftMouseUp);
+				// this is Tiger's bug.
+				// see also: http://lists.apple.com/archives/Quartz-dev/2005/Oct/msg00048.html
+			}
+				
+			CGEventPost(kCGHIDEventTap, event);
+			CFRelease(event);
+			break;
+		case 13: //right click
+			CFRelease(CGEventCreate(NULL));		
+			// this is Tiger's bug.
+			//see also: http://www.cocoabuilder.com/archive/message/cocoa/2006/10/4/172206
+
+			if(action) {
+				event = CGEventCreateMouseEvent(NULL, kCGEventRightMouseDown, point, kCGMouseButtonRight);
+				CGEventSetType(event, kCGEventRightMouseDown);
+				// this is Tiger's bug.
+				// see also: http://lists.apple.com/archives/Quartz-dev/2005/Oct/msg00048.html
+			} else {
+				event = CGEventCreateMouseEvent(NULL, kCGEventRightMouseUp, point, kCGMouseButtonRight);
+				CGEventSetType(event, kCGEventRightMouseUp);
+				// this is Tiger's bug.
+				// see also: http://lists.apple.com/archives/Quartz-dev/2005/Oct/msg00048.html
+			}
+
+			CGEventPost(kCGHIDEventTap, event);
+			CFRelease(event);
+			break;
+	}
+}
+
+-(void)toggleIRMouseMode {
+	if (mouseEventMode != 2) {
+		mouseEventMode = 2;
+		[textView setString:[NSString stringWithFormat:@"%@\n===== IR Sensor Mouse Mode On =====", [textView string]]];
+	} else {
+		mouseEventMode = 0;
+
+/*		CFRelease(CGEventCreate(NULL));		
+		// this is Tiger's bug.
+		// see also: http://www.cocoabuilder.com/archive/message/cocoa/2006/10/4/172206
+
+		CGEventRef event = CGEventCreateMouseEvent(NULL, kCGEventLeftMouseUp, point, kCGMouseButtonLeft);
+		CGEventSetType(event, kCGEventLeftMouseUp);
+		// this is Tiger's bug.
+		// see also: http://lists.apple.com/archives/Quartz-dev/2005/Oct/msg00048.html
+				
+		CGEventPost(kCGHIDEventTap, event);
+		CFRelease(event);
+*/				
+		[textView setString:[NSString stringWithFormat:@"%@\n===== IR Sensor Mouse Mode Off =====", [textView string]]];
+	}
+}
+
+
+-(void)toggleMotionMouseMode {
+	if (mouseEventMode != 1) {
+		mouseEventMode = 1;
+		[textView setString:[NSString stringWithFormat:@"%@\n===== Acceleration Sensor Mouse Mode on=====", [textView string]]];
+	} else {
+		mouseEventMode = 0;
+				
+/*		CFRelease(CGEventCreate(NULL));		
+		// this is Tiger's bug.
+		// see also: http://www.cocoabuilder.com/archive/message/cocoa/2006/10/4/172206
+				
+		CGEventRef event = CGEventCreateMouseEvent(NULL, kCGEventLeftMouseUp, point, kCGMouseButtonLeft);
+		CGEventSetType(event, kCGEventLeftMouseUp);
+		// this is Tiger's bug.
+		// see also: http://lists.apple.com/archives/Quartz-dev/2005/Oct/msg00048.html
+				
+		CGEventPost(kCGHIDEventTap, event);
+		CFRelease(event);
+*/		
+		[textView setString:[NSString stringWithFormat:@"%@\n===== Acceleration Sensor Mouse Mode off =====", [textView string]]];
+	}
+			
+}
 @end
