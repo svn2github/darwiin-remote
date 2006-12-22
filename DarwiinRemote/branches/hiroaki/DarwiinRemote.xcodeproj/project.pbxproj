@@ -11,8 +11,8 @@
 		530D028B0B36F5DE009A0AEC /* WiiRemote.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 530D02840B36F5C1009A0AEC /* WiiRemote.framework */; };
 		531447F60B3010A900757188 /* ApplicationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 531447E10B3010A900757188 /* ApplicationServices.framework */; };
 		5317449B0B240DD500579963 /* AppController.m in Sources */ = {isa = PBXBuildFile; fileRef = 5317449A0B240DD500579963 /* AppController.m */; };
-		5334B3C50B38189B009632C3 /* PreferenceWindow.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 5334B3C30B38189B009632C3 /* PreferenceWindow.h */; };
-		5334B3C60B38189B009632C3 /* PreferenceWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 5334B3C40B38189B009632C3 /* PreferenceWindow.m */; };
+		5335B3470B3C73F800B21C9A /* PreferenceWindow.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 5335B3450B3C73F800B21C9A /* PreferenceWindow.h */; };
+		5335B3480B3C73F800B21C9A /* PreferenceWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 5335B3460B3C73F800B21C9A /* PreferenceWindow.m */; };
 		535197AD0B39657F007184B2 /* WidgetsEnableTransformer2.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 535197AB0B39657F007184B2 /* WidgetsEnableTransformer2.h */; };
 		535197AE0B39657F007184B2 /* WidgetsEnableTransformer2.m in Sources */ = {isa = PBXBuildFile; fileRef = 535197AC0B39657F007184B2 /* WidgetsEnableTransformer2.m */; };
 		536851240B32DE2400A38BE5 /* KeyCaptureField.m in Sources */ = {isa = PBXBuildFile; fileRef = 536851220B32DE2400A38BE5 /* KeyCaptureField.m */; };
@@ -43,10 +43,10 @@
 			dstSubfolderSpec = 10;
 			files = (
 				530D028B0B36F5DE009A0AEC /* WiiRemote.framework in CopyFiles */,
-				5334B3C50B38189B009632C3 /* PreferenceWindow.h in CopyFiles */,
 				539021E50B383F61004E3DE7 /* WidgetsEnableTransformer.h in CopyFiles */,
 				535197AD0B39657F007184B2 /* WidgetsEnableTransformer2.h in CopyFiles */,
 				53FA54B70B3AD352003B73F3 /* iGetKeys.h in CopyFiles */,
+				5335B3470B3C73F800B21C9A /* PreferenceWindow.h in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -65,8 +65,8 @@
 		531447E10B3010A900757188 /* ApplicationServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ApplicationServices.framework; path = /System/Library/Frameworks/ApplicationServices.framework; sourceTree = "<absolute>"; };
 		531744990B240DD500579963 /* AppController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppController.h; sourceTree = "<group>"; };
 		5317449A0B240DD500579963 /* AppController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AppController.m; sourceTree = "<group>"; };
-		5334B3C30B38189B009632C3 /* PreferenceWindow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PreferenceWindow.h; sourceTree = "<group>"; };
-		5334B3C40B38189B009632C3 /* PreferenceWindow.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PreferenceWindow.m; sourceTree = "<group>"; };
+		5335B3450B3C73F800B21C9A /* PreferenceWindow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PreferenceWindow.h; sourceTree = "<group>"; };
+		5335B3460B3C73F800B21C9A /* PreferenceWindow.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PreferenceWindow.m; sourceTree = "<group>"; };
 		535197AB0B39657F007184B2 /* WidgetsEnableTransformer2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WidgetsEnableTransformer2.h; sourceTree = "<group>"; };
 		535197AC0B39657F007184B2 /* WidgetsEnableTransformer2.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WidgetsEnableTransformer2.m; sourceTree = "<group>"; };
 		536851210B32DE2400A38BE5 /* KeyCaptureField.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KeyCaptureField.h; sourceTree = "<group>"; };
@@ -118,8 +118,8 @@
 				53C576F80B24999B00D36527 /* GraphPoint.m */,
 				536851210B32DE2400A38BE5 /* KeyCaptureField.h */,
 				536851220B32DE2400A38BE5 /* KeyCaptureField.m */,
-				5334B3C30B38189B009632C3 /* PreferenceWindow.h */,
-				5334B3C40B38189B009632C3 /* PreferenceWindow.m */,
+				5335B3450B3C73F800B21C9A /* PreferenceWindow.h */,
+				5335B3460B3C73F800B21C9A /* PreferenceWindow.m */,
 			);
 			name = Classes;
 			sourceTree = "<group>";
@@ -286,10 +286,10 @@
 				536851240B32DE2400A38BE5 /* KeyCaptureField.m in Sources */,
 				5368529D0B33172200A38BE5 /* KeyConfiguration_AppDelegate.m in Sources */,
 				5368529E0B33172200A38BE5 /* KeyConfiguration_DataModel.xcdatamodel in Sources */,
-				5334B3C60B38189B009632C3 /* PreferenceWindow.m in Sources */,
 				539021E60B383F61004E3DE7 /* WidgetsEnableTransformer.m in Sources */,
 				535197AE0B39657F007184B2 /* WidgetsEnableTransformer2.m in Sources */,
 				53FA54B60B3AD352003B73F3 /* iGetKeys.c in Sources */,
+				5335B3480B3C73F800B21C9A /* PreferenceWindow.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
