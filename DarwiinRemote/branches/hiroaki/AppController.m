@@ -3,6 +3,8 @@
 
 @implementation AppController
 
+
+
 - (IBAction)setForceFeedbackEnabled:(id)sender
 {
 	[wii setForceFeedbackEnabled:[sender state]];
@@ -19,7 +21,7 @@
 	[wii setLEDEnabled1:[led1 state] enabled2:[led2 state] enabled3:[led3 state] enabled4:[led4 state]];
 }
 
-
+/**
 - (IBAction)setMouseModeEnabled:(id)sender{
 
 	
@@ -31,7 +33,7 @@
 		sendMouseEvent = NO;
 	}
 }
-
+**/
 
 - (IBAction)setMotionSensorsEnabled:(id)sender
 {
@@ -64,8 +66,31 @@
 
 }
 
+- (id)init{
+	
+	modes = [[NSArray arrayWithObjects:@"Nothing", @"Key", @"\tReturn", @"\tTab", @"\tEsc", @"\tBackspace", @"\tUp", @"\tDown", @"\tLeft",@"\tRight", @"\tPage Up", @"\tPage Down", @"Left Click", @"Left Click2", @"Right Click", @"Right Click2", @"Toggle Mouse (Motion)", @"Toggle Mouse (IR)",nil] retain];
+
+	
+	id transformer = [[[WidgetsEnableTransformer alloc] init] autorelease];
+	[NSValueTransformer setValueTransformer:transformer forName:@"WidgetsEnableTransformer"];
+	/**
+	id transformer2 = [[[KeyCodeTransformer alloc] init] autorelease];
+	[NSValueTransformer setValueTransformer:transformer2 forName:@"KeyCodeTransformer"];
+	**/
+	id transformer3 = [[[WidgetsEnableTransformer2 alloc] init] autorelease];
+	[NSValueTransformer setValueTransformer:transformer3 forName:@"WidgetsEnableTransformer2"];
+
+	NSSortDescriptor* descriptor = [[[NSSortDescriptor alloc] initWithKey:@"name" ascending:YES] autorelease];
+	configSortDescriptors = [[NSArray arrayWithObjects:descriptor, nil] retain];
+	return self;
+}
+
 -(void)awakeFromNib{
-	sendMouseEvent = NO;
+
+	InitAscii2KeyCodeTable(&table);
+	
+	
+	mouseEventMode = 0;
 	discovery = [[WiiRemoteDiscovery alloc] init];
 	[discovery setDelegate:self];
 	[discovery start];
@@ -94,6 +119,8 @@
 		[defaultValues setObject:num2 forKey:@"x3"];
 		[defaultValues setObject:num forKey:@"y3"];
 		[defaultValues setObject:num forKey:@"z3"];
+		
+		[defaultValues setObject:[NSNumber numberWithInt:0] forKey:@"selection"];
 
         [[NSUserDefaults standardUserDefaults] registerDefaults: defaultValues];
     }
@@ -112,12 +139,38 @@
 	z3 = [[defaults objectForKey:@"z3"] doubleValue];
 
 
-	NSLog(@"%f, %f, %f, %f, %f, %f, %f, %f, %f", x1, y1, z1, x2, y2, z2, x3, y3, z3);
-
 	x0 = (x1 + x2) / 2.0;
 	y0 = (y1 + y3) / 2.0;
 	z0 = (z2 + z3) / 2.0;
+	
+	
+	
+	[self setupInitialKeyMappings];
+	
+
+	
+	[[NSNotificationCenter defaultCenter] addObserver:self
+														selector:@selector(expansionPortChanged:)
+														name:@"WiiRemoteExpansionPortChangedNotification"
+														object:nil];
+	
+	
+
+
 }
+
+- (void)expansionPortChanged:(NSNotification *)nc{
+	WiiRemote* tmpWii = (WiiRemote*)[nc object];
+	if (![[tmpWii address] isEqualToString:[wii address]]){
+		return;
+	}
+	
+	if ([tmpWii isExpansionPortUsed]){
+		[tmpWii setNunchukEnabled:YES];
+	}
+	
+}
+
 
 //delegats implementation
 
@@ -130,13 +183,17 @@
 //	[wiimote setIRSensorEnabled:YES];
 	[discovery stop];
 	[graphView startTimer];
+	
+	NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
+	[mappingController setSelectionIndex:[[defaults objectForKey:@"selection"] intValue]];
+
 }
 
 - (void) WiiRemoteDiscoveryError:(int)code {
 	[textView setString:[NSString stringWithFormat:@"%@\n===== WiiRemoteDiscovery error (%d) =====", [textView string], code]];
 }
 
-- (void) wiiRemoteDisconnected {
+- (void) wiiRemoteDisconnected:(IOBluetoothDevice*)device {
 	[textView setString:[NSString stringWithFormat:@"%@\n===== lost connection with WiiRemote =====", [textView string]]];
 	[wii release];
 	wii = nil;
@@ -144,205 +201,220 @@
 	[textView setString:[NSString stringWithFormat:@"%@\nPlease press the synchronize button", [textView string]]];
 }
 
+- (void) irPointMovedX:(float)px Y:(float)py{
+	
+	if (mouseEventMode != 2)
+		return;
+	
+	BOOL haveMouse = (px > -2)?YES:NO;
+	
+	if (!haveMouse) {
+		[graphView setIRPointX:-2 Y:-2];
+		return;
+	} else {
+		[graphView setIRPointX:px Y:py];
 
-//- (void) dataChanged:(short)buttonData accX:(unsigned char)accX accY:(unsigned char)accY accZ:(unsigned char)accZ{
-- (void) dataChanged:(unsigned short)buttonData accX:(unsigned char)accX accY:(unsigned char)accY accZ:(unsigned char)accZ mouseX:(float)mx mouseY:(float)my{
-	[graphView setData:accX y:accY z:accZ];
-	[batteryLevel setDoubleValue:(double)[wii batteryLevel]];
-	tmpAccX = accX;
-	tmpAccY = accY;
-	tmpAccZ = accZ;
+	}
 	
 	
-	double ax = (double)(accX - x0) / (x3 - x0);
-	double ay = (double)(accY - y0) / (y2 - y0);
-//	double az = (double)(accZ - z0) / (z1 - z0);
-
-	
-	double roll = atan(ax) * 180.0 / 3.14 * 2;
-	double pitch = atan(ay) * 180.0 / 3.14 * 2;
 	int dispWidth = CGDisplayPixelsWide(kCGDirectMainDisplay);
 	int dispHeight = CGDisplayPixelsHigh(kCGDirectMainDisplay);
 	
 	
-	NSPoint p = [mainWindow mouseLocationOutsideOfEventStream];
-	NSRect p2 = [mainWindow frame];
+	float newx = (px*1)*dispWidth + dispWidth/2;
+	float newy = -(py*1)*dispWidth + dispHeight/2;
 	
-	point.x = p.x + p2.origin.x;
-	point.y = dispHeight - p.y - p2.origin.y;
-
-
+	if (newx < 0) newx = 0;
+	if (newy < 0) newy = 0;
+	if (newx >= dispWidth) newx = dispWidth-1;
+	if (newy >= dispHeight) newy = dispHeight-1;
 	
+	float dx = newx - point.x;
+	float dy = newy - point.y;
 	
-	// Set the mouse pointer position delta for different angles - in degrees.
-	// roll - 0 = level
-	// roll < 0 = left side down.
-	// roll > 0 = right side down.
+	float d = sqrt(dx*dx+dy*dy);
 	
-	if (mouseEventMode == 1){
-		if (roll < -15)
-			point.x -= 2;
-		if (roll < -45)
-			point.x -= 4;
-		if (roll < -75)
-			point.x -= 6;
-		
-		if (roll > 15)
-			point.x += 2;
-		if (roll > 45)
-			point.x += 4;
-		if (roll > 75)
-			point.x += 6;
-		
-		// pitch -	-90 = vertical, IR port up
-		//			  0 = horizontal, A-button up.
-		//			 90 = vertical, IR port down
-		
-		// The "natural" hand position for the wiimote is ~ -40 up. 
-		
-		if (pitch < -50)
-			point.y -= 2;
-		if (pitch < -60)
-			point.y -= 4;
-		if (pitch < -80)
-			point.y -= 6;
-		
-		if (pitch > -15)
-			point.y += 2;
-		if (pitch > -5)
-			point.y += 4;
-		if (pitch > 15)
-			point.y += 6; 
-		
-		
-		if (point.x < 0)
-			point.x = 0;
-		if (point.y < 0)
-			point.y = 0;
-	}
-
-	
-	BOOL haveMouse = (mx > -2)?YES:NO;
-	
-	if (haveMouse) {
-		[graphView setIRPointX:mx Y:my];
+	// mouse filtering
+	if (d < 20) {
+		point.x = point.x * 0.9 + newx*0.1;
+		point.y = point.y * 0.9 + newy*0.1;
+	} else if (d < 50) {
+		point.x = point.x * 0.7 + newx*0.3;
+		point.y = point.y * 0.7 + newy*0.3;
 	} else {
-		[graphView setIRPointX:-2 Y:-2];
+		point.x = newx;
+		point.y = newy;
 	}
-	
-	if (mouseEventMode == 2 && haveMouse) {
-		// the 1 in the next two lines is the screen scaling factor.  1 seems to work
-		// pretty good.  smaller values will result in wider movement, but not as much
-		// give at the edges or be able to get to the corners of the screen when rotated
-		float newx = (mx*1)*dispWidth + dispWidth/2;
-		float newy = -(my*1)*dispWidth + dispHeight/2;
-		
-		if (newx < 0) newx = 0;
-		if (newy < 0) newy = 0;
-		if (newx >= dispWidth) newx = dispWidth-1;
-		if (newy >= dispHeight) newy = dispHeight-1;
-		
-		float dx = newx - point.x;
-		float dy = newy - point.y;
-		
-		float d = sqrt(dx*dx+dy*dy);
-		
-		// mouse filtering
-		if (d < 20) {
-			point.x = point.x * 0.9 + newx*0.1;
-			point.y = point.y * 0.9 + newy*0.1;
-		} else if (d < 50) {
-			point.x = point.x * 0.7 + newx*0.3;
-			point.y = point.y * 0.7 + newy*0.3;
-		} else {
-			point.x = newx;
-			point.y = newy;
-		}
-		
-		//	printf("%4d %4d    %4d %4d\n", (int)newx, (int)newy, (int)point.x, (int)point.y);
-	}
-	
-	
-	if (point.x < 0)
-		point.x = 0;
-	if (point.y < 0)
-		point.y = 0;
 	
 	if (point.x > dispWidth)
 		point.x = dispWidth - 1;
 	
 	if (point.y > dispHeight)
 		point.y = dispHeight - 1;
-		
 	
-	if ((buttonData & kWiiRemoteAButton)){
-		[aButton setEnabled:YES];
+	if (point.x < 0)
+		point.x = 0;
+	if (point.y < 0)
+		point.y = 0;
+	
+	
+	
+	if (!isLeftButtonDown && !isRightButtonDown){
+		CFRelease(CGEventCreate(NULL));		
+		// this is Tiger's bug.
+		// see also: http://www.cocoabuilder.com/archive/message/cocoa/2006/10/4/172206
 		
-		if (!isPressedAButton){
-			isPressedAButton = YES;
-			if (mouseEventMode != 0){
-				
-				CFRelease(CGEventCreate(NULL));		
-				// this is Tiger's bug.
-				//see also: http://www.cocoabuilder.com/archive/message/cocoa/2006/10/4/172206
-				
-				
-				CGEventRef event = CGEventCreateMouseEvent(NULL, kCGEventLeftMouseDown, point, kCGMouseButtonLeft);
-				
-				
-				CGEventSetType(event, kCGEventLeftMouseDown);
-				// this is Tiger's bug.
-				// see also: http://lists.apple.com/archives/Quartz-dev/2005/Oct/msg00048.html
-				
-				
-				CGEventPost(kCGHIDEventTap, event);
-				CFRelease(event);
-				
+		
+		CGEventRef event = CGEventCreateMouseEvent(NULL, kCGEventMouseMoved, point, kCGMouseButtonLeft);
+		
+		CGEventSetType(event, kCGEventMouseMoved);
+		// this is Tiger's bug.
+		// see also: http://lists.apple.com/archives/Quartz-dev/2005/Oct/msg00048.html
+		
+		
+		CGEventPost(kCGHIDEventTap, event);
+		CFRelease(event);
+	}else{		
+		
+		CFRelease(CGEventCreate(NULL));		
+		// this is Tiger's bug.
+		//see also: http://www.cocoabuilder.com/archive/message/cocoa/2006/10/4/172206
+		
+		
+		CGEventRef event = CGEventCreateMouseEvent(NULL, kCGEventLeftMouseDragged, point, kCGMouseButtonLeft);
+		
+		CGEventSetType(event, kCGEventLeftMouseDragged);
+		// this is Tiger's bug.
+		// see also: http://lists.apple.com/archives/Quartz-dev/2005/Oct/msg00048.html
+		
+		CGEventPost(kCGHIDEventTap, event);
+		CFRelease(event);	
+	}
+	
+}
 
-			}
-		}else{
-			if (mouseEventMode != 0){				//dragging...
-				
-				CFRelease(CGEventCreate(NULL));		
-				// this is Tiger's bug.
-				//see also: http://www.cocoabuilder.com/archive/message/cocoa/2006/10/4/172206
-				
-				
-				CGEventRef event = CGEventCreateMouseEvent(NULL, kCGEventLeftMouseDragged, point, kCGMouseButtonLeft);
-				
-				CGEventSetType(event, kCGEventLeftMouseDragged);
-				// this is Tiger's bug.
-				// see also: http://lists.apple.com/archives/Quartz-dev/2005/Oct/msg00048.html
-				
-				CGEventPost(kCGHIDEventTap, event);
-				CFRelease(event);
-				
-			}
-		}
-	}else{
+
+
+- (void) buttonChanged:(WiiButtonType)type isPressed:(BOOL)isPressed{
+	
+	
+	id mappings = [mappingController selection];
+	id map = nil;
+	if (type == WiiRemoteAButton){
+		map = [mappings valueForKeyPath:@"wiimote.a"];
+	}else if (type == WiiRemoteBButton){
+		map = [mappings valueForKeyPath:@"wiimote.b"];
+	}else if (type == WiiRemoteUpButton){
+		map = [mappings valueForKeyPath:@"wiimote.up"];
+	}else if (type == WiiRemoteDownButton){
+		map = [mappings valueForKeyPath:@"wiimote.down"];
+	}else if (type == WiiRemoteLeftButton){
+		map = [mappings valueForKeyPath:@"wiimote.left"];
+	}else if (type == WiiRemoteRightButton){
+		map = [mappings valueForKeyPath:@"wiimote.right"];
+	}else if (type == WiiRemoteMinusButton){
+		map = [mappings valueForKeyPath:@"wiimote.minus"];
+	}else if (type == WiiRemotePlusButton){
+		map = [mappings valueForKeyPath:@"wiimote.plus"];
+	}else if (type == WiiRemoteHomeButton){
+		map = [mappings valueForKeyPath:@"wiimote.home"];
+	}else if (type == WiiRemoteOneButton){
+		map = [mappings valueForKeyPath:@"wiimote.one"];
+	}else if (type == WiiRemoteTwoButton){
+		map = [mappings valueForKeyPath:@"wiimote.two"];
+	}else if (type == WiiNunchukCButton){
+		map = [mappings valueForKeyPath:@"nunchuk.c"];
+	}else if (type == WiiNunchukZButton){
+		map = [mappings valueForKeyPath:@"nunchuk.z"];
+	}
+	
+	
+	NSString* modeName = [modes objectAtIndex:[[map valueForKey:@"mode"] intValue] ];
+	NSLog(@"modeName: %@", modeName);
+	if ([modeName isEqualToString:@"Key"]){
+
+		[self sendModifierKeys:map isPressed:isPressed]; 
 		
-		[aButton setEnabled:NO];
-		if (mouseEventMode != 0){
+		char c = (char)[[map valueForKey:@"character"] characterAtIndex:0];
+		short keycode = AsciiToKeyCode(&table, c);
+		[self sendKeyboardEvent:keycode keyDown:isPressed];
+	}else if ([modeName isEqualToString:@"\tReturn"]){
+		[self sendModifierKeys:map isPressed:isPressed]; 
+		
+		[self sendKeyboardEvent:36 keyDown:isPressed];
+		
+	}else if ([modeName isEqualToString:@"\tTab"]){
+		[self sendModifierKeys:map isPressed:isPressed]; 
+		
+		[self sendKeyboardEvent:48 keyDown:isPressed];
+		
+	}else if ([modeName isEqualToString:@"\tEsc"]){
+		[self sendModifierKeys:map isPressed:isPressed]; 
+		
+		[self sendKeyboardEvent:53 keyDown:isPressed];
+		
+	}else if ([modeName isEqualToString:@"\tBackspace"]){
+		[self sendModifierKeys:map isPressed:isPressed]; 
+		
+		[self sendKeyboardEvent:51 keyDown:isPressed];
+		
+	}else if ([modeName isEqualToString:@"\tUp"]){
+		[self sendModifierKeys:map isPressed:isPressed]; 
+		
+		[self sendKeyboardEvent:126 keyDown:isPressed];
+		
+	}else if ([modeName isEqualToString:@"\tDown"]){
+		[self sendModifierKeys:map isPressed:isPressed]; 
+		
+		[self sendKeyboardEvent:125 keyDown:isPressed];
+		
+	}else if ([modeName isEqualToString:@"\tLeft"]){
+		[self sendModifierKeys:map isPressed:isPressed]; 
+		
+		[self sendKeyboardEvent:123 keyDown:isPressed];
+		
+	}else if ([modeName isEqualToString:@"\tRight"]){
+		[self sendModifierKeys:map isPressed:isPressed]; 
+		
+		[self sendKeyboardEvent:124 keyDown:isPressed];
+		
+	}else if ([modeName isEqualToString:@"\tPage Up"]){
+		[self sendModifierKeys:map isPressed:isPressed]; 
+		
+		[self sendKeyboardEvent:116 keyDown:isPressed];
+		
+	}else if ([modeName isEqualToString:@"\tPage Down"]){
+		[self sendModifierKeys:map isPressed:isPressed]; 
+		
+		[self sendKeyboardEvent:121 keyDown:isPressed];
+		
+	}else if ([modeName isEqualToString:@"Left Click"]){
+		[self sendModifierKeys:map isPressed:isPressed];
+		
+		
+		
+		if (!isLeftButtonDown && isPressed){	//start dragging...
+			isLeftButtonDown = YES;
 			
 			CFRelease(CGEventCreate(NULL));		
 			// this is Tiger's bug.
-			// see also: http://www.cocoabuilder.com/archive/message/cocoa/2006/10/4/172206
+			//see also: http://www.cocoabuilder.com/archive/message/cocoa/2006/10/4/172206
 			
 			
-			CGEventRef event = CGEventCreateMouseEvent(NULL, kCGEventMouseMoved, point, kCGMouseButtonLeft);
+			CGEventRef event = CGEventCreateMouseEvent(NULL, kCGEventLeftMouseDown, point, kCGMouseButtonLeft);
 			
-			CGEventSetType(event, kCGEventMouseMoved);
+			
+			CGEventSetType(event, kCGEventLeftMouseDown);
 			// this is Tiger's bug.
 			// see also: http://lists.apple.com/archives/Quartz-dev/2005/Oct/msg00048.html
-
+			
 			
 			CGEventPost(kCGHIDEventTap, event);
-			CFRelease(event);
-			
+			CFRelease(event);	
+		}else if (isLeftButtonDown && !isPressed){	//end dragging...
 
-		}
-		
-		if (isPressedAButton){
+			isLeftButtonDown = NO;
+
 			
 			CFRelease(CGEventCreate(NULL));		
 			// this is Tiger's bug.
@@ -359,267 +431,363 @@
 			CGEventPost(kCGHIDEventTap, event);
 			CFRelease(event);
 			
-			isPressedAButton = NO;
+		}
+				
+	}else if ([modeName isEqualToString:@"Left Click2"]){
+		
+		if (!isPressed)
+			return;
+		
+		[self sendModifierKeys:map isPressed:YES];
+		CFRelease(CGEventCreate(NULL));		
+		// this is Tiger's bug.
+		//see also: http://www.cocoabuilder.com/archive/message/cocoa/2006/10/4/172206
+		
+		
+		CGEventRef event = CGEventCreateMouseEvent(NULL, kCGEventLeftMouseDown, point, kCGMouseButtonLeft);
+		
+		
+		CGEventSetType(event, kCGEventLeftMouseDown);
+		// this is Tiger's bug.
+		// see also: http://lists.apple.com/archives/Quartz-dev/2005/Oct/msg00048.html
+		
+		
+		CGEventPost(kCGHIDEventTap, event);
+		CFRelease(event);
+		
+		CFRelease(CGEventCreate(NULL));		
+		// this is Tiger's bug.
+		// see also: http://www.cocoabuilder.com/archive/message/cocoa/2006/10/4/172206
+		
+		
+		event = CGEventCreateMouseEvent(NULL, kCGEventLeftMouseUp, point, kCGMouseButtonLeft);
+		
+		CGEventSetType(event, kCGEventLeftMouseUp);
+		// this is Tiger's bug.
+		// see also: http://lists.apple.com/archives/Quartz-dev/2005/Oct/msg00048.html
+		
+		
+		CGEventPost(kCGHIDEventTap, event);
+		CFRelease(event);
+		
+		[self sendModifierKeys:map isPressed:NO];
+
+				
+	}else if ([modeName isEqualToString:@"Right Click"]){
+		[self sendModifierKeys:map isPressed:isPressed]; 
+		
+		
+		[self sendModifierKeys:map isPressed:isPressed];
+		
+		
+		
+		if (!isRightButtonDown && isPressed){	//start dragging...
+			isRightButtonDown = YES;
+			
+			CFRelease(CGEventCreate(NULL));		
+			// this is Tiger's bug.
+			//see also: http://www.cocoabuilder.com/archive/message/cocoa/2006/10/4/172206
+			
+			
+			CGEventRef event = CGEventCreateMouseEvent(NULL, kCGEventRightMouseDown, point, kCGMouseButtonRight);
+			
+			
+			CGEventSetType(event, kCGEventRightMouseDown);
+			// this is Tiger's bug.
+			// see also: http://lists.apple.com/archives/Quartz-dev/2005/Oct/msg00048.html
+			
+			
+			CGEventPost(kCGHIDEventTap, event);
+			CFRelease(event);	
+		}else if (isRightButtonDown && !isPressed){	//end dragging...
+			
+			isRightButtonDown = NO;
+			
+			
+			CFRelease(CGEventCreate(NULL));		
+			// this is Tiger's bug.
+			// see also: http://www.cocoabuilder.com/archive/message/cocoa/2006/10/4/172206
+			
+			
+			CGEventRef event = CGEventCreateMouseEvent(NULL, kCGEventRightMouseUp, point, kCGMouseButtonRight);
+			
+			CGEventSetType(event, kCGEventRightMouseUp);
+			// this is Tiger's bug.
+			// see also: http://lists.apple.com/archives/Quartz-dev/2005/Oct/msg00048.html
+			
+			
+			CGEventPost(kCGHIDEventTap, event);
+			CFRelease(event);
+			
+		}
+		
+	}else if ([modeName isEqualToString:@"Right Click2"]){
+		if (!isPressed)
+			return;
+		
+		[self sendModifierKeys:map isPressed:YES];
+		CFRelease(CGEventCreate(NULL));		
+		// this is Tiger's bug.
+		//see also: http://www.cocoabuilder.com/archive/message/cocoa/2006/10/4/172206
+		
+		
+		CGEventRef event = CGEventCreateMouseEvent(NULL, kCGEventRightMouseDown, point, kCGMouseButtonRight);
+		
+		
+		CGEventSetType(event, kCGEventRightMouseDown);
+		// this is Tiger's bug.
+		// see also: http://lists.apple.com/archives/Quartz-dev/2005/Oct/msg00048.html
+		
+		
+		CGEventPost(kCGHIDEventTap, event);
+		CFRelease(event);
+		
+		CFRelease(CGEventCreate(NULL));		
+		// this is Tiger's bug.
+		// see also: http://www.cocoabuilder.com/archive/message/cocoa/2006/10/4/172206
+		
+		
+		event = CGEventCreateMouseEvent(NULL, kCGEventRightMouseUp, point, kCGMouseButtonRight);
+		
+		CGEventSetType(event, kCGEventRightMouseUp);
+		// this is Tiger's bug.
+		// see also: http://lists.apple.com/archives/Quartz-dev/2005/Oct/msg00048.html
+		
+		
+		CGEventPost(kCGHIDEventTap, event);
+		CFRelease(event);
+		
+		[self sendModifierKeys:map isPressed:NO];
+		
+		
+	}else if ([modeName isEqualToString:@"Toggle Mouse (Motion)"]){
+		
+		if (isPressed)
+			return;
+		
+		if (mouseEventMode != 1){	//Mouse mode on
+			mouseEventMode = 1;
+		}else{						//Mouse mode off
+			mouseEventMode = 0;
+			CFRelease(CGEventCreate(NULL));		
+			// this is Tiger's bug.
+			// see also: http://www.cocoabuilder.com/archive/message/cocoa/2006/10/4/172206
+			
+			
+			CGEventRef event = CGEventCreateMouseEvent(NULL, kCGEventRightMouseUp, point, kCGMouseButtonRight);
+			
+			CGEventSetType(event, kCGEventRightMouseUp);
+			// this is Tiger's bug.
+			// see also: http://lists.apple.com/archives/Quartz-dev/2005/Oct/msg00048.html
+			
+			
+			CGEventPost(kCGHIDEventTap, event);
+			CFRelease(event);
+			
+			
+			CFRelease(CGEventCreate(NULL));		
+			// this is Tiger's bug.
+			// see also: http://www.cocoabuilder.com/archive/message/cocoa/2006/10/4/172206
+			
+			
+			event = CGEventCreateMouseEvent(NULL, kCGEventLeftMouseUp, point, kCGMouseButtonLeft);
+			
+			CGEventSetType(event, kCGEventLeftMouseUp);
+			// this is Tiger's bug.
+			// see also: http://lists.apple.com/archives/Quartz-dev/2005/Oct/msg00048.html
+			
+			
+			CGEventPost(kCGHIDEventTap, event);
+			CFRelease(event);
+			
+			[self sendKeyboardEvent:58 keyDown:NO];
+			[self sendKeyboardEvent:56 keyDown:NO];
+			[self sendKeyboardEvent:55 keyDown:NO];
+			[self sendKeyboardEvent:59 keyDown:NO];
+
+		}
+		
+	}else if ([modeName isEqualToString:@"Toggle Mouse (IR)"]){
+		
+		
+		if (isPressed)
+			return;
+		
+		if (mouseEventMode != 2){	//Mouse mode on
+			mouseEventMode = 2;
+		}else{						//Mouse mode off
+			mouseEventMode = 0;
+			CFRelease(CGEventCreate(NULL));		
+			// this is Tiger's bug.
+			// see also: http://www.cocoabuilder.com/archive/message/cocoa/2006/10/4/172206
+			
+			
+			CGEventRef event = CGEventCreateMouseEvent(NULL, kCGEventRightMouseUp, point, kCGMouseButtonRight);
+			
+			CGEventSetType(event, kCGEventRightMouseUp);
+			// this is Tiger's bug.
+			// see also: http://lists.apple.com/archives/Quartz-dev/2005/Oct/msg00048.html
+			
+			
+			CGEventPost(kCGHIDEventTap, event);
+			CFRelease(event);
+			
+			
+			CFRelease(CGEventCreate(NULL));		
+			// this is Tiger's bug.
+			// see also: http://www.cocoabuilder.com/archive/message/cocoa/2006/10/4/172206
+			
+			
+			event = CGEventCreateMouseEvent(NULL, kCGEventLeftMouseUp, point, kCGMouseButtonLeft);
+			
+			CGEventSetType(event, kCGEventLeftMouseUp);
+			// this is Tiger's bug.
+			// see also: http://lists.apple.com/archives/Quartz-dev/2005/Oct/msg00048.html
+			
+			
+			CGEventPost(kCGHIDEventTap, event);
+			CFRelease(event);
+			
+			[self sendKeyboardEvent:58 keyDown:NO];
+			[self sendKeyboardEvent:56 keyDown:NO];
+			[self sendKeyboardEvent:55 keyDown:NO];
+			[self sendKeyboardEvent:59 keyDown:NO];
+			
 		}
 	}
-
 	
-	if ((buttonData & kWiiRemoteBButton)){
-		[bButton setEnabled:YES];
-		if (!isPressedBButton){
-			isPressedBButton = YES;
-			
-
-			[self sendKeyboardEvent:(CGKeyCode)36 keyDown:YES];
-		}
-	}else{
-		[bButton setEnabled:NO];
-		
-		if (isPressedBButton){
-			isPressedBButton = NO;
-			
-			[self sendKeyboardEvent:(CGKeyCode)36 keyDown:NO];
-		}
-	}
-	
-	if ((buttonData & kWiiRemoteUpButton)){
-		[upButton setEnabled:YES];
-		
-		if (!isPressedUpButton){
-			isPressedUpButton = YES;
-			
-			[self sendKeyboardEvent:(CGKeyCode)126 keyDown:YES];
-		}
-		
-	}else{
-		[upButton setEnabled:NO];
-		
-		if (isPressedUpButton){
-			isPressedUpButton = NO;
-			[self sendKeyboardEvent:(CGKeyCode)126 keyDown:NO];
-
-		}
-	}
-	
-	if ((buttonData & kWiiRemoteDownButton)){
-		[downButton setEnabled:YES];
-		
-		if (!isPressedDownButton){
-			isPressedDownButton = YES;
-			[self sendKeyboardEvent:(CGKeyCode)125 keyDown:YES];
-
-		}
-		
-	}else{
-		[downButton setEnabled:NO];
-		
-		if (isPressedDownButton){
-			isPressedDownButton = NO;
-			[self sendKeyboardEvent:(CGKeyCode)125 keyDown:NO];
-
-		}
-	}
-	
-	if ((buttonData & kWiiRemoteLeftButton)){
-		[leftButton setEnabled:YES];
-		
-		if (!isPressedLeftButton){
-			isPressedLeftButton = YES;
-			[self sendKeyboardEvent:(CGKeyCode)123 keyDown:YES];
-
-		}
-		
-	}else{
-		[leftButton setEnabled:NO];
-		
-		if (isPressedLeftButton){
-			isPressedLeftButton = NO;
-			[self sendKeyboardEvent:(CGKeyCode)123 keyDown:NO];
-
-		}
-	}
-	
-	if ((buttonData & kWiiRemoteRightButton)){
-		[rightButton setEnabled:YES];
-		
-		if (!isPressedRightButton){
-			isPressedRightButton = YES;
-			
-			[self sendKeyboardEvent:(CGKeyCode)124 keyDown:YES];
-
-		}
-		
-	}else{
-		[rightButton setEnabled:NO];
-		
-		if (isPressedRightButton){
-			isPressedRightButton = NO;
-			[self sendKeyboardEvent:(CGKeyCode)124 keyDown:NO];
-
-		}
-		
-	}
-	
-	if ((buttonData & kWiiRemoteMinusButton)){
-		[minusButton setEnabled:YES];
-		
-		if (!isPressedMinusButton){
-			isPressedMinusButton = YES;
-			
-			[self sendKeyboardEvent:(CGKeyCode)56 keyDown:YES];
-			[self sendKeyboardEvent:(CGKeyCode)125 keyDown:YES];
-
-			
-		}
-	}else{
-		[minusButton setEnabled:NO];
-		
-		if (isPressedMinusButton){
-			isPressedMinusButton = NO;
-			
-			[self sendKeyboardEvent:(CGKeyCode)56 keyDown:NO];
-			[self sendKeyboardEvent:(CGKeyCode)125 keyDown:NO];
-
-			
-		}
-	}
-	
-	if ((buttonData & kWiiRemotePlusButton)){
-		[plusButton setEnabled:YES];
-		
-		if (!isPressedPlusButton){
-			isPressedPlusButton = YES;
-			
-			[self sendKeyboardEvent:(CGKeyCode)56 keyDown:YES];
-			[self sendKeyboardEvent:(CGKeyCode)126 keyDown:YES];
-
-			
-		}
-		
-	}else{
-		[plusButton setEnabled:NO];
-		
-		if (isPressedPlusButton){
-			isPressedPlusButton = NO;
-			
-			[self sendKeyboardEvent:(CGKeyCode)56 keyDown:NO];
-			[self sendKeyboardEvent:(CGKeyCode)126 keyDown:NO];
-
-		}
-		
-	}
-	
-	if ((buttonData & kWiiRemoteHomeButton)){
-		[homeButton setEnabled:YES];
-		
-		if (!isPressedHomeButton){
-			isPressedHomeButton = YES;
-			
-			
-			[self sendKeyboardEvent:(CGKeyCode)55 keyDown:YES];
-			[self sendKeyboardEvent:(CGKeyCode)53 keyDown:YES];
-
-		}
-		
-	}else{
-		[homeButton setEnabled:NO];
-		
-		if (isPressedHomeButton){
-			isPressedHomeButton = NO;
-			
-			[self sendKeyboardEvent:(CGKeyCode)53 keyDown:NO];
-			[self sendKeyboardEvent:(CGKeyCode)55 keyDown:NO];
-
-			
-		}
-	}
-	
-	if ((buttonData & kWiiRemoteOneButton)){
-		[oneButton setEnabled:YES];
-		
-		if (!isPressedOneButton){
-			isPressedOneButton = YES;
-			
-		}
-		
-	}else{
-		[oneButton setEnabled:NO];
-		
-		if (isPressedOneButton){
-			isPressedOneButton = NO;
-			if (mouseEventMode != 1){
-				mouseEventMode = 1;
-				[textView setString:[NSString stringWithFormat:@"%@\n===== Acceleration Sensor Mouse Mode =====", [textView string]]];
-			}else{
-				mouseEventMode = 0;
-				
-				CFRelease(CGEventCreate(NULL));		
-				// this is Tiger's bug.
-				// see also: http://www.cocoabuilder.com/archive/message/cocoa/2006/10/4/172206
-				
-				
-				CGEventRef event = CGEventCreateMouseEvent(NULL, kCGEventLeftMouseUp, point, kCGMouseButtonLeft);
-				
-				CGEventSetType(event, kCGEventLeftMouseUp);
-				// this is Tiger's bug.
-				// see also: http://lists.apple.com/archives/Quartz-dev/2005/Oct/msg00048.html
-				
-				
-				CGEventPost(kCGHIDEventTap, event);
-				CFRelease(event);
-				
-				
-				isPressedAButton = NO;
-				[textView setString:[NSString stringWithFormat:@"%@\n===== Mouse Mode off =====", [textView string]]];
-			}
-			
-		}
-	}
-	
-	if ((buttonData & kWiiRemoteTwoButton)){
-		[twoButton setEnabled:YES];
-		
-		
-		if (!isPressedTwoButton){
-			isPressedTwoButton = YES;
-		}
-	}else{
-		[twoButton setEnabled:NO];
-		
-		if (isPressedTwoButton){
-			isPressedTwoButton = NO;
-			if (mouseEventMode != 2){
-				mouseEventMode = 2;
-				[textView setString:[NSString stringWithFormat:@"%@\n===== IR Sensor Mouse Mode =====", [textView string]]];
-				
-			}else{
-				mouseEventMode = 0;
-				
-				CFRelease(CGEventCreate(NULL));		
-				// this is Tiger's bug.
-				// see also: http://www.cocoabuilder.com/archive/message/cocoa/2006/10/4/172206
-				
-				
-				CGEventRef event = CGEventCreateMouseEvent(NULL, kCGEventLeftMouseUp, point, kCGMouseButtonLeft);
-				
-				CGEventSetType(event, kCGEventLeftMouseUp);
-				// this is Tiger's bug.
-				// see also: http://lists.apple.com/archives/Quartz-dev/2005/Oct/msg00048.html
-				
-				
-				CGEventPost(kCGHIDEventTap, event);
-				CFRelease(event);
-				
-				
-				isPressedAButton = NO;
-				[textView setString:[NSString stringWithFormat:@"%@\n===== Mouse Mode Off =====", [textView string]]];
-			}
-		}
-	}
 	
 }
 
+- (void) sendModifierKeys:(id)map isPressed:(BOOL)isPressed{
+	if ([[map valueForKey:@"shift"] boolValue]){
+		[self sendKeyboardEvent:56 keyDown:isPressed];
+	}
+	
+	if ([[map valueForKey:@"command"] boolValue]){
+		[self sendKeyboardEvent:55 keyDown:isPressed];
+	}
+	
+	if ([[map valueForKey:@"control"] boolValue]){
+		[self sendKeyboardEvent:59 keyDown:isPressed];
+	}
+	
+	if ([[map valueForKey:@"option"] boolValue]){
+		[self sendKeyboardEvent:58 keyDown:isPressed];
+	}
+}
 
+- (void) accelerationChanged:(WiiAccelerationSensorType)type accX:(unsigned char)accX accY:(unsigned char)accY accZ:(unsigned char)accZ{
+	
+	[graphView setData:accX y:accY z:accZ];
+	[batteryLevel setDoubleValue:(double)[wii batteryLevel]];
+	
+	
+	if (mouseEventMode != 1)
+		return;
+	
+	tmpAccX = accX;
+	tmpAccY = accY;
+	tmpAccZ = accZ;
+	
+	
+	double ax = (double)(accX - x0) / (x3 - x0);
+	double ay = (double)(accY - y0) / (y2 - y0);
+	
+	double roll = atan(ax) * 180.0 / 3.14 * 2;
+	double pitch = atan(ay) * 180.0 / 3.14 * 2;
+	int dispWidth = CGDisplayPixelsWide(kCGDirectMainDisplay);
+	int dispHeight = CGDisplayPixelsHigh(kCGDirectMainDisplay);
+	
+	
+	NSPoint p = [mainWindow mouseLocationOutsideOfEventStream];
+	NSRect p2 = [mainWindow frame];
+	
+	point.x = p.x + p2.origin.x;
+	point.y = dispHeight - p.y - p2.origin.y;
+	
+	
+	if (roll < -15)
+		point.x -= 2;
+	if (roll < -45)
+		point.x -= 4;
+	if (roll < -75)
+		point.x -= 6;
+	
+	if (roll > 15)
+		point.x += 2;
+	if (roll > 45)
+		point.x += 4;
+	if (roll > 75)
+		point.x += 6;
+	
+	// pitch -	-90 = vertical, IR port up
+	//			  0 = horizontal, A-button up.
+	//			 90 = vertical, IR port down
+	
+	// The "natural" hand position for the wiimote is ~ -40 up. 
+	
+	if (pitch < -50)
+		point.y -= 2;
+	if (pitch < -60)
+		point.y -= 4;
+	if (pitch < -80)
+		point.y -= 6;
+	
+	if (pitch > -15)
+		point.y += 2;
+	if (pitch > -5)
+		point.y += 4;
+	if (pitch > 15)
+		point.y += 6; 
+	
+	
+	if (point.x < 0)
+		point.x = 0;
+	if (point.y < 0)
+		point.y = 0;
+	
+	if (point.x > dispWidth)
+		point.x = dispWidth - 1;
+	
+	if (point.y > dispHeight)
+		point.y = dispHeight - 1;
+	
+	
+	
+	if (!isLeftButtonDown && !isRightButtonDown){
+		CFRelease(CGEventCreate(NULL));		
+		// this is Tiger's bug.
+		// see also: http://www.cocoabuilder.com/archive/message/cocoa/2006/10/4/172206
+		
+		
+		CGEventRef event = CGEventCreateMouseEvent(NULL, kCGEventMouseMoved, point, kCGMouseButtonLeft);
+		
+		CGEventSetType(event, kCGEventMouseMoved);
+		// this is Tiger's bug.
+		// see also: http://lists.apple.com/archives/Quartz-dev/2005/Oct/msg00048.html
+		
+		
+		CGEventPost(kCGHIDEventTap, event);
+		CFRelease(event);
+	}else{		
+		
+		CFRelease(CGEventCreate(NULL));		
+		// this is Tiger's bug.
+		//see also: http://www.cocoabuilder.com/archive/message/cocoa/2006/10/4/172206
+		
+		
+		CGEventRef event = CGEventCreateMouseEvent(NULL, kCGEventLeftMouseDragged, point, kCGMouseButtonLeft);
+		
+		CGEventSetType(event, kCGEventLeftMouseDragged);
+		// this is Tiger's bug.
+		// see also: http://lists.apple.com/archives/Quartz-dev/2005/Oct/msg00048.html
+		
+		CGEventPost(kCGHIDEventTap, event);
+		CFRelease(event);	
+	}
+	
+}
 
 - (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication *)sender{
 	
@@ -638,8 +806,14 @@
 	[defaults setObject:[[NSNumber alloc] initWithDouble:z3] forKey:@"z3"];
 	
 	
+	[defaults setObject:[[NSNumber alloc] initWithInt:[mappingController selectionIndex]] forKey:@"selection"];
+
+	
 	[graphView stopTimer];
 	[wii closeConnection];
+	
+	[appDelegate saveAction:nil];
+	
 	return NSTerminateNow;
 }
 
@@ -657,37 +831,268 @@
 
 
 - (IBAction)openKeyConfiguration:(id)sender{
-	[keyConfigWindow setKeyTitle:[sender title]];
+	//[keyConfigWindow setKeyTitle:[sender title]];
 
-	
-	[NSApp beginSheet:keyConfigWindow
+	NSManagedObjectContext * context  = [appDelegate managedObjectContext];
+
+	[context commitEditing];
+
+
+
+	[NSApp beginSheet:preferenceWindow
 	   modalForWindow:mainWindow
         modalDelegate:self
 	   didEndSelector:@selector(sheetDidEnd:returnCode:contextInfo:)
-		  contextInfo:NULL];
+		  contextInfo:nil];
+	
+}
+
+
+- (void)setupInitialKeyMappings{
+	NSManagedObjectContext * context  = [appDelegate managedObjectContext];
+	NSManagedObjectModel   * model    = [appDelegate managedObjectModel];
+	NSDictionary           * entities = [model entitiesByName];
+	NSEntityDescription    * entity   = [entities valueForKey:@"KeyMapping"];
+	
+	NSFetchRequest* fetch = [[NSFetchRequest alloc] init];
+	NSError* error;
+	
+	[fetch setEntity:entity];
+	
+	NSArray* results = [context executeFetchRequest:fetch error:&error];
+	if ([results count] > 0){
+		return;
+	}
+	
+	NSManagedObject* config = [NSEntityDescription insertNewObjectForEntityForName:@"KeyConfiguration" inManagedObjectContext: context];
+	NSManagedObject* wiiMote = [NSEntityDescription insertNewObjectForEntityForName:@"Wiimote" inManagedObjectContext: context];
+	
+	
+	NSManagedObject* up = [NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context];
+	//[up setValue:@"Up" forKey:@"character"];
+	//[up setValue:[[NSNumber alloc] initWithInt:126] forKey:@"keyCode"];
+	[up setValue:[[NSNumber alloc] initWithBool:NO] forKey:@"command"];
+	[up setValue:[[NSNumber alloc] initWithBool:NO] forKey:@"control"];
+	[up setValue:[[NSNumber alloc] initWithBool:NO] forKey:@"option"];
+	[up setValue:[[NSNumber alloc] initWithBool:NO] forKey:@"shift"];
+	[up setValue:[[NSNumber alloc] initWithInt:6] forKey:@"mode"];
+	[wiiMote setValue:up forKey:@"up"];
+	
+	
+	NSManagedObject* down = [NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context];
+	//[down setValue:@"Down" forKey:@"character"];
+	//[down setValue:[[NSNumber alloc] initWithInt:125] forKey:@"keyCode"];
+	[down setValue:[[NSNumber alloc] initWithBool:NO] forKey:@"command"];
+	[down setValue:[[NSNumber alloc] initWithBool:NO] forKey:@"control"];
+	[down setValue:[[NSNumber alloc] initWithBool:NO] forKey:@"option"];
+	[down setValue:[[NSNumber alloc] initWithBool:NO] forKey:@"shift"];
+	[down setValue:[[NSNumber alloc] initWithInt:7] forKey:@"mode"];
+	[wiiMote setValue:down forKey:@"down"];
+	
+	
+	NSManagedObject* left = [NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context];
+	//[left setValue:@"Left" forKey:@"character"];
+	//[left setValue:[[NSNumber alloc] initWithInt:123] forKey:@"keyCode"];
+	[left setValue:[[NSNumber alloc] initWithBool:NO] forKey:@"command"];
+	[left setValue:[[NSNumber alloc] initWithBool:NO] forKey:@"control"];
+	[left setValue:[[NSNumber alloc] initWithBool:NO] forKey:@"option"];
+	[left setValue:[[NSNumber alloc] initWithBool:NO] forKey:@"shift"];
+	[left setValue:[[NSNumber alloc] initWithInt:8] forKey:@"mode"];
+	[wiiMote setValue:left forKey:@"left"];
+	
+	
+	NSManagedObject* right = [NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context];
+	//[right setValue:@"Right" forKey:@"character"];
+	//[right setValue:[[NSNumber alloc] initWithInt:124] forKey:@"keyCode"];
+	[right setValue:[[NSNumber alloc] initWithBool:NO] forKey:@"command"];
+	[right setValue:[[NSNumber alloc] initWithBool:NO] forKey:@"control"];
+	[right setValue:[[NSNumber alloc] initWithBool:NO] forKey:@"option"];
+	[right setValue:[[NSNumber alloc] initWithBool:NO] forKey:@"shift"];
+	[right setValue:[[NSNumber alloc] initWithInt:9] forKey:@"mode"];
+	[wiiMote setValue:right forKey:@"right"];
+	
+	
+	NSManagedObject* a = [NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context];
+	//[a setValue:@"Down" forKey:@"character"];
+	//[a setValue:[[NSNumber alloc] initWithInt:125] forKey:@"keyCode"];
+	[a setValue:[[NSNumber alloc] initWithBool:NO] forKey:@"command"];
+	[a setValue:[[NSNumber alloc] initWithBool:NO] forKey:@"control"];
+	[a setValue:[[NSNumber alloc] initWithBool:NO] forKey:@"option"];
+	[a setValue:[[NSNumber alloc] initWithBool:NO] forKey:@"shift"];
+	[a setValue:[[NSNumber alloc] initWithInt:12] forKey:@"mode"];
+	[wiiMote setValue:a forKey:@"a"];
+	
+	
+	NSManagedObject* b = [NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context];
+	//[b setValue:@"Return" forKey:@"character"];
+	//[b setValue:[[NSNumber alloc] initWithInt:36] forKey:@"keyCode"];
+	[b setValue:[[NSNumber alloc] initWithBool:NO] forKey:@"command"];
+	[b setValue:[[NSNumber alloc] initWithBool:NO] forKey:@"control"];
+	[b setValue:[[NSNumber alloc] initWithBool:NO] forKey:@"option"];
+	[b setValue:[[NSNumber alloc] initWithBool:NO] forKey:@"shift"];
+	[b setValue:[[NSNumber alloc] initWithInt:2] forKey:@"mode"];
+	[wiiMote setValue:b forKey:@"b"];
+	
+	
+	NSManagedObject* plus = [NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context];
+	//[plus setValue:@"Right" forKey:@"character"];
+	//[plus setValue:[[NSNumber alloc] initWithInt:124] forKey:@"keyCode"];
+	[plus setValue:[[NSNumber alloc] initWithBool:YES] forKey:@"command"];
+	[plus setValue:[[NSNumber alloc] initWithBool:NO] forKey:@"control"];
+	[plus setValue:[[NSNumber alloc] initWithBool:NO] forKey:@"option"];
+	[plus setValue:[[NSNumber alloc] initWithBool:NO] forKey:@"shift"];
+	[plus setValue:[[NSNumber alloc] initWithInt:9] forKey:@"mode"];
+	[wiiMote setValue:plus forKey:@"plus"];
+	
+	
+	NSManagedObject* minus = [NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context];
+	//[minus setValue:@"Left" forKey:@"character"];
+	//[minus setValue:[[NSNumber alloc] initWithInt:123] forKey:@"keyCode"];
+	[minus setValue:[[NSNumber alloc] initWithBool:YES] forKey:@"command"];
+	[minus setValue:[[NSNumber alloc] initWithBool:NO] forKey:@"control"];
+	[minus setValue:[[NSNumber alloc] initWithBool:NO] forKey:@"option"];
+	[minus setValue:[[NSNumber alloc] initWithBool:NO] forKey:@"shift"];
+	[minus setValue:[[NSNumber alloc] initWithInt:8] forKey:@"mode"];
+	[wiiMote setValue:minus forKey:@"minus"];
+	
+	
+	NSManagedObject* home = [NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context];
+	//[home setValue:@"Escape" forKey:@"character"];
+	//[home setValue:[[NSNumber alloc] initWithInt:53] forKey:@"keyCode"];
+	[home setValue:[[NSNumber alloc] initWithBool:YES] forKey:@"command"];
+	[home setValue:[[NSNumber alloc] initWithBool:NO] forKey:@"control"];
+	[home setValue:[[NSNumber alloc] initWithBool:NO] forKey:@"option"];
+	[home setValue:[[NSNumber alloc] initWithBool:NO] forKey:@"shift"];
+	[home setValue:[[NSNumber alloc] initWithInt:4] forKey:@"mode"];
+	[wiiMote setValue:home forKey:@"home"];
+	
+	
+	NSManagedObject* one = [NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context];
+	//[one setValue:@"Down" forKey:@"character"];
+	//[one setValue:[[NSNumber alloc] initWithInt:125] forKey:@"keyCode"];
+	[one setValue:[[NSNumber alloc] initWithBool:NO] forKey:@"command"];
+	[one setValue:[[NSNumber alloc] initWithBool:NO] forKey:@"control"];
+	[one setValue:[[NSNumber alloc] initWithBool:NO] forKey:@"option"];
+	[one setValue:[[NSNumber alloc] initWithBool:NO] forKey:@"shift"];
+	[one setValue:[[NSNumber alloc] initWithInt:16] forKey:@"mode"];
+	[wiiMote setValue:one forKey:@"one"];
+
+	
+	NSManagedObject* two = [NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context];
+	//[two setValue:@"Down" forKey:@"character"];
+	//[two setValue:[[NSNumber alloc] initWithInt:125] forKey:@"keyCode"];
+	[two setValue:[[NSNumber alloc] initWithBool:NO] forKey:@"command"];
+	[two setValue:[[NSNumber alloc] initWithBool:NO] forKey:@"control"];
+	[two setValue:[[NSNumber alloc] initWithBool:NO] forKey:@"option"];
+	[two setValue:[[NSNumber alloc] initWithBool:NO] forKey:@"shift"];
+	[two setValue:[[NSNumber alloc] initWithInt:17] forKey:@"mode"];
+	[wiiMote setValue:two forKey:@"two"];
+	
+	
+	[config setValue:@"AppleRemote" forKey:@"name"];
+	[config setValue:wiiMote forKey:@"wiimote"];
+	
+	[appDelegate saveAction:nil];
 	
 }
 
 - (void)sheetDidEnd:(NSWindow *)sheetWin returnCode:(int)returnCode contextInfo:(void *)contextInfo{
-	KeyConfigWindow* win = (KeyConfigWindow*)sheetWin;
-	
+	NSManagedObjectContext * context  = [appDelegate managedObjectContext];
+
 	if (returnCode == 1){
-		NSManagedObjectContext* context  = [appDelegate managedObjectContext];
-		//NSManagedObjectModel* model = [appDelegate managedObjectModel];
-		//NSDictionary* entities = [model entitiesByName];
-		//NSEntityDescription* entity = [entities valueForKey:@"KeyMapping"];
-		
-		NSManagedObject* keyMap  = nil;
-		
-		keyMap = [NSEntityDescription insertNewObjectForEntityForName: @"KeyMapping" inManagedObjectContext: context];
-		[keyMap setValue:@"hoge" forKey:@"character"];
-		
-		NSLog(@"character: %@", [keyMap valueForKey:@"character"] );
+		[context commitEditing];
+		[appDelegate saveAction:nil];
+	}else{
+		//[context discardEditing];
+		[context rollback];
 	}
 	
-	[appDelegate saveAction:nil];
 	
 	[sheetWin close];
+}
+
+
+- (IBAction)addConfiguration:(id)sender{
+	int result = [NSApp runModalForWindow:enterNameWindow];
+	[enterNameWindow close];
+	NSManagedObjectContext * context  = [appDelegate managedObjectContext];
+
+	if (result == 1){
+		id config = [self createNewConfigration:[newNameField stringValue]];
+		[mappingController setSelectsInsertedObjects:YES];
+		[mappingController addObject:config];
+		
+		//[context insertObject:config];
+		
+		[context commitEditing];
+	}
+
+}
+
+- (NSManagedObject*)createNewConfigration:(NSString*)name{
+	NSManagedObjectContext * context  = [appDelegate managedObjectContext];
+	NSManagedObject* config = [NSEntityDescription insertNewObjectForEntityForName:@"KeyConfiguration" inManagedObjectContext: context];
+	NSManagedObject* wiimote = [NSEntityDescription insertNewObjectForEntityForName:@"Wiimote" inManagedObjectContext: context];
+	NSManagedObject* one = [NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context];
+	NSManagedObject* two = [NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context];
+	NSManagedObject* a = [NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context];
+	NSManagedObject* b = [NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context];
+	NSManagedObject* minus = [NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context];
+	NSManagedObject* plus = [NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context];
+	NSManagedObject* home = [NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context];
+	NSManagedObject* up = [NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context];
+	NSManagedObject* down = [NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context];
+	NSManagedObject* left = [NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context];
+	NSManagedObject* right = [NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context];
+	
+	[wiimote setValue:one forKey:@"one"];
+	[wiimote setValue:two forKey:@"two"];
+	[wiimote setValue:a forKey:@"a"];
+	[wiimote setValue:b forKey:@"b"];
+	[wiimote setValue:minus forKey:@"minus"];
+	[wiimote setValue:home forKey:@"home"];
+	[wiimote setValue:plus forKey:@"plus"];
+	[wiimote setValue:up forKey:@"up"];
+	[wiimote setValue:down forKey:@"down"];
+	[wiimote setValue:left forKey:@"left"];
+	[wiimote setValue:right forKey:@"right"];
+	
+	[config setValue:wiimote forKey:@"wiimote"];
+	[config setValue:name forKey:@"name"];
+	
+	return config;
+}
+
+
+- (IBAction)enterSaveName:(id)sender{
+    // OK button is pushed
+	
+	if ([[newNameField stringValue] length] == 0){
+		return;
+	}
+	
+    [NSApp stopModalWithCode:1];
+}
+
+- (IBAction)cancelEnterSaveName:(id)sender{
+	// Cancel button is pushed
+    [NSApp stopModalWithCode:0];
+
+}
+
+- (IBAction)deleteConfiguration:(id)sender{
+	if ([[mappingController arrangedObjects] count] <= 1){
+		return;
+	}
+	
+	NSManagedObjectContext * context  = [appDelegate managedObjectContext];
+	[mappingController removeObjectAtArrangedObjectIndex:[mappingController selectionIndex]];
+	[context commitEditing];
+
+}
+
+- (IBAction)setMouseModeEnabled:(id)sender{
+	
 }
 
 @end

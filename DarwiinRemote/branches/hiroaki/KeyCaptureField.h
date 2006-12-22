@@ -7,12 +7,11 @@
 @interface KeyCaptureField : NSTextField
 {
 	NSDictionary* keyCodes;
-	CGKeyCode keyCode;
-	NSString* character;
+	NSNumber* keyCode;
+	IBOutlet id observer;
 }
 
-- (NSString*)characterName;
-- (CGKeyCode)keyCode;
+
 
 
 

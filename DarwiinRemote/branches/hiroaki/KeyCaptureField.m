@@ -3,10 +3,10 @@
 @implementation KeyCaptureField
 
 
-
-
-
 - (void)awakeFromNib{
+	
+	[self setNextKeyView:self];
+	[self setNextResponder:nil];
 	
 	keyCodes = [[NSDictionary alloc] initWithObjectsAndKeys:
 		@"Space", [NSNumber numberWithInt:49],
@@ -45,8 +45,9 @@
 		@"F12", [NSNumber numberWithInt:111],
 		
 		nil];
-
-	[self setNextResponder:nil];	
+	
+	
+	
 }
 
 - (BOOL)acceptsFirstResponder{
@@ -59,14 +60,21 @@
 	return YES;
 }
 
-
 - (void)keyDown:(NSEvent*)event{
+	NSLog(@"down");
 }
 
+
 - (void)keyUp:(NSEvent*)event{
+	if([[event characters] isEqualToString:@"\t"]){
+		[self setStringValue:@"\t"];
+		NSLog(@"hoge");
+	}
+	
 	[super keyUp:event];
+
 	
-	
+	/**
 	if (![keyCodes objectForKey:[NSNumber numberWithInt:[event keyCode]]]){
 		[self setStringValue:@""];
 		
@@ -85,19 +93,27 @@
 		
 		
 	}else{
+		[self setStringValue:@""];
+		//[self insertText:[keyCodes objectForKey:[NSNumber numberWithInt:[event keyCode]]]];
 		[self setStringValue:[keyCodes objectForKey:[NSNumber numberWithInt:[event keyCode]]]];
-	}
+	}**/
+
 	
-	keyCode = [event keyCode];
-	character = [self stringValue];
+	//keyCode = [[NSNumber alloc] initWithInt:[event keyCode]];
+	
+	//[self setValue:keyCode forKey:@"keyCode"];
+	//NSLog(@"keyCode: %d", [keyCode intValue] );
 }
 
-- (CGKeyCode)keyCode{
+
+
+- (void)textDidChange:(NSNotification *)notification{
+	NSLog(@"changed");
+}
+
+- (NSNumber*)keyCode{
 	return keyCode;
 }
 
-- (NSString*)characterName{
-	return character;
-}
 
 @end
