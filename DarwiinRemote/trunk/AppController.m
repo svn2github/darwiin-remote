@@ -330,26 +330,48 @@
 	id map = nil;
 	if (type == WiiRemoteAButton){
 		map = [mappings valueForKeyPath:@"wiimote.a"];
+		[aButton setEnabled:isPressed];
+		
 	}else if (type == WiiRemoteBButton){
 		map = [mappings valueForKeyPath:@"wiimote.b"];
+		[bButton setEnabled:isPressed];
+
 	}else if (type == WiiRemoteUpButton){
 		map = [mappings valueForKeyPath:@"wiimote.up"];
+		[upButton setEnabled:isPressed];
+
 	}else if (type == WiiRemoteDownButton){
 		map = [mappings valueForKeyPath:@"wiimote.down"];
+		[downButton setEnabled:isPressed];
+
 	}else if (type == WiiRemoteLeftButton){
 		map = [mappings valueForKeyPath:@"wiimote.left"];
+		[leftButton setEnabled:isPressed];
+
 	}else if (type == WiiRemoteRightButton){
 		map = [mappings valueForKeyPath:@"wiimote.right"];
+		[rightButton setEnabled:isPressed];
+
 	}else if (type == WiiRemoteMinusButton){
 		map = [mappings valueForKeyPath:@"wiimote.minus"];
+		[minusButton setEnabled:isPressed];
+
 	}else if (type == WiiRemotePlusButton){
 		map = [mappings valueForKeyPath:@"wiimote.plus"];
+		[plusButton setEnabled:isPressed];
+
 	}else if (type == WiiRemoteHomeButton){
 		map = [mappings valueForKeyPath:@"wiimote.home"];
+		[homeButton setEnabled:isPressed];
+
 	}else if (type == WiiRemoteOneButton){
 		map = [mappings valueForKeyPath:@"wiimote.one"];
+		[oneButton setEnabled:isPressed];
+
 	}else if (type == WiiRemoteTwoButton){
 		map = [mappings valueForKeyPath:@"wiimote.two"];
+		[twoButton setEnabled:isPressed];
+
 	}else if (type == WiiNunchukCButton){
 		map = [mappings valueForKeyPath:@"nunchuk.c"];
 	}else if (type == WiiNunchukZButton){
@@ -901,6 +923,7 @@
 	CGEventRef event = CGEventCreateKeyboardEvent(NULL, keyCode, keyDown);
 	CGEventPost(kCGHIDEventTap, event);
 	CFRelease(event);
+	usleep(10000);
 }
 
 
