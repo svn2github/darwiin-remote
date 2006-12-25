@@ -11,14 +11,10 @@
 		530D028B0B36F5DE009A0AEC /* WiiRemote.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 530D02840B36F5C1009A0AEC /* WiiRemote.framework */; };
 		531447F60B3010A900757188 /* ApplicationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 531447E10B3010A900757188 /* ApplicationServices.framework */; };
 		5317449B0B240DD500579963 /* AppController.m in Sources */ = {isa = PBXBuildFile; fileRef = 5317449A0B240DD500579963 /* AppController.m */; };
-		5335B3470B3C73F800B21C9A /* PreferenceWindow.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 5335B3450B3C73F800B21C9A /* PreferenceWindow.h */; };
 		5335B3480B3C73F800B21C9A /* PreferenceWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 5335B3460B3C73F800B21C9A /* PreferenceWindow.m */; };
-		535197AD0B39657F007184B2 /* WidgetsEnableTransformer2.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 535197AB0B39657F007184B2 /* WidgetsEnableTransformer2.h */; };
 		535197AE0B39657F007184B2 /* WidgetsEnableTransformer2.m in Sources */ = {isa = PBXBuildFile; fileRef = 535197AC0B39657F007184B2 /* WidgetsEnableTransformer2.m */; };
-		536851240B32DE2400A38BE5 /* KeyCaptureField.m in Sources */ = {isa = PBXBuildFile; fileRef = 536851220B32DE2400A38BE5 /* KeyCaptureField.m */; };
 		5368529D0B33172200A38BE5 /* KeyConfiguration_AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 536852970B33172200A38BE5 /* KeyConfiguration_AppDelegate.m */; };
 		5368529E0B33172200A38BE5 /* KeyConfiguration_DataModel.xcdatamodel in Sources */ = {isa = PBXBuildFile; fileRef = 536852980B33172200A38BE5 /* KeyConfiguration_DataModel.xcdatamodel */; };
-		539021E50B383F61004E3DE7 /* WidgetsEnableTransformer.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 539021E30B383F61004E3DE7 /* WidgetsEnableTransformer.h */; };
 		539021E60B383F61004E3DE7 /* WidgetsEnableTransformer.m in Sources */ = {isa = PBXBuildFile; fileRef = 539021E40B383F61004E3DE7 /* WidgetsEnableTransformer.m */; };
 		53BDDEBB0B2B22710033DB22 /* COPYRIGHT.txt in Resources */ = {isa = PBXBuildFile; fileRef = 53BDDEBA0B2B22710033DB22 /* COPYRIGHT.txt */; };
 		53BDDEBD0B2B229B0033DB22 /* HISTORY.txt in Resources */ = {isa = PBXBuildFile; fileRef = 53BDDEBC0B2B229B0033DB22 /* HISTORY.txt */; };
@@ -27,7 +23,6 @@
 		53C576F90B24999B00D36527 /* GraphPoint.m in Sources */ = {isa = PBXBuildFile; fileRef = 53C576F80B24999B00D36527 /* GraphPoint.m */; };
 		53F79ADC0B261EBE00C74335 /* icon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 53F79ADB0B261EBE00C74335 /* icon.icns */; };
 		53FA54B60B3AD352003B73F3 /* iGetKeys.c in Sources */ = {isa = PBXBuildFile; fileRef = 53FA54B40B3AD352003B73F3 /* iGetKeys.c */; };
-		53FA54B70B3AD352003B73F3 /* iGetKeys.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 53FA54B50B3AD352003B73F3 /* iGetKeys.h */; };
 		53FA54E90B3AD41A003B73F3 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 53FA54D40B3AD41A003B73F3 /* Carbon.framework */; };
 		8D11072A0486CEB800E47090 /* MainMenu.nib in Resources */ = {isa = PBXBuildFile; fileRef = 29B97318FDCFA39411CA2CEA /* MainMenu.nib */; };
 		8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C165CFE840E0CC02AAC07 /* InfoPlist.strings */; };
@@ -43,10 +38,6 @@
 			dstSubfolderSpec = 10;
 			files = (
 				530D028B0B36F5DE009A0AEC /* WiiRemote.framework in CopyFiles */,
-				539021E50B383F61004E3DE7 /* WidgetsEnableTransformer.h in CopyFiles */,
-				535197AD0B39657F007184B2 /* WidgetsEnableTransformer2.h in CopyFiles */,
-				53FA54B70B3AD352003B73F3 /* iGetKeys.h in CopyFiles */,
-				5335B3470B3C73F800B21C9A /* PreferenceWindow.h in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -283,7 +274,6 @@
 				5317449B0B240DD500579963 /* AppController.m in Sources */,
 				53C573550B24870B00D36527 /* GraphView.m in Sources */,
 				53C576F90B24999B00D36527 /* GraphPoint.m in Sources */,
-				536851240B32DE2400A38BE5 /* KeyCaptureField.m in Sources */,
 				5368529D0B33172200A38BE5 /* KeyConfiguration_AppDelegate.m in Sources */,
 				5368529E0B33172200A38BE5 /* KeyConfiguration_DataModel.xcdatamodel in Sources */,
 				539021E60B383F61004E3DE7 /* WidgetsEnableTransformer.m in Sources */,

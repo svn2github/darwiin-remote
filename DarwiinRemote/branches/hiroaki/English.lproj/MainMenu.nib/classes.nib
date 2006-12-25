@@ -25,6 +25,7 @@
                 drawer = NSDrawer; 
                 enterNameWindow = NSWindow; 
                 graphView = GraphView; 
+                graphView2 = GraphView; 
                 homeButton = NSButton; 
                 led1 = NSButton; 
                 led2 = NSButton; 

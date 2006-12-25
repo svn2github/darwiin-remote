@@ -24,6 +24,7 @@
 	
     IBOutlet NSDrawer *drawer;
     IBOutlet GraphView *graphView;
+	IBOutlet GraphView *graphView2;
     IBOutlet NSTextView *textView;
 	IBOutlet NSButton* led1;
 	IBOutlet NSButton* led2;
@@ -51,7 +52,7 @@
 	WiiRemoteDiscovery *discovery;
 	WiiRemote* wii;
 	CGPoint point;
-	BOOL isPressedBButton, isPressedAButton, isPressedHomeButton, isPressedUpButton, isPressedDownButton, isPressedLeftButton, isPressedRightButton, isPressedOneButton, isPressedTwoButton, isPressedPlusButton, isPressedMinusButton;
+	//BOOL isPressedBButton, isPressedAButton, isPressedHomeButton, isPressedUpButton, isPressedDownButton, isPressedLeftButton, isPressedRightButton, isPressedOneButton, isPressedTwoButton, isPressedPlusButton, isPressedMinusButton;
 	
 	BOOL isLeftButtonDown, isRightButtonDown;
 	
@@ -60,6 +61,8 @@
 	double x0, y0, z0;
 	unsigned char tmpAccX, tmpAccY, tmpAccZ;
 	
+	WiiJoyStickCalibData nunchukJsCalib;
+	WiiAccCalibData wiiAccCalib, nunchukAccCalib;
 	
 	Ascii2KeyCodeTable table;
 
