@@ -42,6 +42,10 @@
 
 
 - (IBAction)doCalibration:(id)sender{
+	
+	id config = [mappingController selection];
+	
+	
 	if ([sender tag] == 0){
 		x1 = tmpAccX;
 		y1 = tmpAccY;
@@ -62,9 +66,20 @@
 	y0 = (y1 + y3) / 2.0;
 	z0 = (z2 + z3) / 2.0;
 	
+	[config setValue:[NSNumber numberWithInt:(int)x0] forKeyPath:@"wiimote.accX_zero"];
+	[config setValue:[NSNumber numberWithInt:(int)y0] forKeyPath:@"wiimote.accY_zero"];
+	[config setValue:[NSNumber numberWithInt:(int)z0] forKeyPath:@"wiimote.accZ_zero"];
+
+	[config setValue:[NSNumber numberWithInt:(int)x3] forKeyPath:@"wiimote.accX_1g"];
+	[config setValue:[NSNumber numberWithInt:(int)y2] forKeyPath:@"wiimote.accY_1g"];
+	[config setValue:[NSNumber numberWithInt:(int)z1] forKeyPath:@"wiimote.accZ_1g"];
+
+	
 	[textView setString:[NSString stringWithFormat:@"%@\n===== x: %d  y: %d  z: %d =====", [textView string], tmpAccX, tmpAccY, tmpAccZ]];
 
 }
+
+
 
 - (id)init{
 	
@@ -99,15 +114,15 @@
 	point.x = 0;
 	point.y = 0;
 	
-	//User defaults settings...
+	
+	/**
 	{
         NSMutableDictionary *defaultValues = [NSMutableDictionary dictionary];
 		
 		NSNumber* num = [[NSNumber alloc] initWithDouble:128.0];
 		NSNumber* num2 = [[NSNumber alloc] initWithDouble:154.0];
 
-        //NSData *num = [NSArchiver archivedDataWithRootObject:[[NSNumber alloc]initWithInt:0]];
-        //NSData *check = [NSArchiver archivedDataWithRootObject:[[NSNumber alloc]initWithInt:NSOffState]];
+
 		[defaultValues setObject:num forKey:@"x1"];
 		[defaultValues setObject:num forKey:@"y1"];
 		[defaultValues setObject:num2 forKey:@"z1"];
@@ -142,7 +157,7 @@
 	x0 = (x1 + x2) / 2.0;
 	y0 = (y1 + y3) / 2.0;
 	z0 = (z2 + z3) / 2.0;
-	
+	**/
 	
 	
 	[self setupInitialKeyMappings];
@@ -167,11 +182,9 @@
 	
 	if ([tmpWii isExpansionPortAttached]){
 		[tmpWii setExpansionPortEnabled:YES];
-		[graphView2 startTimer];
 
 	}else{
 		[tmpWii setExpansionPortEnabled:NO];
-		[graphView2 stopTimer];
 
 	}
 	
@@ -189,10 +202,14 @@
 //	[wiimote setIRSensorEnabled:YES];
 	[discovery stop];
 	[graphView startTimer];
+	[graphView2 startTimer];
+
 	
 	
 	NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
 	[mappingController setSelectionIndex:[[defaults objectForKey:@"selection"] intValue]];
+	
+
 
 }
 
@@ -228,8 +245,11 @@
 	int dispHeight = CGDisplayPixelsHigh(kCGDirectMainDisplay);
 	
 	
-	float newx = (px*1)*dispWidth + dispWidth/2;
-	float newy = -(py*1)*dispWidth + dispHeight/2;
+	id config = [mappingController selection];
+	float sens2 = [[config valueForKey:@"sensitivity2"] floatValue] * [[config valueForKey:@"sensitivity2"] floatValue];
+	
+	float newx = (px*1*sens2)*dispWidth + dispWidth/2;
+	float newy = -(py*1*sens2)*dispWidth + dispHeight/2;
 	
 	if (newx < 0) newx = 0;
 	if (newy < 0) newy = 0;
@@ -240,6 +260,8 @@
 	float dy = newy - point.y;
 	
 	float d = sqrt(dx*dx+dy*dy);
+
+	
 	
 	// mouse filtering
 	if (d < 20) {
@@ -573,6 +595,8 @@
 		
 		if (mouseEventMode != 1){	//Mouse mode on
 			mouseEventMode = 1;
+			[textView setString:[NSString stringWithFormat:@"%@\n===== Mouse Mode On (Motion Sensors) =====", [textView string]]];
+
 		}else{						//Mouse mode off
 			mouseEventMode = 0;
 			CFRelease(CGEventCreate(NULL));		
@@ -610,8 +634,12 @@
 			[self sendKeyboardEvent:56 keyDown:NO];
 			[self sendKeyboardEvent:55 keyDown:NO];
 			[self sendKeyboardEvent:59 keyDown:NO];
+			
+			[textView setString:[NSString stringWithFormat:@"%@\n===== Mouse Mode Off =====", [textView string]]];
+
 
 		}
+		[mouseMode selectItemAtIndex:mouseEventMode];
 		
 	}else if ([modeName isEqualToString:@"Toggle Mouse (IR)"]){
 		
@@ -621,6 +649,8 @@
 		
 		if (mouseEventMode != 2){	//Mouse mode on
 			mouseEventMode = 2;
+			[textView setString:[NSString stringWithFormat:@"%@\n===== Mouse Mode On (IR) =====", [textView string]]];
+
 		}else{						//Mouse mode off
 			mouseEventMode = 0;
 			CFRelease(CGEventCreate(NULL));		
@@ -659,7 +689,10 @@
 			[self sendKeyboardEvent:55 keyDown:NO];
 			[self sendKeyboardEvent:59 keyDown:NO];
 			
+			[textView setString:[NSString stringWithFormat:@"%@\n===== Mouse Mode Off =====", [textView string]]];
+
 		}
+		[mouseMode selectItemAtIndex:mouseEventMode];
 	}
 	
 	
@@ -703,14 +736,33 @@
 	[batteryLevel setDoubleValue:(double)[wii batteryLevel]];
 	
 	
-	if (mouseEventMode != 1)
-		return;
-	
 	tmpAccX = accX;
 	tmpAccY = accY;
 	tmpAccZ = accZ;
 	
+	if (mouseEventMode != 1)
+		return;
 	
+
+	
+	
+	id config = [mappingController selection];
+	if ([[config valueForKey:@"manualCalibration"] boolValue]){
+		x0 = [[config valueForKeyPath:@"wiimote.accX_zero"] intValue] ;
+		x3 = [[config valueForKeyPath:@"wiimote.accX_1g"] intValue];
+		y0 = [[config valueForKeyPath:@"wiimote.accY_zero"] intValue];
+		y2 = [[config valueForKeyPath:@"wiimote.accY_1g"] intValue];
+		
+	}else{ 
+		WiiAccCalibData data = [wii accCalibData:WiiRemoteAccelerationSensor];
+		x0 = data.accX_zero;
+		x3 = data.accX_1g;
+		y0 = data.accY_zero;
+		y2 = data.accY_1g;
+	}
+	
+	
+
 	double ax = (double)(accX - x0) / (x3 - x0);
 	double ay = (double)(accY - y0) / (y2 - y0);
 	
@@ -726,20 +778,21 @@
 	point.x = p.x + p2.origin.x;
 	point.y = dispHeight - p.y - p2.origin.y;
 	
+	float sens1 = [[config valueForKey:@"sensitivity1"] floatValue] * [[config valueForKey:@"sensitivity1"] floatValue];
 	
 	if (roll < -15)
-		point.x -= 2;
+		point.x -= 2 * sens1;
 	if (roll < -45)
-		point.x -= 4;
+		point.x -= 4 * sens1;
 	if (roll < -75)
-		point.x -= 6;
+		point.x -= 6 * sens1;
 	
 	if (roll > 15)
-		point.x += 2;
+		point.x += 2 * sens1;
 	if (roll > 45)
-		point.x += 4;
+		point.x += 4 * sens1;
 	if (roll > 75)
-		point.x += 6;
+		point.x += 6 * sens1;
 	
 	// pitch -	-90 = vertical, IR port up
 	//			  0 = horizontal, A-button up.
@@ -748,18 +801,18 @@
 	// The "natural" hand position for the wiimote is ~ -40 up. 
 	
 	if (pitch < -50)
-		point.y -= 2;
+		point.y -= 2 * sens1;
 	if (pitch < -60)
-		point.y -= 4;
+		point.y -= 4 * sens1;
 	if (pitch < -80)
-		point.y -= 6;
+		point.y -= 6 * sens1;
 	
 	if (pitch > -15)
-		point.y += 2;
+		point.y += 2 * sens1;
 	if (pitch > -5)
-		point.y += 4;
+		point.y += 4 * sens1;
 	if (pitch > 15)
-		point.y += 6; 
+		point.y += 6 * sens1; 
 	
 	
 	if (point.x < 0)
@@ -1035,6 +1088,7 @@
 	[config setValue:nunchuk forKey:@"nunchuk"];
 	[config setValue:name forKey:@"name"];
 	
+	
 	return config;
 }
 
@@ -1067,7 +1121,55 @@
 }
 
 - (IBAction)setMouseModeEnabled:(id)sender{
+	mouseEventMode = [sender indexOfSelectedItem];
 	
+	switch(mouseEventMode){
+		case 0:
+			CFRelease(CGEventCreate(NULL));		
+			// this is Tiger's bug.
+			// see also: http://www.cocoabuilder.com/archive/message/cocoa/2006/10/4/172206
+			
+			
+			CGEventRef event = CGEventCreateMouseEvent(NULL, kCGEventRightMouseUp, point, kCGMouseButtonRight);
+			
+			CGEventSetType(event, kCGEventRightMouseUp);
+			// this is Tiger's bug.
+			// see also: http://lists.apple.com/archives/Quartz-dev/2005/Oct/msg00048.html
+			
+			
+			CGEventPost(kCGHIDEventTap, event);
+			CFRelease(event);
+			
+			
+			CFRelease(CGEventCreate(NULL));		
+			// this is Tiger's bug.
+			// see also: http://www.cocoabuilder.com/archive/message/cocoa/2006/10/4/172206
+			
+			
+			event = CGEventCreateMouseEvent(NULL, kCGEventLeftMouseUp, point, kCGMouseButtonLeft);
+			
+			CGEventSetType(event, kCGEventLeftMouseUp);
+			// this is Tiger's bug.
+			// see also: http://lists.apple.com/archives/Quartz-dev/2005/Oct/msg00048.html
+			
+			
+			CGEventPost(kCGHIDEventTap, event);
+			CFRelease(event);
+			
+			[self sendKeyboardEvent:58 keyDown:NO];
+			[self sendKeyboardEvent:56 keyDown:NO];
+			[self sendKeyboardEvent:55 keyDown:NO];
+			[self sendKeyboardEvent:59 keyDown:NO];
+			
+			[textView setString:[NSString stringWithFormat:@"%@\n===== Mouse Mode Off =====", [textView string]]];
+			break;
+		case 1:
+			[textView setString:[NSString stringWithFormat:@"%@\n===== Mouse Mode On (Motion Sensors) =====", [textView string]]];
+			break;
+		case 2:
+			[textView setString:[NSString stringWithFormat:@"%@\n===== Mouse Mode On (IR Sensor) =====", [textView string]]];
+			
+	}
 }
 
 @end

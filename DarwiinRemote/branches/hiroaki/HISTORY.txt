@@ -1,3 +1,12 @@
+0.4 (2006.12.26)
+====================
+	o New Features:
+		- supports Nunchuk
+		- supports manual key mappings
+		
+	o Changes:
+		- 
+
 0.3.1 (2006.12.13)
 ====================
 	o  New Features:

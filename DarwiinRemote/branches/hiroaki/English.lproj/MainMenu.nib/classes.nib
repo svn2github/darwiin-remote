@@ -35,6 +35,7 @@
                 mainWindow = NSWindow; 
                 mappingController = NSArrayController; 
                 minusButton = NSButton; 
+                mouseMode = NSPopUpButton; 
                 newNameField = NSTextField; 
                 oneButton = NSButton; 
                 plusButton = NSButton; 

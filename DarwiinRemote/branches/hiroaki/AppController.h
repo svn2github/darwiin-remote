@@ -45,6 +45,7 @@
 	IBOutlet NSButton* homeButton;
 	IBOutlet NSButton* oneButton;
 	IBOutlet NSButton* twoButton;
+	IBOutlet NSPopUpButton* mouseMode;
 	
 	IBOutlet NSLevelIndicator* batteryLevel;
 	IBOutlet NSTextField* newNameField;
@@ -57,8 +58,8 @@
 	BOOL isLeftButtonDown, isRightButtonDown;
 	
 	int mouseEventMode;
-	double x1, x2, x3, y1, y2, y3, z1, z2, z3;
-	double x0, y0, z0;
+	int x1, x2, x3, y1, y2, y3, z1, z2, z3;
+	int x0, y0, z0;
 	unsigned char tmpAccX, tmpAccY, tmpAccZ;
 	
 	WiiJoyStickCalibData nunchukJsCalib;
