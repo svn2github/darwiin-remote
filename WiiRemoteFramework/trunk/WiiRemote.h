@@ -39,9 +39,32 @@ enum {
 	WiiRemoteRightButton,
 	
 	WiiNunchukZButton,
-	WiiNunchukCButton
+	WiiNunchukCButton,
+	
+	WiiClassicControllerXButton,
+	WiiClassicControllerYButton,
+	WiiClassicControllerAButton,
+	WiiClassicControllerBButton,
+	WiiClassicControllerLButton,
+	WiiClassicControllerRButton,
+	WiiClassicControllerZLButton,
+	WiiClassicControllerZRButton,
+	WiiClassicControllerUpButton,
+	WiiClassicControllerDownButton,
+	WiiClassicControllerLeftButton,
+	WiiClassicControllerRightButton,
+	WiiClassicControllerMinusButton,
+	WiiClassicControllerHomeButton,
+	WiiClassicControllerPlusButton
 };
 
+
+typedef UInt16 WiiExpansionPortType;
+enum{
+	WiiExpNotAttached,
+	WiiNunchuk,
+	WiiClassicController
+};
 
 typedef UInt16 WiiAccelerationSensorType;
 enum{
@@ -76,6 +99,8 @@ enum{
 	int orientation;
 	int leftPoint; // is point 0 or 1 on the left. -1 when not tracking.
 	
+	
+	WiiExpansionPortType expType;
 	WiiAccCalibData wiiCalibData, nunchukCalibData;
 	WiiJoyStickCalibData nunchukJoyStickCalibData;
 	IRData	irData[4];
@@ -87,24 +112,35 @@ enum{
 	BOOL isLED1Illuminated, isLED2Illuminated, isLED3Illuminated, isLED4Illuminated;
 	NSTimer* statusTimer;
 	IOBluetoothUserNotification *disconnectNotification;
-	BOOL buttonState[13];
+	BOOL buttonState[28];
 	
 	
 	
 	//nunchuk
-	unsigned char xStick;
-	unsigned char yStick;
+	unsigned char nStickX;
+	unsigned char nStickY;
 	unsigned char nAccX;
 	unsigned char nAccY;
 	unsigned char nAccZ;
 	unsigned char nButtonData;
+	
+	//classic controller
+	unsigned char cButtonData;
+	unsigned char cStickX1;
+	unsigned char cStickY1;
+	unsigned char cStickX2;
+	unsigned char cStickY2;
+	unsigned char cAnalogL;
+	unsigned char cAnalogR;
 	
 } 
 
 - (NSString*) address;
 - (void)setDelegate:(id)delegate;
 - (double)batteryLevel;
-- (BOOL)isExpansionPortAttached;
+
+- (WiiExpansionPortType)expansionPortType;
+//- (BOOL)isExpansionPortAttached;
 - (BOOL)available;
 - (BOOL)isButtonPressed:(WiiButtonType)type;
 - (WiiJoyStickCalibData)joyStickCalibData:(WiiJoyStickType)type;
@@ -131,6 +167,7 @@ enum{
 - (void) buttonChanged:(WiiButtonType)type isPressed:(BOOL)isPressed;
 - (void) accelerationChanged:(WiiAccelerationSensorType)type accX:(unsigned char)accX accY:(unsigned char)accY accZ:(unsigned char)accZ;
 - (void) joyStickChanged:(WiiJoyStickType)type tiltX:(unsigned char)tiltX tiltY:(unsigned char)tiltY;
+- (void) analogButtonChanged:(WiiButtonType)type amount:(unsigned)press;
 - (void) wiiRemoteDisconnected:(IOBluetoothDevice*)device;
 
 

@@ -14,20 +14,40 @@ typedef unsigned char darr[];
 
 typedef UInt16 WiiButtonBitMask;
 enum {
-	kWiiRemoteTwoButton			= 0x0001,
-	kWiiRemoteOneButton			= 0x0002,
-	kWiiRemoteBButton			= 0x0004,
-	kWiiRemoteAButton			= 0x0008,
-	kWiiRemoteMinusButton		= 0x0010,
-	kWiiRemoteHomeButton		= 0x0080,
-	kWiiRemoteLeftButton		= 0x0100,
-	kWiiRemoteRightButton		= 0x0200,
-	kWiiRemoteDownButton		= 0x0400,
-	kWiiRemoteUpButton			= 0x0800,
-	kWiiRemotePlusButton		= 0x1000,
+	kWiiRemoteTwoButton					= 0x0001,
+	kWiiRemoteOneButton					= 0x0002,
+	kWiiRemoteBButton					= 0x0004,
+	kWiiRemoteAButton					= 0x0008,
+	kWiiRemoteMinusButton				= 0x0010,
+	kWiiRemoteHomeButton				= 0x0080,
+	kWiiRemoteLeftButton				= 0x0100,
+	kWiiRemoteRightButton				= 0x0200,
+	kWiiRemoteDownButton				= 0x0400,
+	kWiiRemoteUpButton					= 0x0800,
+	kWiiRemotePlusButton				= 0x1000,
 	
-	kWiiNunchukZButton			= 0x0001,
-	kWiiNunchukCButton			= 0x0002
+	
+	kWiiNunchukZButton					= 0x0001,
+	kWiiNunchukCButton					= 0x0002,
+	
+	
+	kWiiClassicControllerUpButton		= 0x0001,
+	kWiiClassicControllerLeftButton		= 0x0002,
+	kWiiClassicControllerZRButton		= 0x0004,
+	kWiiClassicControllerXButton		= 0x0008,
+	kWiiClassicControllerAButton		= 0x0010,
+	kWiiClassicControllerYButton		= 0x0020,
+	kWiiClassicControllerBButton		= 0x0040,
+	kWiiClassicControllerZLButton		= 0x0080,
+	kWiiClassicControllerUnUsedButton	= 0x0100,
+	kWiiClassicControllerRButton		= 0x0200,
+	kWiiClassicControllerPlusButton		= 0x0400,
+	kWiiClassicControllerHomeButton		= 0x0800,
+	kWiiClassicControllerMinusButton	= 0x1000,
+	kWiiClassicControllerLButton		= 0x2000,
+	kWiiClassicControllerDownButton		= 0x4000,
+	kWiiClassicControllerRightButton	= 0x8000
+	
 };
 
 
@@ -475,6 +495,24 @@ enum {
 	//reading ram data
 	if (dp[1] == 0x21){
 		 
+		//specify attached expasion device
+		if (dataLength >=22 & dp[5] == 0x00 && dp[6] == 0xF0){
+			if (dp[21] == 0x00){
+				if (expType != WiiNunchuk){
+					expType = WiiNunchuk;
+					[[NSNotificationCenter defaultCenter] postNotificationName:@"WiiRemoteExpansionPortChangedNotification" object:self];
+				}
+			}else if (dp[21] == 0x01){
+				if (expType != WiiClassicController){
+					expType = WiiClassicController;
+					[[NSNotificationCenter defaultCenter] postNotificationName:@"WiiRemoteExpansionPortChangedNotification" object:self];					
+				}
+			}else{
+				expType = WiiExpNotAttached;
+			}
+		}
+		
+		
 		//wii calibration data
 		if (dataLength >= 20 && dp[5] == 0x00 && dp[6] == 0x10){
 			wiiCalibData.accX_zero = dp[13];
@@ -487,22 +525,28 @@ enum {
 		}
 				  
 		
-		//Nunchuk calibration data
 		if (dataLength >= 22 && dp[5] == 0x00 && dp[6] == 0x20){
-			nunchukCalibData.accX_zero = (dp[7] ^ 0x17) + 0x17;
-			nunchukCalibData.accY_zero = (dp[8] ^ 0x17) + 0x17;
-			nunchukCalibData.accZ_zero = (dp[9] ^ 0x17) + 0x17;
+			if (expType == WiiNunchuk){										//nunchuk calibration data
+				nunchukCalibData.accX_zero = (dp[7] ^ 0x17) + 0x17;
+				nunchukCalibData.accY_zero = (dp[8] ^ 0x17) + 0x17;
+				nunchukCalibData.accZ_zero = (dp[9] ^ 0x17) + 0x17;
+				
+				nunchukCalibData.accX_1g = (dp[11] ^ 0x17) + 0x17;
+				nunchukCalibData.accY_1g = (dp[12] ^ 0x17) + 0x17;
+				nunchukCalibData.accZ_1g = (dp[13] ^ 0x17) + 0x17;
+				
+				nunchukJoyStickCalibData.x_max = (dp[15] ^ 0x17) + 0x17;
+				nunchukJoyStickCalibData.x_min = (dp[16] ^ 0x17) + 0x17;
+				nunchukJoyStickCalibData.x_center = (dp[17] ^ 0x17) + 0x17;
+				nunchukJoyStickCalibData.y_max = (dp[19] ^ 0x17) + 0x17;
+				nunchukJoyStickCalibData.y_min = (dp[20] ^ 0x17) + 0x17;
+				nunchukJoyStickCalibData.y_center = (dp[21] ^ 0x17) + 0x17;	
+				
+			}else if (expType == WiiClassicController){
+				//classic controller calibration data (probably)
+			}
 			
-			nunchukCalibData.accX_1g = (dp[11] ^ 0x17) + 0x17;
-			nunchukCalibData.accY_1g = (dp[12] ^ 0x17) + 0x17;
-			nunchukCalibData.accZ_1g = (dp[13] ^ 0x17) + 0x17;
-			
-			nunchukJoyStickCalibData.x_max = (dp[15] ^ 0x17) + 0x17;
-			nunchukJoyStickCalibData.x_min = (dp[16] ^ 0x17) + 0x17;
-			nunchukJoyStickCalibData.x_center = (dp[17] ^ 0x17) + 0x17;
-			nunchukJoyStickCalibData.y_max = (dp[19] ^ 0x17) + 0x17;
-			nunchukJoyStickCalibData.y_min = (dp[20] ^ 0x17) + 0x17;
-			nunchukJoyStickCalibData.y_center = (dp[21] ^ 0x17) + 0x17;
+
 		} 
 	}
 	
@@ -516,21 +560,17 @@ enum {
 			[[NSNotificationCenter defaultCenter] postNotificationName:@"WiiRemoteBatteryLowNotification" object:self];
 		}
 		
-		if ((dp[4] & 0x02)){
+		if ((dp[4] & 0x02)){	//some device attached to Wii
+			
+			[self readData:0x04A400F0 length:16];		//specify expansion device type
+			
+		}else{					// unplugged
 
-			if (!isExpansionPortAttached){
-				isExpansionPortAttached = YES;
+			if (expType != WiiExpNotAttached){
 
-				[[NSNotificationCenter defaultCenter] postNotificationName:@"WiiRemoteExpansionPortChangedNotification" object:self];
-			}
-		}else{
-
-			if (isExpansionPortAttached){
-				isExpansionPortAttached = NO;
-
-				[self sendWiiNunchukButtonEvent:0xFFFF];		// reset button data;
+				//[self sendWiiNunchukButtonEvent:0xFFFF];		// reset button data;
 				
-				
+				expType = WiiExpNotAttached;
 				[[NSNotificationCenter defaultCenter] postNotificationName:@"WiiRemoteExpansionPortChangedNotification" object:self];
 			}
 		}
@@ -568,17 +608,41 @@ enum {
 		//retrieve nunchuk data
 		//if (dp[1] == 0x32 || dp[1] == 0x34 || dp[1] == 0x35 || dp[1] == 0x36 || dp[1] == 0x37 || dp[1] == 0x3D){
 		if (dp[1] == 0x37){
-			xStick = (dp[17] ^ 0x17) + 0x17;
-			yStick = (dp[18] ^ 0x17) + 0x17;
-			nAccX = (dp[19] ^ 0x17) + 0x17;
-			nAccY = (dp[20] ^ 0x17) + 0x17;
-			nAccZ = (dp[21] ^ 0x17) + 0x17;
-			nButtonData =(dp[22] ^ 0x17) + 0x17;
+			if (expType == WiiNunchuk){
+				nStickX = (dp[17] ^ 0x17) + 0x17;
+				nStickY = (dp[18] ^ 0x17) + 0x17;
+				nAccX = (dp[19] ^ 0x17) + 0x17;
+				nAccY = (dp[20] ^ 0x17) + 0x17;
+				nAccZ = (dp[21] ^ 0x17) + 0x17;
+				nButtonData =(dp[22] ^ 0x17) + 0x17;
+			}else if (expType == WiiClassicController){
+				cButtonData = (unsigned short)((dp[21] ^ 0x17) + 0x17) << 8 + (dp[22] ^ 0x17) + 0x17;
+				
+				cStickX1 = ((dp[17] ^ 0x17) + 0x17) & 0x3F;
+				cStickY1 = ((dp[18] ^ 0x17) + 0x17) & 0x3F;
+				cStickX2 = (((dp[17] ^ 0x17) + 0x17) & 0xC0) >> 3 + (((dp[18] ^ 0x17) + 0x17) & 0xC0) >> 5 + (((dp[19] ^ 0x17) + 0x17) & 0x80) >> 7; 
+				cStickY2 = ((dp[19] ^ 0x17) + 0x17) & 0x0F;
+				
+				cAnalogR = ((dp[20] ^ 0x17) + 0x17) & 0x0F;
+				cAnalogL = (((dp[20] ^ 0x17) + 0x17) & 0xE0) >> 5 + (((dp[19] ^ 0x17) + 0x17) & 0x60) >> 2;
+			}
 		}
 		
-		if (isExpansionPortEnabled && isExpansionPortAttached){
-			[self sendWiiNunchukButtonEvent:nButtonData];
-			[_delegate accelerationChanged:WiiNunchukAccelerationSensor accX:nAccX accY:nAccY accZ:nAccZ];
+		if (isExpansionPortEnabled){
+			if (expType == WiiNunchuk){
+				[self sendWiiNunchukButtonEvent:nButtonData];
+				[_delegate accelerationChanged:WiiNunchukAccelerationSensor accX:nAccX accY:nAccY accZ:nAccZ];
+				[_delegate joyStickChanged:WiiNunchukJoyStick tiltX:nStickX tiltY:nStickY];
+			}else if (expType == WiiClassicController){
+				[self sendWiiClassicControllerButtonEvent:cButtonData];
+				[_delegate joyStickChanged:WiiClassicControllerLeftJoyStick tiltX:cStickX1 tiltY:cStickY1];
+				[_delegate joyStickChanged:WiiClassicControllerRightJoyStick tiltX:cStickX2 tiltY:cStickY2];
+				
+				[_delegate analogButtonChanged:WiiClassicControllerLeftButton amount:cAnalogL];
+				[_delegate analogButtonChanged:WiiClassicControllerRightButton amount:cAnalogR];
+
+			}
+			
 		}
 		
 		
@@ -626,11 +690,9 @@ enum {
 	}
 	
 	float ox, oy;
-	
 	if (irData[0].s < 0x0F && irData[1].s < 0x0F) {
 		int l = leftPoint, r;
 		if (leftPoint == -1) {
-			//	printf("Tracking.\n");
 			switch (orientation) {
 				case 0: l = (irData[0].x < irData[1].x)?0:1; break;
 				case 1: l = (irData[0].y > irData[1].y)?0:1; break;
@@ -668,8 +730,8 @@ enum {
 		}
 	}
 	
-	
-	[_delegate irPointMovedX:ox Y:oy];
+	if (dp[1] & 0x02)
+		[_delegate irPointMovedX:ox Y:oy];
 	//if (nil != _delegate)
 		//[_delegate dataChanged:buttonData accX:accX accY:accY accZ:accZ mouseX:ox mouseY:oy];
 	//[_delegate dataChanged:buttonData accX:irData[0].x/4 accY:irData[0].y/3 accZ:irData[0].s*16];
@@ -838,15 +900,238 @@ enum {
 	}
 }
 
+- (void)sendWiiClassicControllerButtonEvent:(UInt16)data{
+	if (!(data & kWiiClassicControllerXButton)){
+		
+		if (!buttonState[WiiClassicControllerXButton]){
+			buttonState[WiiClassicControllerXButton] = YES;
+			[_delegate buttonChanged:WiiClassicControllerXButton isPressed:buttonState[WiiClassicControllerXButton]];
+		}
+	}else{
+		if (buttonState[WiiClassicControllerXButton]){
+			buttonState[WiiClassicControllerXButton] = NO;
+			[_delegate buttonChanged:WiiClassicControllerXButton isPressed:buttonState[WiiClassicControllerXButton]];
+			
+		}
+	}
+	
+	if (!(data & kWiiClassicControllerYButton)){
+		
+		if (!buttonState[WiiClassicControllerYButton]){
+			buttonState[WiiClassicControllerYButton] = YES;
+			[_delegate buttonChanged:WiiClassicControllerYButton isPressed:buttonState[WiiClassicControllerYButton]];
+		}
+	}else{
+		if (buttonState[WiiClassicControllerYButton]){
+			buttonState[WiiClassicControllerYButton] = NO;
+			[_delegate buttonChanged:WiiClassicControllerYButton isPressed:buttonState[WiiClassicControllerYButton]];
+			
+		}
+	}
+	
+	if (!(data & kWiiClassicControllerAButton)){
+		
+		if (!buttonState[WiiClassicControllerAButton]){
+			buttonState[WiiClassicControllerAButton] = YES;
+			[_delegate buttonChanged:WiiClassicControllerAButton isPressed:buttonState[WiiClassicControllerAButton]];
+		}
+	}else{
+		if (buttonState[WiiClassicControllerAButton]){
+			buttonState[WiiClassicControllerAButton] = NO;
+			[_delegate buttonChanged:WiiClassicControllerAButton isPressed:buttonState[WiiClassicControllerAButton]];
+			
+		}
+	}
+	
+	if (!(data & kWiiClassicControllerBButton)){
+		
+		if (!buttonState[WiiClassicControllerBButton]){
+			buttonState[WiiClassicControllerBButton] = YES;
+			[_delegate buttonChanged:WiiClassicControllerBButton isPressed:buttonState[WiiClassicControllerBButton]];
+		}
+	}else{
+		if (buttonState[WiiClassicControllerBButton]){
+			buttonState[WiiClassicControllerBButton] = NO;
+			[_delegate buttonChanged:WiiClassicControllerBButton isPressed:buttonState[WiiClassicControllerBButton]];
+			
+		}
+	}
+	
+	if (!(data & kWiiClassicControllerLButton)){
+		
+		if (!buttonState[WiiClassicControllerLButton]){
+			buttonState[WiiClassicControllerLButton] = YES;
+			[_delegate buttonChanged:WiiClassicControllerLButton isPressed:buttonState[WiiClassicControllerLButton]];
+		}
+	}else{
+		if (buttonState[WiiClassicControllerLButton]){
+			buttonState[WiiClassicControllerLButton] = NO;
+			[_delegate buttonChanged:WiiClassicControllerLButton isPressed:buttonState[WiiClassicControllerLButton]];
+			
+		}
+	}
+	
+	if (!(data & kWiiClassicControllerRButton)){
+		
+		if (!buttonState[WiiClassicControllerRButton]){
+			buttonState[WiiClassicControllerRButton] = YES;
+			[_delegate buttonChanged:WiiClassicControllerRButton isPressed:buttonState[WiiClassicControllerRButton]];
+		}
+	}else{
+		if (buttonState[WiiClassicControllerRButton]){
+			buttonState[WiiClassicControllerRButton] = NO;
+			[_delegate buttonChanged:WiiClassicControllerRButton isPressed:buttonState[WiiClassicControllerRButton]];
+			
+		}
+	}
+	
+	if (!(data & kWiiClassicControllerZLButton)){
+		
+		if (!buttonState[WiiClassicControllerZLButton]){
+			buttonState[WiiClassicControllerZLButton] = YES;
+			[_delegate buttonChanged:WiiClassicControllerZLButton isPressed:buttonState[WiiClassicControllerZLButton]];
+		}
+	}else{
+		if (buttonState[WiiClassicControllerZLButton]){
+			buttonState[WiiClassicControllerZLButton] = NO;
+			[_delegate buttonChanged:WiiClassicControllerZLButton isPressed:buttonState[WiiClassicControllerZLButton]];
+			
+		}
+	}
+	
+	if (!(data & kWiiClassicControllerZRButton)){
+		
+		if (!buttonState[WiiClassicControllerZRButton]){
+			buttonState[WiiClassicControllerZRButton] = YES;
+			[_delegate buttonChanged:WiiClassicControllerZRButton isPressed:buttonState[WiiClassicControllerZRButton]];
+		}
+	}else{
+		if (buttonState[WiiClassicControllerZRButton]){
+			buttonState[WiiClassicControllerZRButton] = NO;
+			[_delegate buttonChanged:WiiClassicControllerZRButton isPressed:buttonState[WiiClassicControllerZRButton]];
+			
+		}
+	}
+	
+	
+	if (!(data & kWiiClassicControllerUpButton)){
+		
+		if (!buttonState[WiiClassicControllerUpButton]){
+			buttonState[WiiClassicControllerUpButton] = YES;
+			[_delegate buttonChanged:WiiClassicControllerUpButton isPressed:buttonState[WiiClassicControllerUpButton]];
+		}
+	}else{
+		if (buttonState[WiiClassicControllerUpButton]){
+			buttonState[WiiClassicControllerUpButton] = NO;
+			[_delegate buttonChanged:WiiClassicControllerUpButton isPressed:buttonState[WiiClassicControllerUpButton]];
+			
+		}
+	}
+	
+	
+	if (!(data & kWiiClassicControllerDownButton)){
+		
+		if (!buttonState[WiiClassicControllerDownButton]){
+			buttonState[WiiClassicControllerDownButton] = YES;
+			[_delegate buttonChanged:WiiClassicControllerDownButton isPressed:buttonState[WiiClassicControllerDownButton]];
+		}
+	}else{
+		if (buttonState[WiiClassicControllerDownButton]){
+			buttonState[WiiClassicControllerDownButton] = NO;
+			[_delegate buttonChanged:WiiClassicControllerDownButton isPressed:buttonState[WiiClassicControllerDownButton]];
+			
+		}
+	}
+	
+	if (!(data & kWiiClassicControllerLeftButton)){
+		
+		if (!buttonState[WiiClassicControllerLeftButton]){
+			buttonState[WiiClassicControllerLeftButton] = YES;
+			[_delegate buttonChanged:WiiClassicControllerLeftButton isPressed:buttonState[WiiClassicControllerLeftButton]];
+		}
+	}else{
+		if (buttonState[WiiClassicControllerLeftButton]){
+			buttonState[WiiClassicControllerLeftButton] = NO;
+			[_delegate buttonChanged:WiiClassicControllerLeftButton isPressed:buttonState[WiiClassicControllerLeftButton]];
+			
+		}
+	}
+	
+	if (!(data & kWiiClassicControllerRightButton)){
+		
+		if (!buttonState[WiiClassicControllerRightButton]){
+			buttonState[WiiClassicControllerRightButton] = YES;
+			[_delegate buttonChanged:WiiClassicControllerRightButton isPressed:buttonState[WiiClassicControllerRightButton]];
+		}
+	}else{
+		if (buttonState[WiiClassicControllerRightButton]){
+			buttonState[WiiClassicControllerRightButton] = NO;
+			[_delegate buttonChanged:WiiClassicControllerRightButton isPressed:buttonState[WiiClassicControllerRightButton]];
+			
+		}
+	}
+	
+	if (!(data & kWiiClassicControllerMinusButton)){
+		
+		if (!buttonState[WiiClassicControllerMinusButton]){
+			buttonState[WiiClassicControllerMinusButton] = YES;
+			[_delegate buttonChanged:WiiClassicControllerMinusButton isPressed:buttonState[WiiClassicControllerMinusButton]];
+		}
+	}else{
+		if (buttonState[WiiClassicControllerMinusButton]){
+			buttonState[WiiClassicControllerMinusButton] = NO;
+			[_delegate buttonChanged:WiiClassicControllerMinusButton isPressed:buttonState[WiiClassicControllerMinusButton]];
+			
+		}
+	}
+	
+	if (!(data & kWiiClassicControllerHomeButton)){
+		
+		if (!buttonState[WiiClassicControllerHomeButton]){
+			buttonState[WiiClassicControllerHomeButton] = YES;
+			[_delegate buttonChanged:WiiClassicControllerHomeButton isPressed:buttonState[WiiClassicControllerHomeButton]];
+		}
+	}else{
+		if (buttonState[WiiClassicControllerHomeButton]){
+			buttonState[WiiClassicControllerHomeButton] = NO;
+			[_delegate buttonChanged:WiiClassicControllerHomeButton isPressed:buttonState[WiiClassicControllerHomeButton]];
+			
+		}
+	}
+	
+	
+	if (!(data & kWiiClassicControllerPlusButton)){
+		
+		if (!buttonState[WiiClassicControllerPlusButton]){
+			buttonState[WiiClassicControllerPlusButton] = YES;
+			[_delegate buttonChanged:WiiClassicControllerPlusButton isPressed:buttonState[WiiClassicControllerPlusButton]];
+		}
+	}else{
+		if (buttonState[WiiClassicControllerPlusButton]){
+			buttonState[WiiClassicControllerPlusButton] = NO;
+			[_delegate buttonChanged:WiiClassicControllerPlusButton isPressed:buttonState[WiiClassicControllerPlusButton]];
+			
+		}
+	}
+	
+	
+	
+}
+
 
 - (void)getCurrentStatus:(NSTimer*)timer{
 	unsigned char cmd[] = {0x15, 0x00};
 	[self sendCommand:cmd length:2];
 }
 
+- (WiiExpansionPortType)expansionPortType{
+	return expType;
+}
+
+/**
 - (BOOL)isExpansionPortAttached{
 	return isExpansionPortAttached;
-}
+}**/
 
 - (BOOL)isButtonPressed:(WiiButtonType)type{
 	return buttonState[type];
