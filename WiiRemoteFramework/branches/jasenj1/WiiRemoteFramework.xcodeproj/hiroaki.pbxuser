@@ -1,0 +1,1033 @@
+// !$*UTF8*$!
+{
+	0867D690FE84028FC02AAC07 /* Project object */ = {
+		activeBuildConfigurationName = Release;
+		activeTarget = 8DC2EF4F0486A6940098B216 /* WiiRemoteFramework */;
+		addToTargets = (
+			8DC2EF4F0486A6940098B216 /* WiiRemoteFramework */,
+		);
+		breakpointsGroup = 5351D4BF0B2D1C2600F86B96 /* XCBreakpointsBucket */;
+		codeSenseManager = 531893080B2C37B700277BC3 /* Code sense */;
+		perUserDictionary = {
+			PBXConfiguration.PBXFileTableDataSource3.PBXBookmarksDataSource = {
+				PBXFileTableDataSourceColumnSortingDirectionKey = "-1";
+				PBXFileTableDataSourceColumnSortingKey = PBXBookmarksDataSource_NameID;
+				PBXFileTableDataSourceColumnWidthsKey = (
+					200,
+					200,
+					80,
+				);
+				PBXFileTableDataSourceColumnsKey = (
+					PBXBookmarksDataSource_LocationID,
+					PBXBookmarksDataSource_NameID,
+					PBXBookmarksDataSource_CommentsID,
+				);
+			};
+			PBXConfiguration.PBXFileTableDataSource3.PBXFileTableDataSource = {
+				PBXFileTableDataSourceColumnSortingDirectionKey = "-1";
+				PBXFileTableDataSourceColumnSortingKey = PBXFileDataSource_Filename_ColumnID;
+				PBXFileTableDataSourceColumnWidthsKey = (
+					20,
+					551,
+					20,
+					48,
+					43,
+					43,
+					20,
+				);
+				PBXFileTableDataSourceColumnsKey = (
+					PBXFileDataSource_FiletypeID,
+					PBXFileDataSource_Filename_ColumnID,
+					PBXFileDataSource_Built_ColumnID,
+					PBXFileDataSource_ObjectSize_ColumnID,
+					PBXFileDataSource_Errors_ColumnID,
+					PBXFileDataSource_Warnings_ColumnID,
+					PBXFileDataSource_Target_ColumnID,
+				);
+			};
+			PBXConfiguration.PBXFileTableDataSource3.PBXSymbolsDataSource = {
+				PBXFileTableDataSourceColumnSortingDirectionKey = "-1";
+				PBXFileTableDataSourceColumnSortingKey = PBXSymbolsDataSource_SymbolNameID;
+				PBXFileTableDataSourceColumnWidthsKey = (
+					16,
+					200,
+					50,
+					200,
+				);
+				PBXFileTableDataSourceColumnsKey = (
+					PBXSymbolsDataSource_SymbolTypeIconID,
+					PBXSymbolsDataSource_SymbolNameID,
+					PBXSymbolsDataSource_SymbolTypeID,
+					PBXSymbolsDataSource_ReferenceNameID,
+				);
+			};
+			PBXConfiguration.PBXFileTableDataSource3.XCSCMDataSource = {
+				PBXFileTableDataSourceColumnSortingDirectionKey = "-1";
+				PBXFileTableDataSourceColumnSortingKey = PBXFileDataSource_Filename_ColumnID;
+				PBXFileTableDataSourceColumnWidthsKey = (
+					20,
+					20,
+					527,
+					20,
+					48,
+					43,
+					43,
+					20,
+				);
+				PBXFileTableDataSourceColumnsKey = (
+					PBXFileDataSource_SCM_ColumnID,
+					PBXFileDataSource_FiletypeID,
+					PBXFileDataSource_Filename_ColumnID,
+					PBXFileDataSource_Built_ColumnID,
+					PBXFileDataSource_ObjectSize_ColumnID,
+					PBXFileDataSource_Errors_ColumnID,
+					PBXFileDataSource_Warnings_ColumnID,
+					PBXFileDataSource_Target_ColumnID,
+				);
+			};
+			PBXConfiguration.PBXTargetDataSource.PBXTargetDataSource = {
+				PBXFileTableDataSourceColumnSortingDirectionKey = "-1";
+				PBXFileTableDataSourceColumnSortingKey = PBXFileDataSource_Filename_ColumnID;
+				PBXFileTableDataSourceColumnWidthsKey = (
+					20,
+					200,
+					90,
+					20,
+					48,
+					43,
+					43,
+				);
+				PBXFileTableDataSourceColumnsKey = (
+					PBXFileDataSource_FiletypeID,
+					PBXFileDataSource_Filename_ColumnID,
+					PBXTargetDataSource_PrimaryAttribute,
+					PBXFileDataSource_Built_ColumnID,
+					PBXFileDataSource_ObjectSize_ColumnID,
+					PBXFileDataSource_Errors_ColumnID,
+					PBXFileDataSource_Warnings_ColumnID,
+				);
+			};
+			PBXPerProjectTemplateStateSaveDate = 189102098;
+			PBXWorkspaceStateSaveDate = 189102098;
+		};
+		perUserProjectItems = {
+			532D193E0B45871D00856F81 /* PBXTextBookmark */ = 532D193E0B45871D00856F81 /* PBXTextBookmark */;
+			532D193F0B45871D00856F81 /* PBXTextBookmark */ = 532D193F0B45871D00856F81 /* PBXTextBookmark */;
+			532D19440B45873B00856F81 /* PBXBookmark */ = 532D19440B45873B00856F81 /* PBXBookmark */;
+			532D19470B45875300856F81 /* PBXTextBookmark */ = 532D19470B45875300856F81 /* PBXTextBookmark */;
+			532D194B0B45875300856F81 /* PBXTextBookmark */ = 532D194B0B45875300856F81 /* PBXTextBookmark */;
+			532D19520B45875300856F81 /* PBXTextBookmark */ = 532D19520B45875300856F81 /* PBXTextBookmark */;
+			532D19530B45875300856F81 /* PBXTextBookmark */ = 532D19530B45875300856F81 /* PBXTextBookmark */;
+			532D19560B4587DB00856F81 /* PBXTextBookmark */ = 532D19560B4587DB00856F81 /* PBXTextBookmark */;
+			532D19570B4587DB00856F81 /* PBXTextBookmark */ = 532D19570B4587DB00856F81 /* PBXTextBookmark */;
+			532D19580B4587DB00856F81 /* PBXTextBookmark */ = 532D19580B4587DB00856F81 /* PBXTextBookmark */;
+			532D19590B4587DB00856F81 /* PBXTextBookmark */ = 532D19590B4587DB00856F81 /* PBXTextBookmark */;
+			532D195A0B4587DB00856F81 /* PBXTextBookmark */ = 532D195A0B4587DB00856F81 /* PBXTextBookmark */;
+			532D195B0B4587DB00856F81 /* PBXTextBookmark */ = 532D195B0B4587DB00856F81 /* PBXTextBookmark */;
+			532D195C0B4587DB00856F81 /* PBXTextBookmark */ = 532D195C0B4587DB00856F81 /* PBXTextBookmark */;
+			532D195D0B4587DB00856F81 /* PBXTextBookmark */ = 532D195D0B4587DB00856F81 /* PBXTextBookmark */;
+			532D195E0B4587DB00856F81 /* PBXTextBookmark */ = 532D195E0B4587DB00856F81 /* PBXTextBookmark */;
+			532D19610B4587F900856F81 /* PBXTextBookmark */ = 532D19610B4587F900856F81 /* PBXTextBookmark */;
+			532D19620B4587F900856F81 /* PBXTextBookmark */ = 532D19620B4587F900856F81 /* PBXTextBookmark */;
+			532D19630B4587F900856F81 /* PBXTextBookmark */ = 532D19630B4587F900856F81 /* PBXTextBookmark */;
+			532D19640B4587F900856F81 /* PBXTextBookmark */ = 532D19640B4587F900856F81 /* PBXTextBookmark */;
+			532D19650B4587F900856F81 /* PBXTextBookmark */ = 532D19650B4587F900856F81 /* PBXTextBookmark */;
+			532D19660B4587F900856F81 /* PBXTextBookmark */ = 532D19660B4587F900856F81 /* PBXTextBookmark */;
+			532D19690B45886A00856F81 /* PBXTextBookmark */ = 532D19690B45886A00856F81 /* PBXTextBookmark */;
+			532D196A0B45886A00856F81 /* PBXTextBookmark */ = 532D196A0B45886A00856F81 /* PBXTextBookmark */;
+			532D196B0B45886A00856F81 /* PBXTextBookmark */ = 532D196B0B45886A00856F81 /* PBXTextBookmark */;
+			532D196C0B45886A00856F81 /* PBXTextBookmark */ = 532D196C0B45886A00856F81 /* PBXTextBookmark */;
+			532D196D0B45886A00856F81 /* PBXTextBookmark */ = 532D196D0B45886A00856F81 /* PBXTextBookmark */;
+			532D196E0B45886A00856F81 /* PBXTextBookmark */ = 532D196E0B45886A00856F81 /* PBXTextBookmark */;
+			532D196F0B45886A00856F81 /* PBXTextBookmark */ = 532D196F0B45886A00856F81 /* PBXTextBookmark */;
+			532D19700B45886A00856F81 /* PBXTextBookmark */ = 532D19700B45886A00856F81 /* PBXTextBookmark */;
+			532D19750B458D6400856F81 /* PBXTextBookmark */ = 532D19750B458D6400856F81 /* PBXTextBookmark */;
+			532D19760B458D6400856F81 /* PBXTextBookmark */ = 532D19760B458D6400856F81 /* PBXTextBookmark */;
+			532D19770B458D6400856F81 /* PBXTextBookmark */ = 532D19770B458D6400856F81 /* PBXTextBookmark */;
+			532D19780B458D6400856F81 /* PBXTextBookmark */ = 532D19780B458D6400856F81 /* PBXTextBookmark */;
+			532D197B0B458DC100856F81 /* PBXTextBookmark */ = 532D197B0B458DC100856F81 /* PBXTextBookmark */;
+			532D197C0B458DC100856F81 /* PBXTextBookmark */ = 532D197C0B458DC100856F81 /* PBXTextBookmark */;
+			532D197D0B458DC100856F81 /* PBXTextBookmark */ = 532D197D0B458DC100856F81 /* PBXTextBookmark */;
+			532D197E0B458DC100856F81 /* PBXTextBookmark */ = 532D197E0B458DC100856F81 /* PBXTextBookmark */;
+			532D19810B458E3F00856F81 /* PBXTextBookmark */ = 532D19810B458E3F00856F81 /* PBXTextBookmark */;
+			532D19820B458E3F00856F81 /* PBXTextBookmark */ = 532D19820B458E3F00856F81 /* PBXTextBookmark */;
+			532D19830B458E3F00856F81 /* PBXTextBookmark */ = 532D19830B458E3F00856F81 /* PBXTextBookmark */;
+			532D19840B458E3F00856F81 /* PBXTextBookmark */ = 532D19840B458E3F00856F81 /* PBXTextBookmark */;
+			532D19890B4596A800856F81 /* PBXTextBookmark */ = 532D19890B4596A800856F81 /* PBXTextBookmark */;
+			532D198A0B4596A800856F81 /* PBXTextBookmark */ = 532D198A0B4596A800856F81 /* PBXTextBookmark */;
+			532D198B0B4596A800856F81 /* PBXTextBookmark */ = 532D198B0B4596A800856F81 /* PBXTextBookmark */;
+			532D198C0B4596A800856F81 /* PBXTextBookmark */ = 532D198C0B4596A800856F81 /* PBXTextBookmark */;
+			532D198D0B4596A800856F81 /* PBXTextBookmark */ = 532D198D0B4596A800856F81 /* PBXTextBookmark */;
+			532D198E0B4596A800856F81 /* PBXTextBookmark */ = 532D198E0B4596A800856F81 /* PBXTextBookmark */;
+			532D198F0B4596A800856F81 /* PBXTextBookmark */ = 532D198F0B4596A800856F81 /* PBXTextBookmark */;
+			532D19900B4596A800856F81 /* PBXTextBookmark */ = 532D19900B4596A800856F81 /* PBXTextBookmark */;
+			532D19970B459B9F00856F81 /* PBXTextBookmark */ = 532D19970B459B9F00856F81 /* PBXTextBookmark */;
+			532D19980B459B9F00856F81 /* PBXTextBookmark */ = 532D19980B459B9F00856F81 /* PBXTextBookmark */;
+			532D19990B459B9F00856F81 /* PBXTextBookmark */ = 532D19990B459B9F00856F81 /* PBXTextBookmark */;
+			532D199A0B459B9F00856F81 /* PBXTextBookmark */ = 532D199A0B459B9F00856F81 /* PBXTextBookmark */;
+			532D199B0B459B9F00856F81 /* PBXTextBookmark */ = 532D199B0B459B9F00856F81 /* PBXTextBookmark */;
+			532D199C0B459B9F00856F81 /* PBXTextBookmark */ = 532D199C0B459B9F00856F81 /* PBXTextBookmark */;
+			532D199D0B459B9F00856F81 /* PBXTextBookmark */ = 532D199D0B459B9F00856F81 /* PBXTextBookmark */;
+			532D199E0B459B9F00856F81 /* PBXTextBookmark */ = 532D199E0B459B9F00856F81 /* PBXTextBookmark */;
+			532D199F0B459B9F00856F81 /* PBXTextBookmark */ = 532D199F0B459B9F00856F81 /* PBXTextBookmark */;
+			532D19A00B459B9F00856F81 /* PBXTextBookmark */ = 532D19A00B459B9F00856F81 /* PBXTextBookmark */;
+			5351D5400B2D671C00F86B96 = 5351D5400B2D671C00F86B96 /* PBXTextBookmark */;
+			5351D5F50B2D92AE00F86B96 = 5351D5F50B2D92AE00F86B96 /* PBXTextBookmark */;
+			53552F0B0B4563C500B077F0 = 53552F0B0B4563C500B077F0 /* PBXTextBookmark */;
+			53552F0F0B4563C500B077F0 = 53552F0F0B4563C500B077F0 /* PBXTextBookmark */;
+			53552F100B4563C500B077F0 = 53552F100B4563C500B077F0 /* PBXTextBookmark */;
+			53552F170B4563C500B077F0 = 53552F170B4563C500B077F0 /* PBXTextBookmark */;
+			53552F180B4563C500B077F0 = 53552F180B4563C500B077F0 /* PBXTextBookmark */;
+			53552F190B4563C500B077F0 = 53552F190B4563C500B077F0 /* PBXTextBookmark */;
+			53552F1A0B4563C500B077F0 = 53552F1A0B4563C500B077F0 /* PBXTextBookmark */;
+			53552F1B0B4563C500B077F0 = 53552F1B0B4563C500B077F0 /* PBXTextBookmark */;
+			53552F1C0B4563C500B077F0 = 53552F1C0B4563C500B077F0 /* PBXTextBookmark */;
+			53552F1E0B4563C500B077F0 = 53552F1E0B4563C500B077F0 /* PBXTextBookmark */;
+			53552F1F0B4563C500B077F0 = 53552F1F0B4563C500B077F0 /* PBXTextBookmark */;
+			53CC5D4C0B3AA56B00F1C7B7 = 53CC5D4C0B3AA56B00F1C7B7 /* PBXTextBookmark */;
+			53F416250B43B6BE0059A122 = 53F416250B43B6BE0059A122 /* PBXTextBookmark */;
+			53FA56200B3B16E1003B73F3 = 53FA56200B3B16E1003B73F3 /* PBXTextBookmark */;
+		};
+		sourceControlManager = 531893070B2C37B700277BC3 /* Source Control */;
+		userBuildSettings = {
+		};
+	};
+	089C1667FE841158C02AAC07 /* English */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {982, 764}}";
+			sepNavSelRange = "{0, 0}";
+			sepNavVisRect = "{{0, 0}, {982, 764}}";
+			sepNavWindowFrame = "{{61, 253}, {1027, 878}}";
+		};
+	};
+	53144A860B30492D00757188 /* COPYRIGHT.txt */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {1013, 923}}";
+			sepNavSelRange = "{0, 0}";
+			sepNavVisRect = "{{0, 0}, {1013, 923}}";
+			sepNavWindowFrame = "{{107, 52}, {1058, 1037}}";
+		};
+	};
+	53144A8B0B30495700757188 /* HISTORY.txt */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {1013, 923}}";
+			sepNavSelRange = "{594, 0}";
+			sepNavVisRect = "{{0, 0}, {1013, 923}}";
+			sepNavWindowFrame = "{{609, 6}, {1058, 1037}}";
+		};
+	};
+	531893070B2C37B700277BC3 /* Source Control */ = {
+		isa = PBXSourceControlManager;
+		fallbackIsa = XCSourceControlManager;
+		isSCMEnabled = 1;
+		scmConfiguration = {
+			SubversionToolPath = /opt/local/bin/svn;
+		};
+		scmType = scm.subversion;
+	};
+	531893080B2C37B700277BC3 /* Code sense */ = {
+		isa = PBXCodeSenseManager;
+		indexTemplatePath = "";
+	};
+	532D193E0B45871D00856F81 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 5351D50C0B2D34DA00F86B96 /* WiiRemote.m */;
+		name = "WiiRemote.m: 545";
+		rLen = 0;
+		rLoc = 13243;
+		rType = 0;
+		vrLen = 803;
+		vrLoc = 12650;
+	};
+	532D193F0B45871D00856F81 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 5351D50C0B2D34DA00F86B96 /* WiiRemote.m */;
+		name = "WiiRemote.m: 545";
+		rLen = 0;
+		rLoc = 13243;
+		rType = 0;
+		vrLen = 803;
+		vrLoc = 12650;
+	};
+	532D19440B45873B00856F81 /* PBXBookmark */ = {
+		isa = PBXBookmark;
+		fRef = 5351D50C0B2D34DA00F86B96 /* WiiRemote.m */;
+	};
+	532D19470B45875300856F81 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 5351D50C0B2D34DA00F86B96 /* WiiRemote.m */;
+		name = "WiiRemote.m: 545";
+		rLen = 0;
+		rLoc = 13243;
+		rType = 0;
+		vrLen = 0;
+		vrLoc = 0;
+	};
+	532D194B0B45875300856F81 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 5351D50C0B2D34DA00F86B96 /* WiiRemote.m */;
+		name = "WiiRemote.m: 545";
+		rLen = 0;
+		rLoc = 13243;
+		rType = 0;
+		vrLen = 803;
+		vrLoc = 12650;
+	};
+	532D19520B45875300856F81 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 5351D50C0B2D34DA00F86B96 /* WiiRemote.m */;
+		name = "WiiRemote.m: 545";
+		rLen = 0;
+		rLoc = 13243;
+		rType = 0;
+		vrLen = 1488;
+		vrLoc = 14371;
+	};
+	532D19530B45875300856F81 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 5351D50B0B2D34DA00F86B96 /* WiiRemote.h */;
+		name = "WiiRemote.h: cButtonData";
+		rLen = 0;
+		rLoc = 2927;
+		rType = 0;
+		vrLen = 1135;
+		vrLoc = 441;
+	};
+	532D19560B4587DB00856F81 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 5351D50C0B2D34DA00F86B96 /* WiiRemote.m */;
+		name = "WiiRemote.m: 545";
+		rLen = 0;
+		rLoc = 13243;
+		rType = 0;
+		vrLen = 0;
+		vrLoc = 0;
+	};
+	532D19570B4587DB00856F81 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 5351D50C0B2D34DA00F86B96 /* WiiRemote.m */;
+		name = "WiiRemote.m: 545";
+		rLen = 0;
+		rLoc = 13243;
+		rType = 0;
+		vrLen = 803;
+		vrLoc = 12650;
+	};
+	532D19580B4587DB00856F81 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 5351D50C0B2D34DA00F86B96 /* WiiRemote.m */;
+		name = "WiiRemote.m: 613";
+		rLen = 0;
+		rLoc = 14830;
+		rType = 0;
+		vrLen = 1505;
+		vrLoc = 14374;
+	};
+	532D19590B4587DB00856F81 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 5351D50B0B2D34DA00F86B96 /* WiiRemote.h */;
+		name = "WiiRemote.h: cButtonData";
+		rLen = 0;
+		rLoc = 2927;
+		rType = 0;
+		vrLen = 1121;
+		vrLoc = 735;
+	};
+	532D195A0B4587DB00856F81 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 5351D50C0B2D34DA00F86B96 /* WiiRemote.m */;
+		name = "WiiRemote.m: 627";
+		rLen = 0;
+		rLoc = 15851;
+		rType = 0;
+		vrLen = 1540;
+		vrLoc = 14371;
+	};
+	532D195B0B4587DB00856F81 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 5351D50B0B2D34DA00F86B96 /* WiiRemote.h */;
+		name = "WiiRemote.h: cButtonData";
+		rLen = 0;
+		rLoc = 2927;
+		rType = 0;
+		vrLen = 1121;
+		vrLoc = 735;
+	};
+	532D195C0B4587DB00856F81 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 5351D50C0B2D34DA00F86B96 /* WiiRemote.m */;
+		name = "WiiRemote.m: 613";
+		rLen = 0;
+		rLoc = 14830;
+		rType = 0;
+		vrLen = 1505;
+		vrLoc = 14374;
+	};
+	532D195D0B4587DB00856F81 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 5351D50B0B2D34DA00F86B96 /* WiiRemote.h */;
+		name = "WiiRemote.h: nStickY";
+		rLen = 0;
+		rLoc = 2630;
+		rType = 0;
+		vrLen = 1797;
+		vrLoc = 1988;
+	};
+	532D195E0B4587DB00856F81 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 5351D50B0B2D34DA00F86B96 /* WiiRemote.h */;
+		name = "WiiRemote.h: cButtonData";
+		rLen = 0;
+		rLoc = 2927;
+		rType = 0;
+		vrLen = 1135;
+		vrLoc = 441;
+	};
+	532D19610B4587F900856F81 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 5351D50C0B2D34DA00F86B96 /* WiiRemote.m */;
+		name = "WiiRemote.m: 545";
+		rLen = 0;
+		rLoc = 13243;
+		rType = 0;
+		vrLen = 0;
+		vrLoc = 0;
+	};
+	532D19620B4587F900856F81 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 5351D50C0B2D34DA00F86B96 /* WiiRemote.m */;
+		name = "WiiRemote.m: 545";
+		rLen = 0;
+		rLoc = 13243;
+		rType = 0;
+		vrLen = 803;
+		vrLoc = 12650;
+	};
+	532D19630B4587F900856F81 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 5351D50B0B2D34DA00F86B96 /* WiiRemote.h */;
+		name = "WiiRemote.h: nStickY";
+		rLen = 0;
+		rLoc = 2630;
+		rType = 0;
+		vrLen = 1797;
+		vrLoc = 1988;
+	};
+	532D19640B4587F900856F81 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 5351D50B0B2D34DA00F86B96 /* WiiRemote.h */;
+		name = "WiiRemote.h: nStickY";
+		rLen = 0;
+		rLoc = 2630;
+		rType = 0;
+		vrLen = 1797;
+		vrLoc = 1988;
+	};
+	532D19650B4587F900856F81 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 5351D50C0B2D34DA00F86B96 /* WiiRemote.m */;
+		name = "WiiRemote.m: 627";
+		rLen = 0;
+		rLoc = 15879;
+		rType = 0;
+		vrLen = 1507;
+		vrLoc = 14374;
+	};
+	532D19660B4587F900856F81 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 5351D50B0B2D34DA00F86B96 /* WiiRemote.h */;
+		name = "WiiRemote.h: cButtonData";
+		rLen = 0;
+		rLoc = 2927;
+		rType = 0;
+		vrLen = 1135;
+		vrLoc = 441;
+	};
+	532D19690B45886A00856F81 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 5351D50C0B2D34DA00F86B96 /* WiiRemote.m */;
+		name = "WiiRemote.m: 545";
+		rLen = 0;
+		rLoc = 13243;
+		rType = 0;
+		vrLen = 0;
+		vrLoc = 0;
+	};
+	532D196A0B45886A00856F81 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 5351D50C0B2D34DA00F86B96 /* WiiRemote.m */;
+		name = "WiiRemote.m: 545";
+		rLen = 0;
+		rLoc = 13243;
+		rType = 0;
+		vrLen = 803;
+		vrLoc = 12650;
+	};
+	532D196B0B45886A00856F81 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 5351D50B0B2D34DA00F86B96 /* WiiRemote.h */;
+		name = "WiiRemote.h: address";
+		rLen = 0;
+		rLoc = 2927;
+		rType = 0;
+		vrLen = 1746;
+		vrLoc = 2058;
+	};
+	532D196C0B45886A00856F81 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 5351D50C0B2D34DA00F86B96 /* WiiRemote.m */;
+		name = "WiiRemote.m: 627";
+		rLen = 0;
+		rLoc = 15879;
+		rType = 0;
+		vrLen = 1507;
+		vrLoc = 14374;
+	};
+	532D196D0B45886A00856F81 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 5351D50C0B2D34DA00F86B96 /* WiiRemote.m */;
+		name = "WiiRemote.m: 627";
+		rLen = 0;
+		rLoc = 15879;
+		rType = 0;
+		vrLen = 1507;
+		vrLoc = 14374;
+	};
+	532D196E0B45886A00856F81 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 5351D50B0B2D34DA00F86B96 /* WiiRemote.h */;
+		name = "WiiRemote.h: address";
+		rLen = 0;
+		rLoc = 2927;
+		rType = 0;
+		vrLen = 1746;
+		vrLoc = 2058;
+	};
+	532D196F0B45886A00856F81 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 5351D50C0B2D34DA00F86B96 /* WiiRemote.m */;
+		name = "WiiRemote.m: 623";
+		rLen = 0;
+		rLoc = 15578;
+		rType = 0;
+		vrLen = 1473;
+		vrLoc = 14374;
+	};
+	532D19700B45886A00856F81 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 5351D50B0B2D34DA00F86B96 /* WiiRemote.h */;
+		name = "WiiRemote.h: address";
+		rLen = 0;
+		rLoc = 2927;
+		rType = 0;
+		vrLen = 1135;
+		vrLoc = 441;
+	};
+	532D19750B458D6400856F81 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 5351D50C0B2D34DA00F86B96 /* WiiRemote.m */;
+		name = "WiiRemote.m: 545";
+		rLen = 0;
+		rLoc = 13243;
+		rType = 0;
+		vrLen = 0;
+		vrLoc = 0;
+	};
+	532D19760B458D6400856F81 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 5351D50C0B2D34DA00F86B96 /* WiiRemote.m */;
+		name = "WiiRemote.m: 545";
+		rLen = 0;
+		rLoc = 13243;
+		rType = 0;
+		vrLen = 803;
+		vrLoc = 12650;
+	};
+	532D19770B458D6400856F81 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 5351D50C0B2D34DA00F86B96 /* WiiRemote.m */;
+		name = "WiiRemote.m: 622";
+		rLen = 0;
+		rLoc = 15380;
+		rType = 0;
+		vrLen = 1699;
+		vrLoc = 14374;
+	};
+	532D19780B458D6400856F81 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 5351D50B0B2D34DA00F86B96 /* WiiRemote.h */;
+		name = "WiiRemote.h: address";
+		rLen = 0;
+		rLoc = 2927;
+		rType = 0;
+		vrLen = 1135;
+		vrLoc = 441;
+	};
+	532D197B0B458DC100856F81 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 5351D50C0B2D34DA00F86B96 /* WiiRemote.m */;
+		name = "WiiRemote.m: 545";
+		rLen = 0;
+		rLoc = 13243;
+		rType = 0;
+		vrLen = 0;
+		vrLoc = 0;
+	};
+	532D197C0B458DC100856F81 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 5351D50C0B2D34DA00F86B96 /* WiiRemote.m */;
+		name = "WiiRemote.m: 545";
+		rLen = 0;
+		rLoc = 13243;
+		rType = 0;
+		vrLen = 803;
+		vrLoc = 12650;
+	};
+	532D197D0B458DC100856F81 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 5351D50C0B2D34DA00F86B96 /* WiiRemote.m */;
+		name = "WiiRemote.m: 622";
+		rLen = 0;
+		rLoc = 15380;
+		rType = 0;
+		vrLen = 1705;
+		vrLoc = 14331;
+	};
+	532D197E0B458DC100856F81 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 5351D50B0B2D34DA00F86B96 /* WiiRemote.h */;
+		name = "WiiRemote.h: address";
+		rLen = 0;
+		rLoc = 2927;
+		rType = 0;
+		vrLen = 1135;
+		vrLoc = 441;
+	};
+	532D19810B458E3F00856F81 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 5351D50C0B2D34DA00F86B96 /* WiiRemote.m */;
+		name = "WiiRemote.m: 545";
+		rLen = 0;
+		rLoc = 13243;
+		rType = 0;
+		vrLen = 0;
+		vrLoc = 0;
+	};
+	532D19820B458E3F00856F81 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 5351D50C0B2D34DA00F86B96 /* WiiRemote.m */;
+		name = "WiiRemote.m: 545";
+		rLen = 0;
+		rLoc = 13243;
+		rType = 0;
+		vrLen = 803;
+		vrLoc = 12650;
+	};
+	532D19830B458E3F00856F81 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 5351D50C0B2D34DA00F86B96 /* WiiRemote.m */;
+		name = "WiiRemote.m: 635";
+		rLen = 0;
+		rLoc = 16179;
+		rType = 0;
+		vrLen = 1797;
+		vrLoc = 14331;
+	};
+	532D19840B458E3F00856F81 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 5351D50B0B2D34DA00F86B96 /* WiiRemote.h */;
+		name = "WiiRemote.h: address";
+		rLen = 0;
+		rLoc = 2927;
+		rType = 0;
+		vrLen = 1135;
+		vrLoc = 441;
+	};
+	532D19890B4596A800856F81 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 5351D50C0B2D34DA00F86B96 /* WiiRemote.m */;
+		name = "WiiRemote.m: 545";
+		rLen = 0;
+		rLoc = 13243;
+		rType = 0;
+		vrLen = 0;
+		vrLoc = 0;
+	};
+	532D198A0B4596A800856F81 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 5351D50C0B2D34DA00F86B96 /* WiiRemote.m */;
+		name = "WiiRemote.m: 545";
+		rLen = 0;
+		rLoc = 13243;
+		rType = 0;
+		vrLen = 803;
+		vrLoc = 12650;
+	};
+	532D198B0B4596A800856F81 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 5351D50B0B2D34DA00F86B96 /* WiiRemote.h */;
+		name = "WiiRemote.h: cAnalogR";
+		rLen = 0;
+		rLoc = 2927;
+		rType = 0;
+		vrLen = 1623;
+		vrLoc = 2058;
+	};
+	532D198C0B4596A800856F81 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 5351D50C0B2D34DA00F86B96 /* WiiRemote.m */;
+		name = "WiiRemote.m: 635";
+		rLen = 0;
+		rLoc = 16179;
+		rType = 0;
+		vrLen = 1862;
+		vrLoc = 14434;
+	};
+	532D198D0B4596A800856F81 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 5351D50C0B2D34DA00F86B96 /* WiiRemote.m */;
+		name = "WiiRemote.m: 635";
+		rLen = 0;
+		rLoc = 16179;
+		rType = 0;
+		vrLen = 1862;
+		vrLoc = 14434;
+	};
+	532D198E0B4596A800856F81 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 5351D50B0B2D34DA00F86B96 /* WiiRemote.h */;
+		name = "WiiRemote.h: cAnalogR";
+		rLen = 0;
+		rLoc = 2927;
+		rType = 0;
+		vrLen = 1623;
+		vrLoc = 2058;
+	};
+	532D198F0B4596A800856F81 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 5351D50C0B2D34DA00F86B96 /* WiiRemote.m */;
+		name = "WiiRemote.m: 627";
+		rLen = 0;
+		rLoc = 15577;
+		rType = 0;
+		vrLen = 1923;
+		vrLoc = 14461;
+	};
+	532D19900B4596A800856F81 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 5351D50B0B2D34DA00F86B96 /* WiiRemote.h */;
+		name = "WiiRemote.h: cAnalogR";
+		rLen = 0;
+		rLoc = 2927;
+		rType = 0;
+		vrLen = 1135;
+		vrLoc = 441;
+	};
+	532D19970B459B9F00856F81 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 5351D50C0B2D34DA00F86B96 /* WiiRemote.m */;
+		name = "WiiRemote.m: 545";
+		rLen = 0;
+		rLoc = 13243;
+		rType = 0;
+		vrLen = 0;
+		vrLoc = 0;
+	};
+	532D19980B459B9F00856F81 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 5351D50C0B2D34DA00F86B96 /* WiiRemote.m */;
+		name = "WiiRemote.m: 545";
+		rLen = 0;
+		rLoc = 13243;
+		rType = 0;
+		vrLen = 803;
+		vrLoc = 12650;
+	};
+	532D19990B459B9F00856F81 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 5351D50B0B2D34DA00F86B96 /* WiiRemote.h */;
+		name = "WiiRemote.h: analogButtonChanged:amount:";
+		rLen = 0;
+		rLoc = 4367;
+		rType = 0;
+		vrLen = 1959;
+		vrLoc = 2676;
+	};
+	532D199A0B459B9F00856F81 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 5351D50C0B2D34DA00F86B96 /* WiiRemote.m */;
+		name = "WiiRemote.m: 639";
+		rLen = 0;
+		rLoc = 16355;
+		rType = 0;
+		vrLen = 1923;
+		vrLoc = 14461;
+	};
+	532D199B0B459B9F00856F81 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 5351D50C0B2D34DA00F86B96 /* WiiRemote.m */;
+		name = "WiiRemote.m: 627";
+		rLen = 0;
+		rLoc = 15577;
+		rType = 0;
+		vrLen = 1923;
+		vrLoc = 14461;
+	};
+	532D199C0B459B9F00856F81 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 5351D50B0B2D34DA00F86B96 /* WiiRemote.h */;
+		name = "- (void) analogButtonChanged:(WiiAnalogButtonType)type amount:(unsigned)press;";
+		rLen = 73;
+		rLoc = 4334;
+		rType = 0;
+		vrLen = 1987;
+		vrLoc = 2654;
+	};
+	532D199D0B459B9F00856F81 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 5351D50C0B2D34DA00F86B96 /* WiiRemote.m */;
+		name = "WiiRemote.m: 639";
+		rLen = 0;
+		rLoc = 16355;
+		rType = 0;
+		vrLen = 1923;
+		vrLoc = 14461;
+	};
+	532D199E0B459B9F00856F81 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 5351D50B0B2D34DA00F86B96 /* WiiRemote.h */;
+		name = "WiiRemote.h: analogButtonChanged:amount:";
+		rLen = 0;
+		rLoc = 4367;
+		rType = 0;
+		vrLen = 1959;
+		vrLoc = 2676;
+	};
+	532D199F0B459B9F00856F81 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 5351D50C0B2D34DA00F86B96 /* WiiRemote.m */;
+		name = "WiiRemote.m: 642";
+		rLen = 0;
+		rLoc = 16355;
+		rType = 0;
+		vrLen = 1995;
+		vrLoc = 14461;
+	};
+	532D19A00B459B9F00856F81 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 5351D50B0B2D34DA00F86B96 /* WiiRemote.h */;
+		name = "WiiRemote.h: cAnalogR";
+		rLen = 0;
+		rLoc = 2927;
+		rType = 0;
+		vrLen = 1135;
+		vrLoc = 441;
+	};
+	5351D4BF0B2D1C2600F86B96 /* XCBreakpointsBucket */ = {
+		isa = XCBreakpointsBucket;
+		name = WiiRemoteFramework;
+		objects = (
+		);
+	};
+	5351D50B0B2D34DA00F86B96 /* WiiRemote.h */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {982, 2492}}";
+			sepNavSelRange = "{2927, 0}";
+			sepNavVisRect = "{{0, 311}, {982, 764}}";
+			sepNavWindowFrame = "{{312, 0}, {1027, 878}}";
+		};
+	};
+	5351D50C0B2D34DA00F86B96 /* WiiRemote.m */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {982, 16296}}";
+			sepNavSelRange = "{16355, 0}";
+			sepNavVisRect = "{{0, 8392}, {982, 764}}";
+			sepNavWindowFrame = "{{485, 300}, {1027, 878}}";
+		};
+	};
+	5351D50D0B2D34DA00F86B96 /* WiiRemoteDiscovery.h */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {837, 764}}";
+			sepNavSelRange = "{0, 0}";
+			sepNavVisRect = "{{0, 0}, {837, 764}}";
+			sepNavWindowFrame = "{{61, 253}, {876, 878}}";
+		};
+	};
+	5351D50E0B2D34DA00F86B96 /* WiiRemoteDiscovery.m */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {982, 2086}}";
+			sepNavSelRange = "{314, 0}";
+			sepNavVisRect = "{{0, 129}, {982, 764}}";
+			sepNavWindowFrame = "{{212, 0}, {1027, 878}}";
+		};
+	};
+	5351D5400B2D671C00F86B96 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 5351D50B0B2D34DA00F86B96 /* WiiRemote.h */;
+		name = "WiiRemote.h: 1";
+		rLen = 0;
+		rLoc = 0;
+		rType = 0;
+		vrLen = 311;
+		vrLoc = 0;
+	};
+	5351D5F50B2D92AE00F86B96 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 5351D50E0B2D34DA00F86B96 /* WiiRemoteDiscovery.m */;
+		name = "WiiRemoteDiscovery.m: 1";
+		rLen = 0;
+		rLoc = 0;
+		rType = 0;
+		vrLen = 315;
+		vrLoc = 0;
+	};
+	53552F0B0B4563C500B077F0 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 5351D50C0B2D34DA00F86B96 /* WiiRemote.m */;
+		name = "WiiRemote.m: 185";
+		rLen = 0;
+		rLoc = 4167;
+		rType = 0;
+		vrLen = 0;
+		vrLoc = 0;
+	};
+	53552F0F0B4563C500B077F0 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		comments = "error: parse error before '{' token";
+		fRef = 5351D50C0B2D34DA00F86B96 /* WiiRemote.m */;
+		rLen = 1;
+		rLoc = 544;
+		rType = 1;
+	};
+	53552F100B4563C500B077F0 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 5351D50C0B2D34DA00F86B96 /* WiiRemote.m */;
+		name = "WiiRemote.m: 545";
+		rLen = 0;
+		rLoc = 13243;
+		rType = 0;
+		vrLen = 803;
+		vrLoc = 12650;
+	};
+	53552F170B4563C500B077F0 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 5351D50C0B2D34DA00F86B96 /* WiiRemote.m */;
+		name = "- (void)sendWiiClassicControllerButtonEvent:(UInt16)data";
+		rLen = 56;
+		rLoc = 23814;
+		rType = 0;
+		vrLen = 939;
+		vrLoc = 22529;
+	};
+	53552F180B4563C500B077F0 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 5351D50B0B2D34DA00F86B96 /* WiiRemote.h */;
+		name = "WiiRemote.h: cButtonData";
+		rLen = 0;
+		rLoc = 2927;
+		rType = 0;
+		vrLen = 1145;
+		vrLoc = 804;
+	};
+	53552F190B4563C500B077F0 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 5351D50C0B2D34DA00F86B96 /* WiiRemote.m */;
+		name = "- (void)sendWiiClassicControllerButtonEvent:(UInt16)data";
+		rLen = 56;
+		rLoc = 23814;
+		rType = 0;
+		vrLen = 1421;
+		vrLoc = 22529;
+	};
+	53552F1A0B4563C500B077F0 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 5351D50B0B2D34DA00F86B96 /* WiiRemote.h */;
+		name = "WiiRemote.h: cButtonData";
+		rLen = 0;
+		rLoc = 2927;
+		rType = 0;
+		vrLen = 1145;
+		vrLoc = 804;
+	};
+	53552F1B0B4563C500B077F0 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 5351D50C0B2D34DA00F86B96 /* WiiRemote.m */;
+		name = "- (void)sendWiiClassicControllerButtonEvent:(UInt16)data";
+		rLen = 56;
+		rLoc = 23814;
+		rType = 0;
+		vrLen = 939;
+		vrLoc = 22529;
+	};
+	53552F1C0B4563C500B077F0 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 5351D50B0B2D34DA00F86B96 /* WiiRemote.h */;
+		name = "WiiRemote.h: cButtonData";
+		rLen = 0;
+		rLoc = 2927;
+		rType = 0;
+		vrLen = 521;
+		vrLoc = 802;
+	};
+	53552F1E0B4563C500B077F0 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 5351D50C0B2D34DA00F86B96 /* WiiRemote.m */;
+		name = "- (void)sendWiiClassicControllerButtonEvent:(UInt16)data";
+		rLen = 56;
+		rLoc = 23814;
+		rType = 0;
+		vrLen = 939;
+		vrLoc = 22529;
+	};
+	53552F1F0B4563C500B077F0 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 5351D50C0B2D34DA00F86B96 /* WiiRemote.m */;
+		name = "WiiRemote.m: 1097";
+		rLen = 0;
+		rLoc = 31448;
+		rType = 0;
+		vrLen = 886;
+		vrLoc = 29881;
+	};
+	53CC5D4C0B3AA56B00F1C7B7 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 5351D50C0B2D34DA00F86B96 /* WiiRemote.m */;
+		name = "WiiRemote.m: 61";
+		rLen = 0;
+		rLoc = 1773;
+		rType = 0;
+		vrLen = 553;
+		vrLoc = 881;
+	};
+	53F416250B43B6BE0059A122 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 5351D50C0B2D34DA00F86B96 /* WiiRemote.m */;
+		name = "WiiRemote.m: 185";
+		rLen = 0;
+		rLoc = 4167;
+		rType = 0;
+		vrLen = 0;
+		vrLoc = 0;
+	};
+	53FA56200B3B16E1003B73F3 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 5351D50B0B2D34DA00F86B96 /* WiiRemote.h */;
+		name = "WiiRemote.h: setNunchukEnabled:";
+		rLen = 0;
+		rLoc = 3543;
+		rType = 0;
+		vrLen = 430;
+		vrLoc = 892;
+	};
+	8DC2EF4F0486A6940098B216 /* WiiRemoteFramework */ = {
+		activeExec = 0;
+	};
+	8DC2EF5A0486A6940098B216 /* Info.plist */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {668, 764}}";
+			sepNavSelRange = "{719, 0}";
+			sepNavVisRect = "{{0, 0}, {668, 764}}";
+			sepNavWindowFrame = "{{15, 0}, {713, 878}}";
+		};
+	};
+}
