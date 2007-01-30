@@ -2,6 +2,7 @@
 
 #import <Cocoa/Cocoa.h>
 #import <ApplicationServices/ApplicationServices.h>
+#import <QuartzComposer/QCView.h>
 #import <WiiRemote/WiiRemote.h>
 #import <WiiRemote/WiiRemoteDiscovery.h>
 #import "GraphView.h"
@@ -47,8 +48,24 @@
 	IBOutlet NSButton* twoButton;
 	IBOutlet NSPopUpButton* mouseMode;
 	
+	IBOutlet NSView* batteryLevelView;
 	IBOutlet NSLevelIndicator* batteryLevel;
+	
+	IBOutlet QCView* wiimoteQCView;
+	IBOutlet QCView* joystickQCView;
+
 	IBOutlet NSTextField* newNameField;
+	
+	IBOutlet NSTextField* WiimoteX;
+	IBOutlet NSTextField* WiimoteY;
+	IBOutlet NSTextField* WiimoteZ;
+	
+	IBOutlet NSTextField* NunchukX;
+	IBOutlet NSTextField* NunchukY;
+	IBOutlet NSTextField* NunchukZ;
+	
+	IBOutlet NSTextField* joystickX;
+	IBOutlet NSTextField* joystickY;
 	
 	WiiRemoteDiscovery *discovery;
 	WiiRemote* wii;
@@ -84,4 +101,5 @@
 - (IBAction)enterSaveName:(id)sender;
 - (IBAction)cancelEnterSaveName:(id)sender;
 
+- (void) sendModifierKeys:(id)map isPressed:(BOOL)isPressed;
 @end

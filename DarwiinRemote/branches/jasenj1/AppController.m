@@ -19,6 +19,12 @@
 {
 
 	[wii setLEDEnabled1:[led1 state] enabled2:[led2 state] enabled3:[led3 state] enabled4:[led4 state]];
+
+	[wiimoteQCView setValue:[NSNumber numberWithBool:[led1 state] ] forInputKey:[NSString stringWithString:@"LED_1"]];
+	[wiimoteQCView setValue:[NSNumber numberWithBool:[led2 state] ] forInputKey:[NSString stringWithString:@"LED_2"]];
+	[wiimoteQCView setValue:[NSNumber numberWithBool:[led3 state] ] forInputKey:[NSString stringWithString:@"LED_3"]];
+	[wiimoteQCView setValue:[NSNumber numberWithBool:[led4 state] ] forInputKey:[NSString stringWithString:@"LED_4"]];
+
 }
 
 /**
@@ -102,8 +108,19 @@
 
 -(void)awakeFromNib{
 
+	[[NSNotificationCenter defaultCenter] addObserver:self
+											selector:@selector(expansionPortChanged:)
+											name:@"WiiRemoteExpansionPortChangedNotification"
+											object:nil];
+
 	InitAscii2KeyCodeTable(&table);
 	
+	/**	
+		Interface Builder doesn't allow vertical level meters.
+		So the battery level is put in an NSView and then the view is rotated.
+	**/
+	[batteryLevelView setFrameRotation: 90.0];
+
 	
 	mouseEventMode = 0;
 	discovery = [[WiiRemoteDiscovery alloc] init];
@@ -161,33 +178,26 @@
 	
 	
 	[self setupInitialKeyMappings];
-	
-
-	
-	[[NSNotificationCenter defaultCenter] addObserver:self
-														selector:@selector(expansionPortChanged:)
-														name:@"WiiRemoteExpansionPortChangedNotification"
-														object:nil];
-	
-	
-
-
+		
 }
 
 - (void)expansionPortChanged:(NSNotification *)nc{
+
+	[textView setString:[NSString stringWithFormat:@"%@\n===== Expansion port status changed. =====", [textView string]]];
+	
 	WiiRemote* tmpWii = (WiiRemote*)[nc object];
+	
 	if (![[tmpWii address] isEqualToString:[wii address]]){
 		return;
 	}
 	
 	if ([tmpWii isExpansionPortAttached]){
-		[tmpWii setExpansionPortEnabled:YES];
-
+		[wii setExpansionPortEnabled:YES];
+		NSLog(@"** Expansion Port Enabled");
 	}else{
-		[tmpWii setExpansionPortEnabled:NO];
-
-	}
-	
+		[wii setExpansionPortEnabled:NO];
+		NSLog(@"** Expansion Port Disabled");
+	}	
 }
 
 
@@ -197,7 +207,10 @@
 	wii = wiimote;
 	[wiimote setDelegate:self];
 	[textView setString:[NSString stringWithFormat:@"%@\n===== Connected to WiiRemote =====", [textView string]]];
+	
 	[wiimote setLEDEnabled1:YES enabled2:NO enabled3:NO enabled4:NO];
+	[wiimoteQCView setValue:[NSNumber numberWithBool:[led1 state] ] forInputKey:[NSString stringWithString:@"LED_1"]];
+
 	[wiimote setMotionSensorEnabled:YES];
 //	[wiimote setIRSensorEnabled:YES];
 	[discovery stop];
@@ -239,7 +252,6 @@
 		[graphView setIRPointX:px Y:py];
 
 	}
-	
 	
 	int dispWidth = CGDisplayPixelsWide(kCGDirectMainDisplay);
 	int dispHeight = CGDisplayPixelsHigh(kCGDirectMainDisplay);
@@ -331,51 +343,64 @@
 	if (type == WiiRemoteAButton){
 		map = [mappings valueForKeyPath:@"wiimote.a"];
 		[aButton setEnabled:isPressed];
+		[wiimoteQCView setValue:[NSNumber numberWithBool: isPressed] forInputKey:[NSString stringWithString:@"A_Button"]];
 		
 	}else if (type == WiiRemoteBButton){
 		map = [mappings valueForKeyPath:@"wiimote.b"];
 		[bButton setEnabled:isPressed];
+		[wiimoteQCView setValue:[NSNumber numberWithBool: isPressed] forInputKey:[NSString stringWithString:@"B_Button"]];
 
 	}else if (type == WiiRemoteUpButton){
 		map = [mappings valueForKeyPath:@"wiimote.up"];
 		[upButton setEnabled:isPressed];
+		[wiimoteQCView setValue:[NSNumber numberWithBool: isPressed] forInputKey:[NSString stringWithString:@"Up"]];
 
 	}else if (type == WiiRemoteDownButton){
 		map = [mappings valueForKeyPath:@"wiimote.down"];
 		[downButton setEnabled:isPressed];
+		[wiimoteQCView setValue:[NSNumber numberWithBool: isPressed] forInputKey:[NSString stringWithString:@"Down"]];
 
 	}else if (type == WiiRemoteLeftButton){
 		map = [mappings valueForKeyPath:@"wiimote.left"];
 		[leftButton setEnabled:isPressed];
+		[wiimoteQCView setValue:[NSNumber numberWithBool: isPressed] forInputKey:[NSString stringWithString:@"Left"]];
 
 	}else if (type == WiiRemoteRightButton){
 		map = [mappings valueForKeyPath:@"wiimote.right"];
 		[rightButton setEnabled:isPressed];
+		[wiimoteQCView setValue:[NSNumber numberWithBool: isPressed] forInputKey:[NSString stringWithString:@"Right"]];
 
 	}else if (type == WiiRemoteMinusButton){
 		map = [mappings valueForKeyPath:@"wiimote.minus"];
 		[minusButton setEnabled:isPressed];
+		[wiimoteQCView setValue:[NSNumber numberWithBool: isPressed] forInputKey:[NSString stringWithString:@"Minus"]];
 
 	}else if (type == WiiRemotePlusButton){
 		map = [mappings valueForKeyPath:@"wiimote.plus"];
 		[plusButton setEnabled:isPressed];
+		[wiimoteQCView setValue:[NSNumber numberWithBool: isPressed] forInputKey:[NSString stringWithString:@"Plus"]];
 
 	}else if (type == WiiRemoteHomeButton){
 		map = [mappings valueForKeyPath:@"wiimote.home"];
 		[homeButton setEnabled:isPressed];
+		[wiimoteQCView setValue:[NSNumber numberWithBool: isPressed] forInputKey:[NSString stringWithString:@"Home"]];
 
 	}else if (type == WiiRemoteOneButton){
 		map = [mappings valueForKeyPath:@"wiimote.one"];
 		[oneButton setEnabled:isPressed];
+		[wiimoteQCView setValue:[NSNumber numberWithBool: isPressed] forInputKey:[NSString stringWithString:@"One"]];
 
 	}else if (type == WiiRemoteTwoButton){
 		map = [mappings valueForKeyPath:@"wiimote.two"];
 		[twoButton setEnabled:isPressed];
+		[wiimoteQCView setValue:[NSNumber numberWithBool: isPressed] forInputKey:[NSString stringWithString:@"Two"]];
 
 	}else if (type == WiiNunchukCButton){
 		map = [mappings valueForKeyPath:@"nunchuk.c"];
+		NSLog(@"C Button");
 	}else if (type == WiiNunchukZButton){
 		map = [mappings valueForKeyPath:@"nunchuk.z"];
+		NSLog(@"Z Button");
 	}
 	
 	
@@ -720,7 +745,7 @@
 	
 }
 
-- (void) sendModifierKeys:(id)map isPressed:(BOOL)isPressed{
+- (void) sendModifierKeys:(id)map isPressed:(BOOL)isPressed {
 	if ([[map valueForKey:@"shift"] boolValue]){
 		[self sendKeyboardEvent:56 keyDown:isPressed];
 	}
@@ -739,9 +764,31 @@
 }
 
 
+/* 
+	My nunchuk reports joystick values from ~0x20 to ~0xE0 +/- ~5 in each axis.
+	There may be calibration that can/should be performed and other nunchuks may 
+	report different values and the scaling should be done using the calibrated
+	values.  See http://www.wiili.org/index.php/Nunchuk#Calibration_data for more
+	details.
+*/
 - (void) joyStickChanged:(WiiJoyStickType)type tiltX:(unsigned char)tiltX tiltY:(unsigned char)tiltY{
 	if (type == WiiNunchukJoyStick){
+		unsigned char max = 0xE0;
+		unsigned char center = 0x80;
 		
+		float shiftedX = (tiltX * 1.0) - (center * 1.0);
+		float shiftedY = (tiltY * 1.0) - (center * 1.0);
+		
+		float scaledX = (shiftedX * 1.0) / ((max - center) * 1.0);
+		float scaledY = (shiftedY * 1.0) / ((max - center) * 1.0);
+		
+		// NSLog(@"Joystick X = %f  Y= %f", scaledX, scaledY);
+		[joystickQCView setValue:[NSNumber numberWithFloat: scaledX] forInputKey:[NSString stringWithString:@"X_Position"]];
+		[joystickQCView setValue:[NSNumber numberWithFloat: scaledY] forInputKey:[NSString stringWithString:@"Y_Position"]];
+		
+		[joystickX setStringValue: [NSString stringWithFormat:@"%00X", tiltX]];		
+		[joystickY setStringValue: [NSString stringWithFormat:@"%00X", tiltY]];		
+				
 	}
 }
 
@@ -751,10 +798,18 @@
 	
 	if (type == WiiNunchukAccelerationSensor){
 		[graphView2 setData:accX y:accY z:accZ];
+		[NunchukX setStringValue: [NSString stringWithFormat:@"%00X", accX]];		
+		[NunchukY setStringValue: [NSString stringWithFormat:@"%00X", accY]];		
+		[NunchukZ setStringValue: [NSString stringWithFormat:@"%00X", accZ]];		
+		
 		return;
 	}
 	
 	[graphView setData:accX y:accY z:accZ];
+	[WiimoteX setStringValue: [NSString stringWithFormat:@"%00X", accX]];		
+	[WiimoteY setStringValue: [NSString stringWithFormat:@"%00X", accY]];		
+	[WiimoteZ setStringValue: [NSString stringWithFormat:@"%00X", accZ]];		
+
 	[batteryLevel setDoubleValue:(double)[wii batteryLevel]];
 	
 	
@@ -764,9 +819,6 @@
 	
 	if (mouseEventMode != 1)
 		return;
-	
-
-	
 	
 	id config = [mappingController selection];
 	if ([[config valueForKey:@"manualCalibration"] boolValue]){
