@@ -17,16 +17,26 @@
             CLASS = AppController; 
             LANGUAGE = ObjC; 
             OUTLETS = {
+                NunchukX = NSTextField; 
+                NunchukY = NSTextField; 
+                NunchukZ = NSTextField; 
+                WiimoteX = NSTextField; 
+                WiimoteY = NSTextField; 
+                WiimoteZ = NSTextField; 
                 aButton = NSButton; 
                 appDelegate = "KeyConfiguration_AppDelegate"; 
                 bButton = NSButton; 
                 batteryLevel = NSLevelIndicator; 
+                batteryLevelView = NSView; 
                 downButton = NSButton; 
                 drawer = NSDrawer; 
                 enterNameWindow = NSWindow; 
                 graphView = GraphView; 
                 graphView2 = GraphView; 
                 homeButton = NSButton; 
+                joystickQCView = QCView; 
+                joystickX = NSTextField; 
+                joystickY = NSTextField; 
                 led1 = NSButton; 
                 led2 = NSButton; 
                 led3 = NSButton; 
@@ -44,6 +54,7 @@
                 textView = NSTextView; 
                 twoButton = NSButton; 
                 upButton = NSButton; 
+                wiimoteQCView = QCView; 
             }; 
             SUPERCLASS = NSObject; 
         }, 
