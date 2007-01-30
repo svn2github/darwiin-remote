@@ -76,7 +76,10 @@ enum {
 	isIRSensorEnabled = NO;
 	isMotionSensorEnabled = NO;
 	isVibrationEnabled = NO;
+	
 	isExpansionPortEnabled = NO;
+	isExpansionPortAttached = NO;
+	expType = WiiExpNotAttached;
 	
 	return self;
 }
@@ -179,13 +182,14 @@ enum {
 	if (kIOReturnSuccess != ret)
 		[self closeConnection];
 	
+	// Get current status every 60 seconds.
 	statusTimer = [[NSTimer scheduledTimerWithTimeInterval:60 target:self selector:@selector(getCurrentStatus:) userInfo:nil repeats:YES] retain];
 	[self getCurrentStatus:nil];
 	
-	for(trycount = 0; trycount< 10; trycount++){
+//	for(trycount = 0; trycount< 10; trycount++){
 		[self readData:0x0010 length:16];
-		usleep(10000);
-	}
+//		usleep(10000);
+//	}
 	
 	return ret;
 }
@@ -228,8 +232,11 @@ enum {
 		usleep(10000);
 	}
 	
+	if (ret == kIOReturnNoDevice) {
+		[self disconnected: nil fromDevice:wiiDevice];
+	}
 	
-	
+	NSLog(@"IOReturn for command %00X = %i", buf[1], ret);
 	return ret;
 }
 
@@ -247,13 +254,7 @@ enum {
 	// these variables indicate a desire, and should be updated regardless of the sucess of sending the command
 	isMotionSensorEnabled = enabled;
 	
-	unsigned char cmd[] = {0x12, 0x02, 0x30};
-	if (isVibrationEnabled)	cmd[1] |= 0x01;
-	if (isMotionSensorEnabled)	cmd[2] |= 0x01;
-	if (isIRSensorEnabled)	cmd[2] |= 0x02;
-	if (isExpansionPortEnabled && isExpansionPortAttached) cmd[2] = 0x37;
-	
-	return [self sendCommand:cmd length:3];
+	return [self requestUpdates];
 }
 
 
@@ -284,28 +285,53 @@ enum {
 	return 	[self sendCommand:cmd length:2];
 }
 
--(IOReturn)setExpansionPortEnabled:(BOOL)enabled{
-	
+- (IOReturn)requestUpdates {
 
-
-	isExpansionPortEnabled = enabled;
-	if (!isExpansionPortAttached)
-		isExpansionPortEnabled = NO;
+	// Set the report type the Wiimote should send.
+	unsigned char cmd[] = {0x12, 0x02, 0x30}; // Just buttons.
 	
-	unsigned char cmd[] = {0x12, 0x02, 0x30};
 	if (isVibrationEnabled)	cmd[1] |= 0x01;
 	if (isMotionSensorEnabled)	cmd[2] |= 0x01;
 	if (isIRSensorEnabled)	cmd[2] |= 0x02;
-	if (isExpansionPortEnabled && isExpansionPortAttached) cmd[2] = 0x37;
+	if (isExpansionPortEnabled) cmd[2] = 0x37;
 	
-	[self sendCommand:cmd length:3];
+	return [self sendCommand:cmd length:3];
+
+}
+
+- (IOReturn)setExpansionPortEnabled:(BOOL)enabled{
 	
-	IOReturn ret = [self writeData:(darr){0x00} at:(unsigned long)0x04A40040 length:1];
+	IOReturn ret;
 	
-	if (ret == kIOReturnSuccess){
-		//get calbdata
-		[self readData:0x04A40020 length: 16];
+	if (enabled) {
+		NSLog(@"Enabling expansion port.");
+	} else {
+		NSLog(@"Disabling expansion port.");	
 	}
+	
+	isExpansionPortEnabled = enabled;
+
+	if (!isExpansionPortAttached) {
+		isExpansionPortEnabled = NO;
+	} else {
+			
+		ret = [self writeData:(darr){0x00} at:(unsigned long)0x04A40040 length:1]; // Init expansion device.
+		
+		if (ret == kIOReturnSuccess){
+			// get calib data
+			ret = [self readData:0x04A40020 length: 16];
+		}
+				
+	}
+
+	if (isExpansionPortEnabled) {
+		NSLog(@"Expansion port enabled.");
+	} else {
+		NSLog(@"Expansion port disabled.");
+	}
+	
+	ret = [self requestUpdates];
+
 	return ret;
 }
 
@@ -366,17 +392,18 @@ enum {
 	unsigned long addr = address;
 
 	int i;
-	for(i=0 ; i<length ; i++) {
+	for(i=0 ; i < length ; i++) {
 		cmd[i+6] = data[i];
 	}
-	for(; i<16; i++) {
+	for(; i < 16; i++) {
 		cmd[i+6]= 0;
 	}
+	
 	cmd[0] = 0x16;
-	cmd[1] = (addr>>24)&0xFF;
-	cmd[2] = (addr>>16)&0xFF;
-	cmd[3] = (addr>> 8)&0xFF;
-	cmd[4] = (addr>> 0)&0xFF;
+	cmd[1] = (addr >> 24) & 0xFF;
+	cmd[2] = (addr >> 16) & 0xFF;
+	cmd[3] = (addr >>  8) & 0xFF;
+	cmd[4] = (addr >>  0) & 0xFF;
 	cmd[5] = length;
 	
 	// and of course the vibration flag, as usual
@@ -400,17 +427,15 @@ enum {
 	unsigned short len = length;
 	
 	cmd[0] = 0x17;
-	cmd[1] = (addr>>24)&0xFF;
-	cmd[2] = (addr>>16)&0xFF;
-	cmd[3] = (addr>> 8)&0xFF;
-	cmd[4] = (addr>> 0)&0xFF;
+	cmd[1] = (addr >> 24) & 0xFF;
+	cmd[2] = (addr >> 16) & 0xFF;
+	cmd[3] = (addr >>  8) & 0xFF;
+	cmd[4] = (addr >>  0) & 0xFF;
 	
-	cmd[5] = (len >> 8)&0xFF;
-	cmd[6] = (len >> 0)&0xFF;
-	
+	cmd[5] = (len >> 8) & 0xFF;
+	cmd[6] = (len >> 0) & 0xFF;
 	
 	if (isVibrationEnabled)	cmd[1] |= 0x01;
-	
 	
 	return [self sendCommand:cmd length:7];
 }
@@ -419,8 +444,6 @@ enum {
 - (IOReturn)closeConnection{
 	IOReturn ret = 0;
 	int trycount = 0;
-	
-	
 	
 	if (disconnectNotification!=nil){
 		[disconnectNotification unregister];
@@ -473,13 +496,9 @@ enum {
 	return ret;
 }
 
+- (void) handleRAMData:(unsigned char *)dp length:(size_t)dataLength {
+	// reading ram data
 
-// thanks to Ian!
--(void)l2capChannelData:(IOBluetoothL2CAPChannel*)l2capChannel data:(void *)dataPointer length:(size_t)dataLength{
-	if (!wiiDevice)
-		return;
-	unsigned char* dp = (unsigned char*)dataPointer;
-	
 	/**
 	if (dp[1] == 0x21){
 		int i;
@@ -490,89 +509,110 @@ enum {
 		}
 		printf("\n");
 	}**/
-	 
-	
-	//reading ram data
-	if (dp[1] == 0x21){
-		 
-		//specify attached expasion device
-		if (dataLength >=22 & dp[5] == 0x00 && dp[6] == 0xF0){
-			if (dp[21] == 0x00){
-				if (expType != WiiNunchuk){
-					expType = WiiNunchuk;
-					[[NSNotificationCenter defaultCenter] postNotificationName:@"WiiRemoteExpansionPortChangedNotification" object:self];
-				}
-			}else if (dp[21] == 0x01){
-				if (expType != WiiClassicController){
-					expType = WiiClassicController;
-					[[NSNotificationCenter defaultCenter] postNotificationName:@"WiiRemoteExpansionPortChangedNotification" object:self];					
-				}
-			}else{
-				expType = WiiExpNotAttached;
-			}
-		}
-		
-		
-		//wii calibration data
-		if (dataLength >= 20 && dp[5] == 0x00 && dp[6] == 0x10){
-			wiiCalibData.accX_zero = dp[13];
-			wiiCalibData.accY_zero = dp[14];
-			wiiCalibData.accZ_zero = dp[15];
-			
-			wiiCalibData.accX_1g = dp[17];
-			wiiCalibData.accY_1g = dp[18];
-			wiiCalibData.accZ_1g = dp[19];
-		}
-				  
-		
-		if (dataLength >= 22 && dp[5] == 0x00 && dp[6] == 0x20){
-			if (expType == WiiNunchuk){										//nunchuk calibration data
-				nunchukCalibData.accX_zero = (dp[7] ^ 0x17) + 0x17;
-				nunchukCalibData.accY_zero = (dp[8] ^ 0x17) + 0x17;
-				nunchukCalibData.accZ_zero = (dp[9] ^ 0x17) + 0x17;
-				
-				nunchukCalibData.accX_1g = (dp[11] ^ 0x17) + 0x17;
-				nunchukCalibData.accY_1g = (dp[12] ^ 0x17) + 0x17;
-				nunchukCalibData.accZ_1g = (dp[13] ^ 0x17) + 0x17;
-				
-				nunchukJoyStickCalibData.x_max = (dp[15] ^ 0x17) + 0x17;
-				nunchukJoyStickCalibData.x_min = (dp[16] ^ 0x17) + 0x17;
-				nunchukJoyStickCalibData.x_center = (dp[17] ^ 0x17) + 0x17;
-				nunchukJoyStickCalibData.y_max = (dp[19] ^ 0x17) + 0x17;
-				nunchukJoyStickCalibData.y_min = (dp[20] ^ 0x17) + 0x17;
-				nunchukJoyStickCalibData.y_center = (dp[21] ^ 0x17) + 0x17;	
-				
-			}else if (expType == WiiClassicController){
-				//classic controller calibration data (probably)
-			}
-			
 
-		} 
-	}
-	
-	
-	//controller status (expansion port and battery level data)
-	if (dp[1] == 0x20 && dataLength >= 8){
-		batteryLevel = (double)dp[7];
-		batteryLevel /= (double)0xC0;
+	 
+	// specify attached expasion device
+	if (dataLength >=22 & dp[5] == 0x00 && dp[6] == 0xF0){
+		NSLog(@"Expansion device connected.");
 		
-		if (batteryLevel < warningBatteryLevel){
+		if ([self decrypt:dp[21]] == 0x00){
+				NSLog(@"Nunchuk connected.");
+			if (expType != WiiNunchuk){
+				expType = WiiNunchuk;
+				[[NSNotificationCenter defaultCenter] postNotificationName:@"WiiRemoteExpansionPortChangedNotification" object:self];
+			}
+		}else if ([self decrypt:dp[21]] == 0x01){
+			if (expType != WiiClassicController){
+				expType = WiiClassicController;
+				[[NSNotificationCenter defaultCenter] postNotificationName:@"WiiRemoteExpansionPortChangedNotification" object:self];					
+			}
+		}else{
+			NSLog(@"Unknown device connected (%00X). ", [self decrypt:dp[21]]);
+			expType = WiiExpNotAttached;
+		}
+	}
+		
+		
+	// wiimote calibration data
+	if (dataLength >= 20 && dp[5] == 0x00 && dp[6] == 0x10){
+		wiiCalibData.accX_zero = dp[13];
+		wiiCalibData.accY_zero = dp[14];
+		wiiCalibData.accZ_zero = dp[15];
+		
+		wiiCalibData.accX_1g = dp[17];
+		wiiCalibData.accY_1g = dp[18];
+		wiiCalibData.accZ_1g = dp[19];
+	}
+				  
+	
+	// expansion device calibration data.		
+	if (dataLength >= 22 && dp[5] == 0x00 && dp[6] == 0x20){
+		if (expType == WiiNunchuk) {
+			//nunchuk calibration data
+			nunchukCalibData.accX_zero =  [self decrypt:dp[7]];
+			nunchukCalibData.accY_zero =  [self decrypt:dp[8]];
+			nunchukCalibData.accZ_zero =  [self decrypt:dp[9]];
+			
+			nunchukCalibData.accX_1g =  [self decrypt:dp[11]];
+			nunchukCalibData.accY_1g =  [self decrypt:dp[12]];
+			nunchukCalibData.accZ_1g =  [self decrypt:dp[13]];
+			
+			nunchukJoyStickCalibData.x_max =  [self decrypt:dp[15]];
+			nunchukJoyStickCalibData.x_min =  [self decrypt:dp[16]];
+			nunchukJoyStickCalibData.x_center =  [self decrypt:dp[17]];
+			
+			nunchukJoyStickCalibData.y_max =  [self decrypt:dp[19]];
+			nunchukJoyStickCalibData.y_min =  [self decrypt:dp[20]];
+			nunchukJoyStickCalibData.y_center =  [self decrypt:dp[21]];	
+			
+		} else if (expType == WiiClassicController){
+			//classic controller calibration data (probably)
+		}
+	} // expansion device calibration data
+	
+} // handleRAMData
+
+-(void) handleStatusReport:(unsigned char *)dp length:(size_t)dataLength {
+
+		NSLog(@"Status Report");
+		
+		batteryLevel = (double)dp[7];
+		batteryLevel /= (double)0xC0; // C0 = fully charged.
+		
+		if (batteryLevel < warningBatteryLevel) {
 			[[NSNotificationCenter defaultCenter] postNotificationName:@"WiiRemoteBatteryLowNotification" object:self];
 		}
 		
-		if ((dp[4] & 0x02)){	//some device attached to Wii
-			
-			[self readData:0x04A400F0 length:16];		//specify expansion device type
-			
-		}else{					// unplugged
+		if ((dp[4] & 0x02)) { //some device attached to Wiimote
 
-			if (expType != WiiExpNotAttached){
-
-				//[self sendWiiNunchukButtonEvent:0xFFFF];		// reset button data;
+			NSLog(@"Device Attached");
+			if (isExpansionPortAttached == NO) {
+				isExpansionPortAttached = YES;
 				
-				expType = WiiExpNotAttached;
-				[[NSNotificationCenter defaultCenter] postNotificationName:@"WiiRemoteExpansionPortChangedNotification" object:self];
+				IOReturn ret = [self writeData:(darr){0x00} at:(unsigned long)0x04A40040 length:1]; // Initialize the device
+				
+				if (ret != kIOReturnSuccess) {
+					isExpansionPortAttached = NO;
+					return;
+				}
+				
+				usleep(10000); // Give the write a chance to be processed.
+				
+				ret = [self readData:0x04A400F0 length:16]; // read expansion device type
+				if (ret != kIOReturnSuccess) {
+					isExpansionPortAttached = NO;
+				}
+				
+				NSLog(@"Expansion Device initialized");
 			}
+			return;
+		} else { // unplugged
+			NSLog(@"Device Detached");
+			isExpansionPortAttached = NO;
+			expType = WiiExpNotAttached;
+				//[self sendWiiNunchukButtonEvent:0xFFFF];		// reset button data;		
+			[[NSNotificationCenter defaultCenter] postNotificationName:@"WiiRemoteExpansionPortChangedNotification" object:self];
+			return;
 		}
 		
 		if ((dp[4] & 0x10)){
@@ -598,42 +638,44 @@ enum {
 		}else{
 			isLED4Illuminated = NO;
 		}
+} // handleStatusReport
 
-		
-	}
-	
-	if ((dp[1]&0xF0) == 0x30) {
+
+- (void)handleButtonReport:(unsigned char *)dp length:(size_t)dataLength {
+		// wiimote buttons
 		buttonData = ((short)dp[2] << 8) + dp[3];
 		[self sendWiiRemoteButtonEvent:buttonData];
+		
 		//retrieve nunchuk data
 		//if (dp[1] == 0x32 || dp[1] == 0x34 || dp[1] == 0x35 || dp[1] == 0x36 || dp[1] == 0x37 || dp[1] == 0x3D){
-		if (dp[1] == 0x37){
-			if (expType == WiiNunchuk){
-				nStickX = (dp[17] ^ 0x17) + 0x17;
-				nStickY = (dp[18] ^ 0x17) + 0x17;
-				nAccX = (dp[19] ^ 0x17) + 0x17;
-				nAccY = (dp[20] ^ 0x17) + 0x17;
-				nAccZ = (dp[21] ^ 0x17) + 0x17;
-				nButtonData =(dp[22] ^ 0x17) + 0x17;
-			}else if (expType == WiiClassicController){
-				cButtonData = (unsigned short)((dp[21] ^ 0x17) + 0x17) << 8 + (dp[22] ^ 0x17) + 0x17;
+		if (dp[1] == 0x37) { // buttons, motion sensors, expansion port
+			if (expType == WiiNunchuk) {
+				nStickX = [self decrypt:dp[17]];
+				nStickY = [self decrypt:dp[18]];
+				nAccX   = [self decrypt:dp[19]];
+				nAccY   = [self decrypt:dp[20]];
+				nAccZ   = [self decrypt:dp[21]];
+				nButtonData = [self decrypt:dp[22]];
+			} else if (expType == WiiClassicController) {
+				cButtonData = (unsigned short)([self decrypt:dp[21]] << 8) + [self decrypt:dp[22]];
 				
-				cStickX1 = ((dp[17] ^ 0x17) + 0x17) & 0x3F;
-				cStickY1 = ((dp[18] ^ 0x17) + 0x17) & 0x3F;
-				cStickX2 = (((dp[17] ^ 0x17) + 0x17) & 0xC0) >> 3 + (((dp[18] ^ 0x17) + 0x17) & 0xC0) >> 5 + (((dp[19] ^ 0x17) + 0x17) & 0x80) >> 7; 
-				cStickY2 = ((dp[19] ^ 0x17) + 0x17) & 0x0F;
+				cStickX1 = [self decrypt:dp[17]] & 0x3F;
+				cStickY1 = [self decrypt:dp[18]] & 0x3F;
 				
-				cAnalogR = ((dp[20] ^ 0x17) + 0x17) & 0x0F;
-				cAnalogL = (((dp[20] ^ 0x17) + 0x17) & 0xE0) >> 5 + (((dp[19] ^ 0x17) + 0x17) & 0x60) >> 2;
+				cStickX2 = ([self decrypt:dp[17]] & 0xC0) >> 3 + ([self decrypt:dp[18]] & 0xC0) >> 5 + ([self decrypt:dp[19]] & 0x80) >> 7; 
+				cStickY2 =  [self decrypt:dp[19]] & 0x0F;
+				
+				cAnalogR =  [self decrypt:dp[20]] & 0x0F;
+				cAnalogL = ( [self decrypt:dp[20]] & 0xE0) >> 5 + ( [self decrypt:dp[19]] & 0x60) >> 2;
 			}
-		}
+		} // buttons, motion sensors, expansion port
 		
-		if (isExpansionPortEnabled){
-			if (expType == WiiNunchuk){
+		if (isExpansionPortEnabled) {
+			if (expType == WiiNunchuk) {
 				[self sendWiiNunchukButtonEvent:nButtonData];
 				[_delegate accelerationChanged:WiiNunchukAccelerationSensor accX:nAccX accY:nAccY accZ:nAccZ];
 				[_delegate joyStickChanged:WiiNunchukJoyStick tiltX:nStickX tiltY:nStickY];
-			}else if (expType == WiiClassicController){
+			} else if (expType == WiiClassicController){
 				[self sendWiiClassicControllerButtonEvent:cButtonData];
 				[_delegate joyStickChanged:WiiClassicControllerLeftJoyStick tiltX:cStickX1 tiltY:cStickY1];
 				[_delegate joyStickChanged:WiiClassicControllerRightJoyStick tiltX:cStickX2 tiltY:cStickY2];
@@ -641,24 +683,21 @@ enum {
 				[_delegate analogButtonChanged:WiiClassicControllerLeftButton amount:cAnalogL];
 				[_delegate analogButtonChanged:WiiClassicControllerRightButton amount:cAnalogR];
 
-			}
-			
+			}			
 		}
 		
 		
-		
+		// report contains motion sensor data
 		if (dp[1] & 0x01) {
 			
 			accX = dp[4];
 			accY = dp[5];
 			accZ = dp[6];
 			
-			
 			[_delegate accelerationChanged:WiiRemoteAccelerationSensor accX:accX accY:accY accZ:accZ];
 			
-			
-			lowZ = lowZ*.9 + accZ*.1;
-			lowX = lowX*.9 + accX*.1;
+			lowZ = lowZ * 0.9 + accZ * 0.1;
+			lowX = lowX * 0.9 + accX * 0.1;
 			
 			float absx = abs(lowX-128), absz = abs(lowZ-128);
 			
@@ -674,21 +713,57 @@ enum {
 			}
 			
 			//	printf("orientation: %d\n", orientation);
-		}
+		} // report contains motion sensor data
 		
+		// report contains IR data
 		if (dp[1] & 0x02) {
 			int i;
-			for(i=0 ; i<4 ; i++) {
-				irData[i].x = dp[7+3*i];
-				irData[i].y = dp[8+3*i];
-				irData[i].s = dp[9+3*i];
-				irData[i].x += (irData[i].s & 0x30)<<4;
-				irData[i].y += (irData[i].s & 0xC0)<<2;
+			for(i=0 ; i < 4 ; i++) { 
+				irData[i].x = dp[7 + 3 * i];
+				irData[i].y = dp[8 + 3 * i];
+				irData[i].s = dp[9 + 3 * i];
+				irData[i].x += (irData[i].s & 0x30) << 4;
+				irData[i].y += (irData[i].s & 0xC0) << 2;
 				irData[i].s &= 0x0F;
 			} 
-		}
+		} // report contains IR data
+
+} // handleButtonReport
+
+
+// thanks to Ian!
+-(void)l2capChannelData:(IOBluetoothL2CAPChannel*)l2capChannel data:(void *)dataPointer length:(size_t)dataLength{
+	
+	if (!wiiDevice) {
+		return;
 	}
 	
+	unsigned char* dp = (unsigned char*)dataPointer;
+	
+	//controller status (expansion port and battery level data) - received when report 0x15 sent to Wiimote (getCurrentStatus:) or status of expansion port changes.
+	if (dp[1] == 0x20 && dataLength >= 8) {
+		[self handleStatusReport:dp length:dataLength];
+		[self requestUpdates]; // Make sure we keep getting state change reports.
+		return;
+	}
+
+	if (dp[1] == 0x21) {
+		[self handleRAMData:dp length:dataLength];
+		return;
+	}
+
+	if (dp[1] == 0x22) { // Write data response
+		NSLog(@"Write data response: %00x %00x %00x %00x", dp[2], dp[3], dp[4], dp[5]);
+		return;
+	}
+	
+	// report contains button info
+	if ((dp[1] & 0xF0) == 0x30) {
+		[self handleButtonReport:dp length:dataLength];
+	} 	// report contains button info
+	
+	
+	// ??? Why does the below get executed regardless of the report type?
 	float ox, oy;
 	if (irData[0].s < 0x0F && irData[1].s < 0x0F) {
 		int l = leftPoint, r;
@@ -719,9 +794,6 @@ enum {
 		ox = -dy*cy-dx*cx;
 		oy = -dx*cy+dy*cx;
 		//		printf("x:%5.2f;  y: %5.2f;  angle: %5.1f\n", ox, oy, angle*180/M_PI);
-		
-		
-		
 	} else {
 		ox = oy = -100;
 		if (leftPoint != -1) {
@@ -732,10 +804,15 @@ enum {
 	
 	if (dp[1] & 0x02)
 		[_delegate irPointMovedX:ox Y:oy];
+		
 	//if (nil != _delegate)
 		//[_delegate dataChanged:buttonData accX:accX accY:accY accZ:accZ mouseX:ox mouseY:oy];
 	//[_delegate dataChanged:buttonData accX:irData[0].x/4 accY:irData[0].y/3 accZ:irData[0].s*16];
-}
+} // l2capChannelData
+
+- (unsigned char)decrypt:(unsigned char)data {
+		return (data ^ 0x17) + 0x17;
+	}
 
 - (void)sendWiiRemoteButtonEvent:(UInt16)data{
 
@@ -1099,7 +1176,6 @@ enum {
 		}
 	}
 	
-	
 	if (!(data & kWiiClassicControllerPlusButton)){
 		
 		if (!buttonState[WiiClassicControllerPlusButton]){
@@ -1113,9 +1189,6 @@ enum {
 			
 		}
 	}
-	
-	
-	
 }
 
 
@@ -1128,10 +1201,9 @@ enum {
 	return expType;
 }
 
-/**
 - (BOOL)isExpansionPortAttached{
 	return isExpansionPortAttached;
-}**/
+}
 
 - (BOOL)isButtonPressed:(WiiButtonType)type{
 	return buttonState[type];

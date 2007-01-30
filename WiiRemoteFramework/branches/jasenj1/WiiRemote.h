@@ -140,7 +140,7 @@ enum{
 - (double)batteryLevel;
 
 - (WiiExpansionPortType)expansionPortType;
-//- (BOOL)isExpansionPortAttached;
+- (BOOL)isExpansionPortAttached;
 - (BOOL)available;
 - (BOOL)isButtonPressed:(WiiButtonType)type;
 - (WiiJoyStickCalibData)joyStickCalibData:(WiiJoyStickType)type;
@@ -148,6 +148,7 @@ enum{
 
 - (IOReturn)connectTo:(IOBluetoothDevice*)device;
 - (IOReturn)closeConnection;
+- (IOReturn)requestUpdates;
 - (IOReturn)setIRSensorEnabled:(BOOL)enabled;
 - (IOReturn)setForceFeedbackEnabled:(BOOL)enabled;
 - (IOReturn)setMotionSensorEnabled:(BOOL)enabled;
@@ -157,7 +158,11 @@ enum{
 - (IOReturn)readData:(unsigned long)address length:(unsigned short)length;
 - (IOReturn)sendCommand:(const unsigned char*)data length:(size_t)length;
 
-
+- (void)getCurrentStatus:(NSTimer*)timer;
+- (void)sendWiiRemoteButtonEvent:(UInt16)data;
+- (void)sendWiiNunchukButtonEvent:(UInt16)data;
+- (void)sendWiiClassicControllerButtonEvent:(UInt16)data;
+- (unsigned char)decrypt:(unsigned char)data;
 @end
 
 
