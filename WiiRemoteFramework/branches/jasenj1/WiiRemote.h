@@ -107,6 +107,7 @@ enum{
 	double batteryLevel;
 	double warningBatteryLevel;
 	
+	BOOL readingRegister;
 	BOOL isMotionSensorEnabled, isIRSensorEnabled, isVibrationEnabled, isExpansionPortEnabled;
 	BOOL isExpansionPortAttached;
 	BOOL isLED1Illuminated, isLED2Illuminated, isLED3Illuminated, isLED4Illuminated;

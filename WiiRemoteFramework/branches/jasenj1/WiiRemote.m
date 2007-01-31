@@ -186,10 +186,7 @@ enum {
 	statusTimer = [[NSTimer scheduledTimerWithTimeInterval:60 target:self selector:@selector(getCurrentStatus:) userInfo:nil repeats:YES] retain];
 	[self getCurrentStatus:nil];
 	
-//	for(trycount = 0; trycount< 10; trycount++){
-		[self readData:0x0010 length:16];
-//		usleep(10000);
-//	}
+	[self readData:0x0020 length:7]; // Get Accelerometer calibration data
 	
 	return ret;
 }
@@ -426,16 +423,21 @@ enum {
 	//unsigned short len = CFSwapInt16HostToBig(length);
 	unsigned short len = length;
 	
-	cmd[0] = 0x17;
-	cmd[1] = (addr >> 24) & 0xFF;
+	cmd[0] = 0x17; // read memory
+	
+	// address
+	cmd[1] = (addr >> 24) & 0xFF;  // bit 2 being set indicates read from control registers, 0 indicates EEPROM Memory
 	cmd[2] = (addr >> 16) & 0xFF;
 	cmd[3] = (addr >>  8) & 0xFF;
 	cmd[4] = (addr >>  0) & 0xFF;
 	
+	// Number of bytes to read
 	cmd[5] = (len >> 8) & 0xFF;
 	cmd[6] = (len >> 0) & 0xFF;
 	
 	if (isVibrationEnabled)	cmd[1] |= 0x01;
+	
+	if (cmd[1] & 0x02) readingRegister = YES;
 	
 	return [self sendCommand:cmd length:7];
 }
@@ -496,9 +498,18 @@ enum {
 	return ret;
 }
 
+	/**
+	 * Handle report 0x21 (Read Data) from wiimote.
+	 * dp[0] = Bluetooth header
+	 * dp[1] = (0x21) Report/Channel ID
+	 * dp[2] = Wiimote Buttons
+	 * dp[3] = Wiimote Buttons
+	 * dp[4] = High 4 bits = payload size; Low 4 bits = Error flag (0 = all good)	 
+	 * dp[5] = Offset of memory read
+	 * dp[6] = Offset of memory read
+	 * dp[7+] = the Data.
+	 **/
 - (void) handleRAMData:(unsigned char *)dp length:(size_t)dataLength {
-	// reading ram data
-
 	/**
 	if (dp[1] == 0x21){
 		int i;
@@ -510,9 +521,12 @@ enum {
 		printf("\n");
 	}**/
 
+	// wiimote buttons
+	buttonData = ((short)dp[2] << 8) + dp[3];
+	[self sendWiiRemoteButtonEvent:buttonData];
 	 
 	// specify attached expasion device
-	if (dataLength >=22 & dp[5] == 0x00 && dp[6] == 0xF0){
+	if ((dp[5] == 0x00) && (dp[6] == 0xF0)){
 		NSLog(@"Expansion device connected.");
 		
 		if ([self decrypt:dp[21]] == 0x00){
@@ -530,23 +544,26 @@ enum {
 			NSLog(@"Unknown device connected (%00X). ", [self decrypt:dp[21]]);
 			expType = WiiExpNotAttached;
 		}
+		return;
 	}
 		
 		
 	// wiimote calibration data
-	if (dataLength >= 20 && dp[5] == 0x00 && dp[6] == 0x10){
-		wiiCalibData.accX_zero = dp[13];
-		wiiCalibData.accY_zero = dp[14];
-		wiiCalibData.accZ_zero = dp[15];
+	if (!readingRegister && dp[5] == 0x00 && dp[6] == 0x20){
+		wiiCalibData.accX_zero = dp[7];
+		wiiCalibData.accY_zero = dp[8];
+		wiiCalibData.accZ_zero = dp[9];
 		
-		wiiCalibData.accX_1g = dp[17];
-		wiiCalibData.accY_1g = dp[18];
-		wiiCalibData.accZ_1g = dp[19];
+		//dp[10] - unknown/unused
+		
+		wiiCalibData.accX_1g = dp[11];
+		wiiCalibData.accY_1g = dp[12];
+		wiiCalibData.accZ_1g = dp[13];
+		return;
 	}
-				  
 	
 	// expansion device calibration data.		
-	if (dataLength >= 22 && dp[5] == 0x00 && dp[6] == 0x20){
+	if (readingRegister && dp[5] == 0x00 && dp[6] == 0x20){
 		if (expType == WiiNunchuk) {
 			//nunchuk calibration data
 			nunchukCalibData.accX_zero =  [self decrypt:dp[7]];
@@ -565,6 +582,7 @@ enum {
 			nunchukJoyStickCalibData.y_min =  [self decrypt:dp[20]];
 			nunchukJoyStickCalibData.y_center =  [self decrypt:dp[21]];	
 			
+			return;
 		} else if (expType == WiiClassicController){
 			//classic controller calibration data (probably)
 		}
@@ -610,7 +628,7 @@ enum {
 			NSLog(@"Device Detached");
 			isExpansionPortAttached = NO;
 			expType = WiiExpNotAttached;
-				//[self sendWiiNunchukButtonEvent:0xFFFF];		// reset button data;		
+
 			[[NSNotificationCenter defaultCenter] postNotificationName:@"WiiRemoteExpansionPortChangedNotification" object:self];
 			return;
 		}
