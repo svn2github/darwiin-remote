@@ -102,6 +102,48 @@ enum {
 	return NO;
 }
 
+- (IOReturn)openIChan {
+	int trycount = 0;
+	IOReturn ret;
+	
+	while ((ret = [wiiDevice openL2CAPChannelSync:&ichan withPSM:19 delegate:self]) != kIOReturnSuccess){	// this "19" is magic number ;-)
+		if (trycount == 10){
+			NSLog(@"could not open L2CAP channel ichan");
+			ichan = nil;
+			[cchan closeChannel];
+			[cchan release];
+			[wiiDevice closeConnection];
+			
+			return ret;			
+		}
+		trycount++;
+		usleep(10000); //  wait 10ms
+	}
+	[ichan retain];
+	
+	return ret;
+}
+
+- (IOReturn) openCChan {
+	int trycount = 0;
+	IOReturn ret;
+	
+	while ((ret = [wiiDevice openL2CAPChannelSync:&cchan withPSM:17 delegate:self]) != kIOReturnSuccess){
+		if (trycount == 10){
+			NSLog(@"could not open L2CAP channel cchan (%d)", ret);
+			cchan = nil;
+			[wiiDevice closeConnection];
+			return ret;			
+		}
+		trycount++;
+		usleep(10000); //  wait 10ms
+	}	
+	[cchan retain];
+
+	return ret;
+}
+
+
 - (IOReturn)connectTo:(IOBluetoothDevice*)device{
 	
 	wiiDevice = device;
@@ -123,7 +165,6 @@ enum {
 		usleep(10000); //  wait 10ms
 	}
 	
-	
 	disconnectNotification = [wiiDevice registerForDisconnectNotification:self selector:@selector(disconnected:fromDevice:)];
 	
 	trycount = 0;
@@ -137,53 +178,22 @@ enum {
 		usleep(10000); //  wait 10ms
 	}
 	
-	trycount = 0;
-	while ((ret = [wiiDevice openL2CAPChannelSync:&cchan withPSM:17 delegate:self]) != kIOReturnSuccess){
-		if (trycount == 10){
-			NSLog(@"could not open L2CAP channel cchan (%d)", ret);
-			cchan = nil;
-			[wiiDevice closeConnection];
-			return ret;			
-		}
-		trycount++;
-		usleep(10000); //  wait 10ms
-	}	
-	[cchan retain];
+	ret = [self openIChan];
 	
-	trycount = 0;
-	while ((ret = [wiiDevice openL2CAPChannelSync:&ichan withPSM:19 delegate:self]) != kIOReturnSuccess){	// this "19" is magic number ;-)
-		if (trycount == 10){
-			NSLog(@"could not open L2CAP channel ichan");
-			ichan = nil;
-			[cchan closeChannel];
-			[cchan release];
-			[wiiDevice closeConnection];
-			
-			return ret;			
-		}
-		trycount++;
-		usleep(10000); //  wait 10ms
-	}
-	[ichan retain];
-	
-	trycount = 0;
-	
-	//sensor enable...
-	ret = [self setMotionSensorEnabled:NO];
-	if (kIOReturnSuccess == ret)
-		ret = [self setIRSensorEnabled:NO];
-	//stop force feedback
-	if (kIOReturnSuccess == ret)
-		ret = [self setForceFeedbackEnabled:NO];
+	ret = [self openCChan];
+
 	//turn LEDs off
 	if (kIOReturnSuccess == ret)
 		ret = [self setLEDEnabled1:NO enabled2:NO enabled3:NO enabled4:NO];
 	
-	if (kIOReturnSuccess != ret)
+	if (kIOReturnSuccess != ret) {
 		[self closeConnection];
+		return ret;
+	}
 	
 	// Get current status every 60 seconds.
 	statusTimer = [[NSTimer scheduledTimerWithTimeInterval:60 target:self selector:@selector(getCurrentStatus:) userInfo:nil repeats:YES] retain];
+	
 	[self getCurrentStatus:nil];
 	
 	[self readData:0x0020 length:7]; // Get Accelerometer calibration data
@@ -339,11 +349,13 @@ enum {
 	
 	isIRSensorEnabled = enabled;
 
+/*
 	// set register 0x12 (report type)
 	if (ret = [self setMotionSensorEnabled:isMotionSensorEnabled]) return ret;
 	
 	// set register 0x13 (ir enable/vibe)
 	if (ret = [self setForceFeedbackEnabled:isVibrationEnabled]) return ret;
+*/
 	
 	// set register 0x1a (ir enable 2)
 	unsigned char cmd[] = {0x1a, 0x00};
