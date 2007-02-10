@@ -192,7 +192,7 @@ enum {
 	}
 	
 	// Get current status every 60 seconds.
-	statusTimer = [[NSTimer scheduledTimerWithTimeInterval:60 target:self selector:@selector(getCurrentStatus:) userInfo:nil repeats:YES] retain];
+	statusTimer = [[NSTimer scheduledTimerWithTimeInterval:10 target:self selector:@selector(getCurrentStatus:) userInfo:nil repeats:YES] retain];
 	
 	[self getCurrentStatus:nil];
 	
@@ -243,7 +243,7 @@ enum {
 		[self disconnected: nil fromDevice:wiiDevice];
 	}
 	
-	NSLog(@"IOReturn for command %00X = %i", buf[1], ret);
+	NSLog(@"IOReturn for command x%00X = %i", buf[1], ret);
 	return ret;
 }
 
@@ -322,7 +322,7 @@ enum {
 		isExpansionPortEnabled = NO;
 	} else {
 			
-		ret = [self writeData:(darr){0x00} at:(unsigned long)0x04A40040 length:1]; // Init expansion device.
+//		ret = [self writeData:(darr){0x00} at:(unsigned long)0x04A40040 length:1]; // Init expansion device.
 		
 		if (ret == kIOReturnSuccess){
 			// get calib data
@@ -467,10 +467,11 @@ enum {
 	
 	if (cchan){
 		if ([wiiDevice isConnected]) do {
+			[cchan setDelegate:nil];
 			ret = [cchan closeChannel];
 			trycount++;
 		}while(ret != kIOReturnSuccess && trycount < 10);
-		[cchan release];
+			[cchan release];
 	}
 
 	
@@ -478,6 +479,7 @@ enum {
 	
 	if (ichan){
 		if ([wiiDevice isConnected]) do {
+			[ichan setDelegate:nil];
 			ret = [ichan closeChannel];
 			trycount++;
 		}while(ret != kIOReturnSuccess && trycount < 10);
@@ -590,9 +592,9 @@ enum {
 			nunchukJoyStickCalibData.x_min =  [self decrypt:dp[16]];
 			nunchukJoyStickCalibData.x_center =  [self decrypt:dp[17]];
 			
-			nunchukJoyStickCalibData.y_max =  [self decrypt:dp[19]];
-			nunchukJoyStickCalibData.y_min =  [self decrypt:dp[20]];
-			nunchukJoyStickCalibData.y_center =  [self decrypt:dp[21]];	
+			nunchukJoyStickCalibData.y_max =  [self decrypt:dp[18]];
+			nunchukJoyStickCalibData.y_min =  [self decrypt:dp[19]];
+			nunchukJoyStickCalibData.y_center =  [self decrypt:dp[20]];	
 			
 			return;
 		} else if (expType == WiiClassicController){
@@ -617,6 +619,7 @@ enum {
 
 			NSLog(@"Device Attached");
 			if (isExpansionPortAttached == NO) {
+				
 				isExpansionPortAttached = YES;
 				
 				IOReturn ret = [self writeData:(darr){0x00} at:(unsigned long)0x04A40040 length:1]; // Initialize the device
@@ -632,7 +635,6 @@ enum {
 				if (ret != kIOReturnSuccess) {
 					isExpansionPortAttached = NO;
 				}
-				
 				NSLog(@"Expansion Device initialized");
 			}
 			return;
