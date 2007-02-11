@@ -11,6 +11,13 @@
 #import <IOBluetooth/objc/IOBluetoothL2CAPChannel.h>
 
 
+typedef unsigned char WiiIRModeType;
+enum {
+	kWiiIRModeBasic			= 0x01,
+	kWiiIRModeExtended		= 0x03,
+	kWiiIRModeFull			= 0x05
+};
+
 typedef struct {
 	int x, y, s;
 } IRData;
@@ -103,6 +110,7 @@ enum{
 	WiiExpansionPortType expType;
 	WiiAccCalibData wiiCalibData, nunchukCalibData;
 	WiiJoyStickCalibData nunchukJoyStickCalibData;
+	WiiIRModeType wiiIRMode;
 	IRData	irData[4];
 	double batteryLevel;
 	double warningBatteryLevel;

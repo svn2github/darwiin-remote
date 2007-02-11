@@ -50,9 +50,6 @@ enum {
 	
 };
 
-
-
-
 @implementation WiiRemote
 
 - (id) init{
@@ -74,6 +71,8 @@ enum {
 	cchan = nil;
 	
 	isIRSensorEnabled = NO;
+	wiiIRMode = kWiiIRModeExtended;
+
 	isMotionSensorEnabled = NO;
 	isVibrationEnabled = NO;
 	
@@ -192,7 +191,7 @@ enum {
 	}
 	
 	// Get current status every 60 seconds.
-	statusTimer = [[NSTimer scheduledTimerWithTimeInterval:10 target:self selector:@selector(getCurrentStatus:) userInfo:nil repeats:YES] retain];
+//	statusTimer = [[NSTimer scheduledTimerWithTimeInterval:10 target:self selector:@selector(getCurrentStatus:) userInfo:nil repeats:YES] retain];
 	
 	[self getCurrentStatus:nil];
 	
@@ -258,7 +257,7 @@ enum {
 }
 
 - (IOReturn)setMotionSensorEnabled:(BOOL)enabled{
-	// these variables indicate a desire, and should be updated regardless of the sucess of sending the command
+	// this variable indicate a desire, and should be updated regardless of the sucess of sending the command
 	isMotionSensorEnabled = enabled;
 	
 	return [self requestUpdates];
@@ -266,14 +265,10 @@ enum {
 
 
 - (IOReturn)setForceFeedbackEnabled:(BOOL)enabled{
-	// these variables indicate a desire, and should be updated regardless of the sucess of sending the command
+	// this variable indicate a desire, and should be updated regardless of the sucess of sending the command
 	isVibrationEnabled = enabled;
 	
-	unsigned char cmd[] = {0x13, 0x00};
-	if (isVibrationEnabled)	cmd[1] |= 0x01;
-	if (isIRSensorEnabled)	cmd[1] |= 0x04;
-	
-	return [self sendCommand:cmd length:2];
+	return [self requestUpdates];
 }
 
 - (IOReturn)setLEDEnabled1:(BOOL)enabled1 enabled2:(BOOL)enabled2 enabled3:(BOOL)enabled3 enabled4:(BOOL)enabled4{
@@ -298,13 +293,59 @@ enum {
 	unsigned char cmd[] = {0x12, 0x02, 0x30}; // Just buttons.
 	
 	if (isVibrationEnabled)	cmd[1] |= 0x01;
-	if (isMotionSensorEnabled)	cmd[2] |= 0x01;
-	if (isIRSensorEnabled)	cmd[2] |= 0x02;
-	if (isExpansionPortEnabled) cmd[2] = 0x37;
+	
+	/*
+		There are numerous status report types that can be requested.
+		The IR reports must be matched with the data format set when initializing the IR camera:
+			0x36, 0x37	- 10 IR bytes go with Basic mode
+			0x33		- 12 IR bytes go with Extended mode
+			0x3e/0x3f	- 36 IR bytes go with Full mode
+		
+		The Nunchuk and Classic controller use 6 bytes to report their state, so the reports that
+		give more extension bytes don't provide any more info.
+		
+				Buttons		|	Accelerometer	|	IR		|	Extension
+		--------------------+-------------------+-----------+-------------		
+		0x30: Core Buttons	|					|			|
+		0x31: Core Buttons	|	Accelerometer	|			|
+		0x32: Core Buttons	|					|			|	 8 bytes
+		0x33: Core Buttons	|	Accelerometer	| 12 bytes	|
+		0x34: Core Buttons	|					|			|	19 bytes
+		0x35: Core Buttons	|	Accelerometer	|			|	16 bytes
+		0x36: Core Buttons	|					| 10 bytes	|	 9 bytes
+		0x37: Core Buttons	|	Accelerometer	| 10 bytes	|	 6 bytes
+		?? 0x38: Core Buttons and Accelerometer with 16 IR bytes ??
+		0x3d:				|					|			|	21 bytes
+		
+		0x3e / 0x3f: Interleaved Core Buttons and Accelerometer with 16/36 IR bytes
+		
+	*/
+		
+	if (isIRSensorEnabled) {
+		if (!isExpansionPortEnabled) { 
+			cmd[2] = 0x33; // Buttons, Accelerometer, and 12 IR Bytes.
+			wiiIRMode = kWiiIRModeExtended;
+		}
+		
+		if (isExpansionPortEnabled) {
+			cmd[2] = 0x36;	// Buttons, 10 IR Bytes, 9 Extension Bytes
+			wiiIRMode = kWiiIRModeBasic;
+		}
+		
+		// Set IR Mode
+		[self writeData:(darr){ wiiIRMode } at:0x04B00033 length:1];
+		usleep(10000);
+
+	 } else {
+		if (!isExpansionPortEnabled) cmd[2] = 0x30; // Buttons
+		if (isExpansionPortEnabled)	 cmd[2] = 0x34;	// Buttons, 19 Extension Bytes	 
+	 }
+
+	if (isMotionSensorEnabled)	cmd[2] |= 0x01;	// Add Accelerometer
 	
 	return [self sendCommand:cmd length:3];
 
-}
+} // requestUpdates
 
 - (IOReturn)setExpansionPortEnabled:(BOOL)enabled{
 	
@@ -345,43 +386,63 @@ enum {
 
 //based on Ian's codes. thanks!
 - (IOReturn)setIRSensorEnabled:(BOOL)enabled{
+
 	IOReturn ret;
 	
 	isIRSensorEnabled = enabled;
-
-/*
-	// set register 0x12 (report type)
-	if (ret = [self setMotionSensorEnabled:isMotionSensorEnabled]) return ret;
-	
-	// set register 0x13 (ir enable/vibe)
-	if (ret = [self setForceFeedbackEnabled:isVibrationEnabled]) return ret;
-*/
-	
-	// set register 0x1a (ir enable 2)
-	unsigned char cmd[] = {0x1a, 0x00};
-	if (enabled)	cmd[1] |= 0x04;
+		
+	// ir enable 1
+	unsigned char cmd[] = {0x13, 0x00};
+	if (isVibrationEnabled)	cmd[1] |= 0x01;
+	if (isIRSensorEnabled)	cmd[1] |= 0x04;
 	if (ret = [self sendCommand:cmd length:2]) return ret;
 	
+	// set register 0x1a (ir enable 2)
+	unsigned char cmd2[] = {0x1a, 0x00};
+	if (enabled)	cmd2[1] |= 0x04;
+	if (ret = [self sendCommand:cmd2 length:2]) return ret;
+
 	if(enabled){
+		NSLog(@"Enabling IR Sensor");
+		
+
 		// based on marcan's method, found on wiili wiki:
 		// tweaked to include some aspects of cliff's setup procedure in the hopes
 		// of it actually turning on 100% of the time (was seeing 30-40% failure rate before)
 		// the sleeps help it it seems
 		usleep(10000);
+
+		// start initializing camera
 		if (ret = [self writeData:(darr){0x01} at:0x04B00030 length:1]) return ret;
 		usleep(10000);
-		if (ret = [self writeData:(darr){0x08} at:0x04B00030 length:1]) return ret;
+		
+		// set sensitivity block 1
+		if (ret = [self writeData:(darr){0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x90, 0x00, 0xC0} at:0x04B00000 length:9]) return ret;
 		usleep(10000);
+		
+/*		
+		// set sensitivity block 1
 		if (ret = [self writeData:(darr){0x90} at:0x04B00006 length:1]) return ret;
 		usleep(10000);
+		
 		if (ret = [self writeData:(darr){0xC0} at:0x04B00008 length:1]) return ret;
 		usleep(10000);
-		if (ret = [self writeData:(darr){0x40} at:0x04B0001A length:1]) return ret;
+*/		
+		// set sensitivity block 2
+		if (ret = [self writeData:(darr){0x40, 0x00} at:0x04B0001A length:2]) return ret;
 		usleep(10000);
-		if (ret = [self writeData:(darr){0x33} at:0x04B00033 length:1]) return ret;
-		usleep(10000);
-		if (ret = [self writeData:(darr){0x08} at:0x04B00030 length:1]) return ret;
 		
+		// Set IR Mode
+//		wiiIRMode = isExpansionPortEnabled ? kWiiIRModeBasic : kWiiIRModeExtended;
+		
+//		if (ret = [self writeData:(darr){ wiiIRMode } at:0x04B00033 length:1]) return ret;
+//		usleep(10000);
+		
+		// finish initializing camera
+		if (ret = [self writeData:(darr){0x08} at:0x04B00030 length:1]) return ret;
+		usleep(10000);
+		
+		[self requestUpdates];
 	}else{
 		// probably should do some writes to power down the camera, save battery
 		// but don't know how yet.
@@ -637,14 +698,14 @@ enum {
 				}
 				NSLog(@"Expansion Device initialized");
 			}
-			return;
 		} else { // unplugged
-			NSLog(@"Device Detached");
-			isExpansionPortAttached = NO;
-			expType = WiiExpNotAttached;
+			if (isExpansionPortAttached != NO) {
+				NSLog(@"Device Detached");
+				isExpansionPortAttached = NO;
+				expType = WiiExpNotAttached;
 
-			[[NSNotificationCenter defaultCenter] postNotificationName:@"WiiRemoteExpansionPortChangedNotification" object:self];
-			return;
+				[[NSNotificationCenter defaultCenter] postNotificationName:@"WiiRemoteExpansionPortChangedNotification" object:self];
+			}
 		}
 		
 		if ((dp[4] & 0x10)){
@@ -672,53 +733,172 @@ enum {
 		}
 } // handleStatusReport
 
+- (void)handleExtensionData:(unsigned char *)dp length:(size_t)dataLength {
+
+		unsigned char startByte;
+		
+		switch (dp[1]) {
+			case 0x34 :
+				startByte = 4;
+				break;
+			case 0x35 :
+				startByte = 7;
+				break;
+			case 0x36 :
+				startByte = 14;
+				break;
+			case 0x37 :
+				startByte = 17;
+				break;
+			default:
+				return; // This shouldn't ever happen.
+				break;
+		}
+		
+		if (expType == WiiNunchuk) {
+			nStickX = [self decrypt:dp[startByte]];
+			nStickY = [self decrypt:dp[startByte +1]];
+			nAccX   = [self decrypt:dp[startByte +2]];
+			nAccY   = [self decrypt:dp[startByte +3]];
+			nAccZ   = [self decrypt:dp[startByte +4]];
+			nButtonData = [self decrypt:dp[startByte +5]];
+		} else if (expType == WiiClassicController) {
+			cButtonData = (unsigned short)([self decrypt:dp[21]] << 8) + [self decrypt:dp[22]];
+			
+			cStickX1 = [self decrypt:dp[startByte]] & 0x3F;
+			cStickY1 = [self decrypt:dp[startByte +1]] & 0x3F;
+			
+			cStickX2 = ([self decrypt:dp[startByte]] & 0xC0) >> 3 + 
+						([self decrypt:dp[startByte +2]] & 0xC0) >> 5 + ([self decrypt:dp[startByte +3]] & 0x80) >> 7; 
+			cStickY2 =  [self decrypt:dp[startByte +3]] & 0x0F;
+			
+			cAnalogR =  [self decrypt:dp[startByte +4]] & 0x0F;
+			cAnalogL = ( [self decrypt:dp[startByte +4]] & 0xE0) >> 5 + ( [self decrypt:dp[startByte +3]] & 0x60) >> 2;
+		}
+
+	if (isExpansionPortEnabled) {
+		if (expType == WiiNunchuk) {
+			[self sendWiiNunchukButtonEvent:nButtonData];
+			[_delegate accelerationChanged:WiiNunchukAccelerationSensor accX:nAccX accY:nAccY accZ:nAccZ];
+			[_delegate joyStickChanged:WiiNunchukJoyStick tiltX:nStickX tiltY:nStickY];
+		} else if (expType == WiiClassicController){
+			[self sendWiiClassicControllerButtonEvent:cButtonData];
+			[_delegate joyStickChanged:WiiClassicControllerLeftJoyStick tiltX:cStickX1 tiltY:cStickY1];
+			[_delegate joyStickChanged:WiiClassicControllerRightJoyStick tiltX:cStickX2 tiltY:cStickY2];
+			
+			[_delegate analogButtonChanged:WiiClassicControllerLeftButton amount:cAnalogL];
+			[_delegate analogButtonChanged:WiiClassicControllerRightButton amount:cAnalogR];
+
+		}			
+	}
+} // handleExtensionData
+
+- (void) handleIRData:(unsigned char *)dp length:(size_t)dataLength {
+	
+//	NSLog(@"Handling IR Data for 0x%00x", dp[1]);
+	
+	if (dp[1] == 0x33) { // 12 IR bytes
+			int i;
+			for(i=0 ; i < 4 ; i++) { 
+				irData[i].x = dp[7 + 3 * i];
+				irData[i].y = dp[8 + 3 * i];
+				irData[i].s = dp[9 + 3 * i];
+				irData[i].x += (irData[i].s & 0x30) << 4;
+				irData[i].y += (irData[i].s & 0xC0) << 2;
+				irData[i].s &= 0x0F;
+			} 	
+ 	} else { // 10 IR bytes
+		unsigned char startByte;
+		if (dp[1] == 36) {
+			startByte = 4;
+		} else {
+			startByte = 7;
+		}
+		
+		int i;
+		for (i=0; i < 2; i++) {
+		 	irData[2 * i].x = dp[startByte + (5 * i)];
+			irData[2 * i].x += (dp[(startByte +2) + (5 * i)] & 0x30) << 4;
+			
+			irData[2*i].y = dp[(startByte +1) + (5 * i)];
+			irData[2*i].y += (dp[(startByte +2) + (5 * i)] & 0xC0) << 2;
+			
+			irData[2*i].s = 0x08;  // No size is given in 10 byte report.
+			
+			irData[(2*i)+1].x = dp[(startByte +3)+ (5 * i)];
+			irData[(2*i)+1].x += (dp[(startByte +2) + (5 * i)] & 0x03) << 8;
+			
+			irData[(2*i)+1].y = dp[(startByte +4) + (5 * i)];
+			irData[(2*i)+1].y += (dp[(startByte +2) + (5 * i)] & 0x0C) << 6;
+			
+			irData[(2*i)+1].s = 0x08;  // No size is given in 10 byte report.
+		}
+	}
+
+	NSLog(@"IR Data %00x,%00x  %00x,%00x", irData[0].x, irData[0].y, irData[1].x, irData[1].y);
+
+	float ox, oy;
+	if (irData[0].s < 0x0F && irData[1].s < 0x0F) {
+		int l = leftPoint, r;
+		if (leftPoint == -1) {
+			switch (orientation) {
+				case 0: l = (irData[0].x < irData[1].x)?0:1; break;
+				case 1: l = (irData[0].y > irData[1].y)?0:1; break;
+				case 2: l = (irData[0].x > irData[1].x)?0:1; break;
+				case 3: l = (irData[0].y < irData[1].y)?0:1; break;
+			}
+			leftPoint = l;
+		}
+		r = 1-l;
+		
+		float dx = irData[r].x - irData[l].x;
+		float dy = irData[r].y - irData[l].y;
+		
+		float d = sqrt(dx*dx+dy*dy);
+		
+		dx /= d;
+		dy /= d;
+		
+		float cx = (irData[l].x+irData[r].x)/1024.0 - 1;
+		float cy = (irData[l].y+irData[r].y)/1024.0 - .75;
+		
+		float angle = atan2(dy, dx);
+		
+		ox = -dy*cy-dx*cx;
+		oy = -dx*cy+dy*cx;
+//		NSLog(@"x:%5.2f;  y: %5.2f;  angle: %5.1f\n", ox, oy, angle*180/M_PI);
+	} else {
+		ox = oy = -100;
+		if (leftPoint != -1) {
+			//	printf("Not tracking.\n");
+			leftPoint = -1;
+		}
+	}
+	
+	[_delegate irPointMovedX:ox Y:oy];
+	
+} // handleIRData
 
 - (void)handleButtonReport:(unsigned char *)dp length:(size_t)dataLength {
 		// wiimote buttons
 		buttonData = ((short)dp[2] << 8) + dp[3];
 		[self sendWiiRemoteButtonEvent:buttonData];
-		
-		//retrieve nunchuk data
-		//if (dp[1] == 0x32 || dp[1] == 0x34 || dp[1] == 0x35 || dp[1] == 0x36 || dp[1] == 0x37 || dp[1] == 0x3D){
-		if (dp[1] == 0x37) { // buttons, motion sensors, expansion port
-			if (expType == WiiNunchuk) {
-				nStickX = [self decrypt:dp[17]];
-				nStickY = [self decrypt:dp[18]];
-				nAccX   = [self decrypt:dp[19]];
-				nAccY   = [self decrypt:dp[20]];
-				nAccZ   = [self decrypt:dp[21]];
-				nButtonData = [self decrypt:dp[22]];
-			} else if (expType == WiiClassicController) {
-				cButtonData = (unsigned short)([self decrypt:dp[21]] << 8) + [self decrypt:dp[22]];
 				
-				cStickX1 = [self decrypt:dp[17]] & 0x3F;
-				cStickY1 = [self decrypt:dp[18]] & 0x3F;
-				
-				cStickX2 = ([self decrypt:dp[17]] & 0xC0) >> 3 + ([self decrypt:dp[18]] & 0xC0) >> 5 + ([self decrypt:dp[19]] & 0x80) >> 7; 
-				cStickY2 =  [self decrypt:dp[19]] & 0x0F;
-				
-				cAnalogR =  [self decrypt:dp[20]] & 0x0F;
-				cAnalogL = ( [self decrypt:dp[20]] & 0xE0) >> 5 + ( [self decrypt:dp[19]] & 0x60) >> 2;
-			}
-		} // buttons, motion sensors, expansion port
-		
-		if (isExpansionPortEnabled) {
-			if (expType == WiiNunchuk) {
-				[self sendWiiNunchukButtonEvent:nButtonData];
-				[_delegate accelerationChanged:WiiNunchukAccelerationSensor accX:nAccX accY:nAccY accZ:nAccZ];
-				[_delegate joyStickChanged:WiiNunchukJoyStick tiltX:nStickX tiltY:nStickY];
-			} else if (expType == WiiClassicController){
-				[self sendWiiClassicControllerButtonEvent:cButtonData];
-				[_delegate joyStickChanged:WiiClassicControllerLeftJoyStick tiltX:cStickX1 tiltY:cStickY1];
-				[_delegate joyStickChanged:WiiClassicControllerRightJoyStick tiltX:cStickX2 tiltY:cStickY2];
-				
-				[_delegate analogButtonChanged:WiiClassicControllerLeftButton amount:cAnalogL];
-				[_delegate analogButtonChanged:WiiClassicControllerRightButton amount:cAnalogR];
-
-			}			
+		// report contains extension data		
+		switch (dp[1]) {
+			case 0x34 :
+			case 0x35 :
+			case 0x36 :
+			case 0x37 : 
+				[self handleExtensionData: dp length: dataLength];
+				break;
 		}
 		
-		
+		// report contains IR data
+		if (dp[1] & 0x02) {
+			[self handleIRData: dp length: dataLength];
+		} // report contains IR data
+
 		// report contains motion sensor data
 		if (dp[1] & 0x01) {
 			
@@ -747,19 +927,6 @@ enum {
 			//	printf("orientation: %d\n", orientation);
 		} // report contains motion sensor data
 		
-		// report contains IR data
-		if (dp[1] & 0x02) {
-			int i;
-			for(i=0 ; i < 4 ; i++) { 
-				irData[i].x = dp[7 + 3 * i];
-				irData[i].y = dp[8 + 3 * i];
-				irData[i].s = dp[9 + 3 * i];
-				irData[i].x += (irData[i].s & 0x30) << 4;
-				irData[i].y += (irData[i].s & 0xC0) << 2;
-				irData[i].s &= 0x0F;
-			} 
-		} // report contains IR data
-
 } // handleButtonReport
 
 
@@ -794,49 +961,6 @@ enum {
 		[self handleButtonReport:dp length:dataLength];
 	} 	// report contains button info
 	
-	
-	// ??? Why does the below get executed regardless of the report type?
-	float ox, oy;
-	if (irData[0].s < 0x0F && irData[1].s < 0x0F) {
-		int l = leftPoint, r;
-		if (leftPoint == -1) {
-			switch (orientation) {
-				case 0: l = (irData[0].x < irData[1].x)?0:1; break;
-				case 1: l = (irData[0].y > irData[1].y)?0:1; break;
-				case 2: l = (irData[0].x > irData[1].x)?0:1; break;
-				case 3: l = (irData[0].y < irData[1].y)?0:1; break;
-			}
-			leftPoint = l;
-		}
-		r = 1-l;
-		
-		float dx = irData[r].x - irData[l].x;
-		float dy = irData[r].y - irData[l].y;
-		
-		float d = sqrt(dx*dx+dy*dy);
-		
-		dx /= d;
-		dy /= d;
-		
-		float cx = (irData[l].x+irData[r].x)/1024.0 - 1;
-		float cy = (irData[l].y+irData[r].y)/1024.0 - .75;
-		
-		//		float angle = atan2(dy, dx);
-		
-		ox = -dy*cy-dx*cx;
-		oy = -dx*cy+dy*cx;
-		//		printf("x:%5.2f;  y: %5.2f;  angle: %5.1f\n", ox, oy, angle*180/M_PI);
-	} else {
-		ox = oy = -100;
-		if (leftPoint != -1) {
-			//	printf("Not tracking.\n");
-			leftPoint = -1;
-		}
-	}
-	
-	if (dp[1] & 0x02)
-		[_delegate irPointMovedX:ox Y:oy];
-		
 	//if (nil != _delegate)
 		//[_delegate dataChanged:buttonData accX:accX accY:accY accZ:accZ mouseX:ox mouseY:oy];
 	//[_delegate dataChanged:buttonData accX:irData[0].x/4 accY:irData[0].y/3 accZ:irData[0].s*16];
