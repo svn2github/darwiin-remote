@@ -117,7 +117,7 @@ enum{
 	
 	BOOL readingRegister;
 	BOOL isMotionSensorEnabled, isIRSensorEnabled, isVibrationEnabled, isExpansionPortEnabled;
-	BOOL isExpansionPortAttached;
+	BOOL isExpansionPortAttached, initExpPort;
 	BOOL isLED1Illuminated, isLED2Illuminated, isLED3Illuminated, isLED4Illuminated;
 	NSTimer* statusTimer;
 	IOBluetoothUserNotification *disconnectNotification;
@@ -178,6 +178,7 @@ enum{
 @interface NSObject( WiiRemoteDelegate )
 
 - (void) irPointMovedX:(float)px Y:(float)py;
+- (void) rawIRData: (IRData[4])irData;
 - (void) buttonChanged:(WiiButtonType)type isPressed:(BOOL)isPressed;
 - (void) accelerationChanged:(WiiAccelerationSensorType)type accX:(unsigned char)accX accY:(unsigned char)accY accZ:(unsigned char)accZ;
 - (void) joyStickChanged:(WiiJoyStickType)type tiltX:(unsigned char)tiltX tiltY:(unsigned char)tiltY;

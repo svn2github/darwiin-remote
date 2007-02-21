@@ -79,6 +79,7 @@ enum {
 	isExpansionPortEnabled = NO;
 	isExpansionPortAttached = NO;
 	expType = WiiExpNotAttached;
+//	initExpPort = NO;
 	
 	return self;
 }
@@ -211,8 +212,7 @@ enum {
 }
 
 - (IOReturn)sendCommand:(const unsigned char*)data length:(size_t)length{
-	
-	
+		
 	unsigned char buf[40];
 	memset(buf,0,40);
 	buf[0] = 0x52;
@@ -231,14 +231,17 @@ enum {
 	
 	IOReturn ret;
 	
+	usleep(10000);  // Done to make sure commands don't happen too fast.
+	
 	for (i = 0; i < 10; i++){
-		ret = [cchan writeSync:buf length:length];
+		ret = [cchan writeSync:buf length:length];		
 		if (kIOReturnSuccess == ret)
 			break;
 		usleep(10000);
+//	NSLog(@"IOReturn for command x%00X = %i", buf[1], ret);		
 	}
 	
-	if (ret == kIOReturnNoDevice) {
+	if (ret != kIOReturnSuccess) {
 		[self disconnected: nil fromDevice:wiiDevice];
 	}
 	
@@ -322,14 +325,13 @@ enum {
 	*/
 		
 	if (isIRSensorEnabled) {
-		if (!isExpansionPortEnabled) { 
-			cmd[2] = 0x33; // Buttons, Accelerometer, and 12 IR Bytes.
-			wiiIRMode = kWiiIRModeExtended;
-		}
 		
 		if (isExpansionPortEnabled) {
 			cmd[2] = 0x36;	// Buttons, 10 IR Bytes, 9 Extension Bytes
 			wiiIRMode = kWiiIRModeBasic;
+		} else {
+			cmd[2] = 0x33; // Buttons, Accelerometer, and 12 IR Bytes.
+			wiiIRMode = kWiiIRModeExtended;		
 		}
 		
 		// Set IR Mode
@@ -337,12 +339,17 @@ enum {
 		usleep(10000);
 
 	 } else {
-		if (!isExpansionPortEnabled) cmd[2] = 0x30; // Buttons
-		if (isExpansionPortEnabled)	 cmd[2] = 0x34;	// Buttons, 19 Extension Bytes	 
+	 
+		if (isExpansionPortEnabled) {
+			 cmd[2] = 0x34;	// Buttons, 19 Extension Bytes	 
+		} else {
+			cmd[2] = 0x30; // Buttons
+		}
 	 }
 
 	if (isMotionSensorEnabled)	cmd[2] |= 0x01;	// Add Accelerometer
 	
+	usleep(10000);
 	return [self sendCommand:cmd length:3];
 
 } // requestUpdates
@@ -396,21 +403,21 @@ enum {
 	if (isVibrationEnabled)	cmd[1] |= 0x01;
 	if (isIRSensorEnabled)	cmd[1] |= 0x04;
 	if (ret = [self sendCommand:cmd length:2]) return ret;
+	usleep(10000);
 	
 	// set register 0x1a (ir enable 2)
 	unsigned char cmd2[] = {0x1a, 0x00};
 	if (enabled)	cmd2[1] |= 0x04;
 	if (ret = [self sendCommand:cmd2 length:2]) return ret;
+	usleep(10000);
 
 	if(enabled){
 		NSLog(@"Enabling IR Sensor");
 		
-
 		// based on marcan's method, found on wiili wiki:
 		// tweaked to include some aspects of cliff's setup procedure in the hopes
 		// of it actually turning on 100% of the time (was seeing 30-40% failure rate before)
 		// the sleeps help it it seems
-		usleep(10000);
 
 		// start initializing camera
 		if (ret = [self writeData:(darr){0x01} at:0x04B00030 length:1]) return ret;
@@ -420,24 +427,10 @@ enum {
 		if (ret = [self writeData:(darr){0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x90, 0x00, 0xC0} at:0x04B00000 length:9]) return ret;
 		usleep(10000);
 		
-/*		
-		// set sensitivity block 1
-		if (ret = [self writeData:(darr){0x90} at:0x04B00006 length:1]) return ret;
-		usleep(10000);
-		
-		if (ret = [self writeData:(darr){0xC0} at:0x04B00008 length:1]) return ret;
-		usleep(10000);
-*/		
 		// set sensitivity block 2
 		if (ret = [self writeData:(darr){0x40, 0x00} at:0x04B0001A length:2]) return ret;
 		usleep(10000);
-		
-		// Set IR Mode
-//		wiiIRMode = isExpansionPortEnabled ? kWiiIRModeBasic : kWiiIRModeExtended;
-		
-//		if (ret = [self writeData:(darr){ wiiIRMode } at:0x04B00033 length:1]) return ret;
-//		usleep(10000);
-		
+				
 		// finish initializing camera
 		if (ret = [self writeData:(darr){0x08} at:0x04B00030 length:1]) return ret;
 		usleep(10000);
@@ -595,10 +588,6 @@ enum {
 		}
 		printf("\n");
 	}**/
-
-	// wiimote buttons
-	buttonData = ((short)dp[2] << 8) + dp[3];
-	[self sendWiiRemoteButtonEvent:buttonData];
 	 
 	// specify attached expasion device
 	if ((dp[5] == 0x00) && (dp[6] == 0xF0)){
@@ -619,9 +608,9 @@ enum {
 			NSLog(@"Unknown device connected (%00X). ", [self decrypt:dp[21]]);
 			expType = WiiExpNotAttached;
 		}
+//		initExpPort = NO;
 		return;
 	}
-		
 		
 	// wiimote calibration data
 	if (!readingRegister && dp[5] == 0x00 && dp[6] == 0x20){
@@ -663,6 +652,10 @@ enum {
 		}
 	} // expansion device calibration data
 	
+	// wiimote buttons
+	buttonData = ((short)dp[2] << 8) + dp[3];
+	[self sendWiiRemoteButtonEvent:buttonData];
+	
 } // handleRAMData
 
 -(void) handleStatusReport:(unsigned char *)dp length:(size_t)dataLength {
@@ -682,6 +675,8 @@ enum {
 			if (isExpansionPortAttached == NO) {
 				
 				isExpansionPortAttached = YES;
+				
+//				initExpPort = YES;
 				
 				IOReturn ret = [self writeData:(darr){0x00} at:(unsigned long)0x04A40040 length:1]; // Initialize the device
 				
@@ -823,7 +818,7 @@ enum {
 			irData[2*i].y = dp[(startByte +1) + (5 * i)];
 			irData[2*i].y += (dp[(startByte +2) + (5 * i)] & 0xC0) << 2;
 			
-			irData[2*i].s = 0x08;  // No size is given in 10 byte report.
+			irData[2*i].s = 0x05;  // No size is given in 10 byte report.
 			
 			irData[(2*i)+1].x = dp[(startByte +3)+ (5 * i)];
 			irData[(2*i)+1].x += (dp[(startByte +2) + (5 * i)] & 0x03) << 8;
@@ -831,11 +826,11 @@ enum {
 			irData[(2*i)+1].y = dp[(startByte +4) + (5 * i)];
 			irData[(2*i)+1].y += (dp[(startByte +2) + (5 * i)] & 0x0C) << 6;
 			
-			irData[(2*i)+1].s = 0x08;  // No size is given in 10 byte report.
+			irData[(2*i)+1].s = 0x05;  // No size is given in 10 byte report.
 		}
 	}
 
-	NSLog(@"IR Data %00x,%00x  %00x,%00x", irData[0].x, irData[0].y, irData[1].x, irData[1].y);
+//	NSLog(@"IR Data %00x,%00x  %00x,%00x", irData[0].x, irData[0].y, irData[1].x, irData[1].y);
 
 	float ox, oy;
 	if (irData[0].s < 0x0F && irData[1].s < 0x0F) {
@@ -876,6 +871,7 @@ enum {
 	}
 	
 	[_delegate irPointMovedX:ox Y:oy];
+	[_delegate rawIRData: irData];
 	
 } // handleIRData
 
