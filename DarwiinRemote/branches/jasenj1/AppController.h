@@ -34,6 +34,7 @@
 	IBOutlet NSWindow* mainWindow;
 	IBOutlet PreferenceWindow* preferenceWindow;
 	IBOutlet NSWindow* enterNameWindow;
+	IBOutlet NSWindow* irWindow;
 	
 	IBOutlet NSButton* upButton;
 	IBOutlet NSButton* downButton;
@@ -53,6 +54,7 @@
 	
 	IBOutlet QCView* wiimoteQCView;
 	IBOutlet QCView* joystickQCView;
+	IBOutlet QCView* irQCView;
 
 	IBOutlet NSTextField* newNameField;
 	
@@ -66,6 +68,22 @@
 	
 	IBOutlet NSTextField* joystickX;
 	IBOutlet NSTextField* joystickY;
+	
+	IBOutlet NSTextField* irPoint1X;
+	IBOutlet NSTextField* irPoint1Y;
+	IBOutlet NSTextField* irPoint1Size;
+
+	IBOutlet NSTextField* irPoint2X;
+	IBOutlet NSTextField* irPoint2Y;
+	IBOutlet NSTextField* irPoint2Size;
+
+	IBOutlet NSTextField* irPoint3X;
+	IBOutlet NSTextField* irPoint3Y;
+	IBOutlet NSTextField* irPoint3Size;
+
+	IBOutlet NSTextField* irPoint4X;
+	IBOutlet NSTextField* irPoint4Y;
+	IBOutlet NSTextField* irPoint4Size;
 	
 	WiiRemoteDiscovery *discovery;
 	WiiRemote* wii;
@@ -100,6 +118,8 @@
 - (void)sendKeyboardEvent:(CGKeyCode)keyCode keyDown:(BOOL)keyDown;
 - (IBAction)enterSaveName:(id)sender;
 - (IBAction)cancelEnterSaveName:(id)sender;
+
+- (IBAction)showHideIRWindow:(id)sender;
 
 - (void) sendModifierKeys:(id)map isPressed:(BOOL)isPressed;
 @end

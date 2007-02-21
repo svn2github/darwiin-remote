@@ -3,7 +3,16 @@
 
 @implementation AppController
 
-
+- (IBAction)showHideIRWindow:(id)sender
+{
+	if ([irWindow isVisible]) {
+		[sender setTitle:@"Show IR Info"];
+		[irWindow orderOut:self];
+	} else {
+		[sender setTitle:@"Hide IR Info"];
+		[irWindow makeKeyAndOrderFront:self];
+	}
+}
 
 - (IBAction)setForceFeedbackEnabled:(id)sender
 {
@@ -332,8 +341,80 @@
 		CFRelease(event);	
 	}
 	
-}
+} // irPointMoved
 
+- (void) rawIRData:(IRData[4])irData {
+		[irPoint1X setStringValue: [NSString stringWithFormat:@"%00X", irData[0].x]];		
+		[irPoint1Y setStringValue: [NSString stringWithFormat:@"%00X", irData[0].y]];		
+		[irPoint1Size setStringValue: [NSString stringWithFormat:@"%00X", irData[0].s]];		
+
+		[irPoint2X setStringValue: [NSString stringWithFormat:@"%00X", irData[1].x]];		
+		[irPoint2Y setStringValue: [NSString stringWithFormat:@"%00X", irData[1].y]];		
+		[irPoint2Size setStringValue: [NSString stringWithFormat:@"%00X", irData[1].s]];		
+
+		[irPoint3X setStringValue: [NSString stringWithFormat:@"%00X", irData[2].x]];		
+		[irPoint3Y setStringValue: [NSString stringWithFormat:@"%00X", irData[2].y]];		
+		[irPoint3Size setStringValue: [NSString stringWithFormat:@"%00X", irData[2].s]];		
+	
+		[irPoint4X setStringValue: [NSString stringWithFormat:@"%00X", irData[3].x]];		
+		[irPoint4Y setStringValue: [NSString stringWithFormat:@"%00X", irData[3].y]];		
+		[irPoint4Size setStringValue: [NSString stringWithFormat:@"%00X", irData[3].s]];
+		
+		if (irData[0].s != 0xF) {
+			float scaledX = ((irData[0].x / 1024.0) * 2.0) - 1.0;
+			float scaledY = ((irData[0].y / 768.0) * 1.5) - 0.75;
+			float scaledSize = irData[0].s / 16.0;
+			
+			[irQCView setValue:[NSNumber numberWithFloat: scaledX] forInputKey:[NSString stringWithString:@"Point1X"]];
+			[irQCView setValue:[NSNumber numberWithFloat: scaledY] forInputKey:[NSString stringWithString:@"Point1Y"]];
+			[irQCView setValue:[NSNumber numberWithFloat: scaledSize] forInputKey:[NSString stringWithString:@"Point1Size"]];
+
+			[irQCView setValue:[NSNumber numberWithBool: YES] forInputKey:[NSString stringWithString:@"Point1Enable"]];		
+		} else {
+			[irQCView setValue:[NSNumber numberWithBool: NO] forInputKey:[NSString stringWithString:@"Point1Enable"]];		
+		}
+
+		if (irData[1].s != 0xF) {
+			float scaledX = ((irData[1].x / 1024.0) * 2.0) - 1.0;
+			float scaledY = ((irData[1].y / 768.0) * 1.5) - 0.75;
+			float scaledSize = irData[1].s / 16.0;
+			
+			[irQCView setValue:[NSNumber numberWithFloat: scaledX] forInputKey:[NSString stringWithString:@"Point2X"]];
+			[irQCView setValue:[NSNumber numberWithFloat: scaledY] forInputKey:[NSString stringWithString:@"Point2Y"]];
+			[irQCView setValue:[NSNumber numberWithFloat: scaledSize] forInputKey:[NSString stringWithString:@"Point2Size"]];
+
+			[irQCView setValue:[NSNumber numberWithBool: YES] forInputKey:[NSString stringWithString:@"Point2Enable"]];		
+		} else {
+			[irQCView setValue:[NSNumber numberWithBool: NO] forInputKey:[NSString stringWithString:@"Point2Enable"]];		
+		}
+
+		if (irData[2].s != 0xF) {
+			float scaledX = ((irData[2].x / 1024.0) * 2.0) - 1.0;
+			float scaledY = ((irData[2].y / 768.0) * 1.5) - 0.75;
+			float scaledSize = irData[2].s / 16.0;
+			
+			[irQCView setValue:[NSNumber numberWithFloat: scaledX] forInputKey:[NSString stringWithString:@"Point3X"]];
+			[irQCView setValue:[NSNumber numberWithFloat: scaledY] forInputKey:[NSString stringWithString:@"Point3Y"]];
+			[irQCView setValue:[NSNumber numberWithFloat: scaledSize] forInputKey:[NSString stringWithString:@"Point3Size"]];
+
+			[irQCView setValue:[NSNumber numberWithBool: YES] forInputKey:[NSString stringWithString:@"Point3Enable"]];		
+		} else {
+			[irQCView setValue:[NSNumber numberWithBool: NO] forInputKey:[NSString stringWithString:@"Point3Enable"]];		
+		}
+		if (irData[3].s != 0xF) {
+			float scaledX = ((irData[3].x / 1024.0) * 2.0) - 1.0;
+			float scaledY = ((irData[3].y / 768.0) * 1.5) - 0.75;
+			float scaledSize = irData[3].s / 16.0;
+			
+			[irQCView setValue:[NSNumber numberWithFloat: scaledX] forInputKey:[NSString stringWithString:@"Point4X"]];
+			[irQCView setValue:[NSNumber numberWithFloat: scaledY] forInputKey:[NSString stringWithString:@"Point4Y"]];
+			[irQCView setValue:[NSNumber numberWithFloat: scaledSize] forInputKey:[NSString stringWithString:@"Point4Size"]];
+
+			[irQCView setValue:[NSNumber numberWithBool: YES] forInputKey:[NSString stringWithString:@"Point4Enable"]];		
+		} else {
+			[irQCView setValue:[NSNumber numberWithBool: NO] forInputKey:[NSString stringWithString:@"Point4Enable"]];		
+		}
+}
 
 
 - (void) buttonChanged:(WiiButtonType)type isPressed:(BOOL)isPressed{
@@ -397,9 +478,12 @@
 
 	}else if (type == WiiNunchukCButton){
 		map = [mappings valueForKeyPath:@"nunchuk.c"];
+		[joystickQCView setValue:[NSNumber numberWithBool: isPressed] forInputKey:[NSString stringWithString:@"CEnable"]];
+
 		NSLog(@"C Button");
 	}else if (type == WiiNunchukZButton){
 		map = [mappings valueForKeyPath:@"nunchuk.z"];
+		[joystickQCView setValue:[NSNumber numberWithBool: isPressed] forInputKey:[NSString stringWithString:@"ZEnable"]];
 		NSLog(@"Z Button");
 	}
 	
