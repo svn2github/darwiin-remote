@@ -58,7 +58,7 @@
 		32CA4F630368D1EE00C91783 /* WiiRemote_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WiiRemote_Prefix.pch; sourceTree = "<group>"; };
 		471444FB0B8BD97F009B5DD7 /* IR Data.qtz */ = {isa = PBXFileReference; lastKnownFileType = file; path = "IR Data.qtz"; sourceTree = "<group>"; };
 		47653BBA0B6EEF1400F7DFEA /* QuartzComposer.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzComposer.framework; path = /Developer/SDKs/MacOSX10.4u.sdk/System/Library/Frameworks/Quartz.framework/Frameworks/QuartzComposer.framework; sourceTree = "<absolute>"; };
-		47653BC50B6EEFEA00F7DFEA /* WiiRemote.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WiiRemote.framework; path = "/Users/jasenj1/src/darwiin-remote/WiiRemoteFramework/branches/jasenj1/build/Release/WiiRemote.framework"; sourceTree = "<absolute>"; };
+		47653BC50B6EEFEA00F7DFEA /* WiiRemote.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WiiRemote.framework; path = ../../../WiiRemoteFramework/branches/jasenj1/build/Release/WiiRemote.framework; sourceTree = SOURCE_ROOT; };
 		47653BDF0B6EF34400F7DFEA /* Joystick.qtz */ = {isa = PBXFileReference; lastKnownFileType = file; path = Joystick.qtz; sourceTree = "<group>"; };
 		47653BE10B6EF35900F7DFEA /* Wiimote Buttons.qtz */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Wiimote Buttons.qtz"; sourceTree = "<group>"; };
 		531447E10B3010A900757188 /* ApplicationServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ApplicationServices.framework; path = /System/Library/Frameworks/ApplicationServices.framework; sourceTree = "<absolute>"; };
