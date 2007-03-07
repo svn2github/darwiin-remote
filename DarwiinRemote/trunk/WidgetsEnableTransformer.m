@@ -29,8 +29,8 @@
 	switch([beforeObject intValue]){
 		
 		case 0:
-		case 16:
-		case 17:
+		case 28:
+		case 29:
 			return [[NSNumber alloc] initWithBool:NO];
 		default:
 			return [[NSNumber alloc] initWithBool:YES];

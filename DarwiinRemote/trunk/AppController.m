@@ -83,7 +83,7 @@
 
 - (id)init{
 	
-	modes = [[NSArray arrayWithObjects:@"Nothing", @"Key", @"\tReturn", @"\tTab", @"\tEsc", @"\tBackspace", @"\tUp", @"\tDown", @"\tLeft",@"\tRight", @"\tPage Up", @"\tPage Down", @"Left Click", @"Left Click2", @"Right Click", @"Right Click2", @"Toggle Mouse (Motion)", @"Toggle Mouse (IR)",nil] retain];
+	modes = [[NSArray arrayWithObjects:@"Nothing", @"Key", @"\tReturn", @"\tTab", @"\tEsc", @"\tBackspace", @"\tUp", @"\tDown", @"\tLeft",@"\tRight", @"\tPage Up", @"\tPage Down", @"\tF1", @"\tF2", @"\tF3", @"\tF4", @"\tF5", @"\tF6", @"\tF7", @"\tF8", @"\tF9", @"\tF10", @"\tF11", @"\tF12", @"Left Click", @"Left Click2", @"Right Click", @"Right Click2", @"Toggle Mouse (Motion)", @"Toggle Mouse (IR)",nil] retain];
 
 	
 	id transformer = [[[WidgetsEnableTransformer alloc] init] autorelease];
@@ -225,7 +225,9 @@
 	[textView setString:[NSString stringWithFormat:@"%@\nPlease press the synchronize button", [textView string]]];
 }
 
-- (void) irPointMovedX:(float)px Y:(float)py{
+- (void) irPointMovedX:(float)px Y:(float)py wiiRemote:(WiiRemote*)wiiRemote{
+	
+	NSLog(@"x: %f, y: %f", py, py);
 	
 	if (mouseEventMode != 2)
 		return;
@@ -248,8 +250,8 @@
 	id config = [mappingController selection];
 	float sens2 = [[config valueForKey:@"sensitivity2"] floatValue] * [[config valueForKey:@"sensitivity2"] floatValue];
 	
-	float newx = (px*1*sens2)*dispWidth + dispWidth/2;
-	float newy = -(py*1*sens2)*dispWidth + dispHeight/2;
+	float newx = (px*sens2)*dispWidth + dispWidth/2;
+	float newy = -(py*sens2)*dispWidth + dispHeight/2;
 	
 	if (newx < 0) newx = 0;
 	if (newy < 0) newy = 0;
@@ -286,6 +288,8 @@
 	if (point.y < 0)
 		point.y = 0;
 	
+	
+	NSLog(@"x: %f  y: %f", point.x, point.y);
 	
 	
 	if (!isLeftButtonDown && !isRightButtonDown){
@@ -324,7 +328,7 @@
 
 
 
-- (void) buttonChanged:(WiiButtonType)type isPressed:(BOOL)isPressed{
+- (void) buttonChanged:(WiiButtonType)type isPressed:(BOOL)isPressed wiiRemote:(WiiRemote*)wiiRemote{
 		 
 	id mappings = [mappingController selection];
 	id map = nil;
@@ -376,6 +380,36 @@
 		map = [mappings valueForKeyPath:@"nunchuk.c"];
 	}else if (type == WiiNunchukZButton){
 		map = [mappings valueForKeyPath:@"nunchuk.z"];
+	}else if (type == WiiClassicControllerXButton){
+		map = [mappings valueForKeyPath:@"classiccontroller.x"];
+	}else if (type == WiiClassicControllerYButton){
+		map = [mappings valueForKeyPath:@"classiccontroller.y"];
+	}else if (type == WiiClassicControllerAButton){
+		map = [mappings valueForKeyPath:@"classiccontroller.a"];
+	}else if (type == WiiClassicControllerBButton){
+		map = [mappings valueForKeyPath:@"classiccontroller.b"];
+	}else if (type == WiiClassicControllerLButton){
+		map = [mappings valueForKeyPath:@"classiccontroller.l"];
+	}else if (type == WiiClassicControllerRButton){
+		map = [mappings valueForKeyPath:@"classiccontroller.r"];
+	}else if (type == WiiClassicControllerZLButton){
+		map = [mappings valueForKeyPath:@"classiccontroller.zl"];
+	}else if (type == WiiClassicControllerZRButton){
+		map = [mappings valueForKeyPath:@"classiccontroller.zr"];
+	}else if (type == WiiClassicControllerUpButton){
+		map = [mappings valueForKeyPath:@"classiccontroller.up"];
+	}else if (type == WiiClassicControllerDownButton){
+		map = [mappings valueForKeyPath:@"classiccontroller.down"];
+	}else if (type == WiiClassicControllerLeftButton){
+		map = [mappings valueForKeyPath:@"classiccontroller.left"];
+	}else if (type == WiiClassicControllerRightButton){
+		map = [mappings valueForKeyPath:@"classiccontroller.right"];
+	}else if (type == WiiClassicControllerMinusButton){
+		map = [mappings valueForKeyPath:@"classiccontroller.minus"];
+	}else if (type == WiiClassicControllerHomeButton){
+		map = [mappings valueForKeyPath:@"classiccontroller.home"];
+	}else if (type == WiiClassicControllerPlusButton){
+		map = [mappings valueForKeyPath:@"classiccontroller.plus"];
 	}
 	
 	
@@ -437,6 +471,66 @@
 		[self sendModifierKeys:map isPressed:isPressed]; 
 		
 		[self sendKeyboardEvent:121 keyDown:isPressed];
+		
+	}else if ([modeName isEqualToString:@"\tF1"]){
+		[self sendModifierKeys:map isPressed:isPressed]; 
+		
+		[self sendKeyboardEvent:122 keyDown:isPressed];
+		
+	}else if ([modeName isEqualToString:@"\tF2"]){
+		[self sendModifierKeys:map isPressed:isPressed]; 
+		
+		[self sendKeyboardEvent:120 keyDown:isPressed];
+		
+	}else if ([modeName isEqualToString:@"\tF3"]){
+		[self sendModifierKeys:map isPressed:isPressed]; 
+		
+		[self sendKeyboardEvent:99 keyDown:isPressed];
+		
+	}else if ([modeName isEqualToString:@"\tF4"]){
+		[self sendModifierKeys:map isPressed:isPressed]; 
+		
+		[self sendKeyboardEvent:118 keyDown:isPressed];
+		
+	}else if ([modeName isEqualToString:@"\tF5"]){
+		[self sendModifierKeys:map isPressed:isPressed]; 
+		
+		[self sendKeyboardEvent:96 keyDown:isPressed];
+		
+	}else if ([modeName isEqualToString:@"\tF6"]){
+		[self sendModifierKeys:map isPressed:isPressed]; 
+		
+		[self sendKeyboardEvent:97 keyDown:isPressed];
+		
+	}else if ([modeName isEqualToString:@"\tF7"]){
+		[self sendModifierKeys:map isPressed:isPressed]; 
+		
+		[self sendKeyboardEvent:98 keyDown:isPressed];
+		
+	}else if ([modeName isEqualToString:@"\tF8"]){
+		[self sendModifierKeys:map isPressed:isPressed]; 
+		
+		[self sendKeyboardEvent:100 keyDown:isPressed];
+		
+	}else if ([modeName isEqualToString:@"\tF9"]){
+		[self sendModifierKeys:map isPressed:isPressed]; 
+		
+		[self sendKeyboardEvent:101 keyDown:isPressed];
+		
+	}else if ([modeName isEqualToString:@"\tF10"]){
+		[self sendModifierKeys:map isPressed:isPressed]; 
+		
+		[self sendKeyboardEvent:109 keyDown:isPressed];
+		
+	}else if ([modeName isEqualToString:@"\tF11"]){
+		[self sendModifierKeys:map isPressed:isPressed]; 
+		
+		[self sendKeyboardEvent:103 keyDown:isPressed];
+		
+	}else if ([modeName isEqualToString:@"\tF12"]){
+		[self sendModifierKeys:map isPressed:isPressed]; 
+		
+		[self sendKeyboardEvent:111 keyDown:isPressed];
 		
 	}else if ([modeName isEqualToString:@"Left Click"]){
 		[self sendModifierKeys:map isPressed:isPressed];
@@ -739,15 +833,17 @@
 }
 
 
-- (void) joyStickChanged:(WiiJoyStickType)type tiltX:(unsigned char)tiltX tiltY:(unsigned char)tiltY{
+- (void) joyStickChanged:(WiiJoyStickType)type tiltX:(unsigned char)tiltX tiltY:(unsigned char)tiltY wiiRemote:(WiiRemote*)wiiRemote{
 	if (type == WiiNunchukJoyStick){
 		
 	}
 }
 
+- (void) analogButtonChanged:(WiiButtonType)type amount:(unsigned char)pressure wiiRemote:(WiiRemote*)wiiRemote{
+	
+}
 
-
-- (void) accelerationChanged:(WiiAccelerationSensorType)type accX:(unsigned char)accX accY:(unsigned char)accY accZ:(unsigned char)accZ{
+- (void) accelerationChanged:(WiiAccelerationSensorType)type accX:(unsigned char)accX accY:(unsigned char)accY accZ:(unsigned char)accZ wiiRemote:(WiiRemote*)wiiRemote{
 	
 	if (type == WiiNunchukAccelerationSensor){
 		[graphView2 setData:accX y:accY z:accZ];
@@ -957,80 +1053,77 @@
 	[fetch setEntity:entity];
 	
 	NSArray* results = [context executeFetchRequest:fetch error:&error];
-	if ([results count] > 0){
-		return;
+	
+	
+	if ([results count] == 0){
+		NSManagedObject* config = [self createNewConfigration:@"Apple Remote"];
+		[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"wiimote.up.command"];
+		[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"wiimote.up.control"];
+		[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"wiimote.up.option"];
+		[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"wiimote.up.shift"];
+		[config setValue:[[NSNumber alloc] initWithInt:6] forKeyPath:@"wiimote.up.mode"];
+		
+		[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"wiimote.down.command"];
+		[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"wiimote.down.control"];
+		[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"wiimote.down.option"];
+		[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"wiimote.down.shift"];
+		[config setValue:[[NSNumber alloc] initWithInt:7] forKeyPath:@"wiimote.down.mode"];
+		
+		[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"wiimote.left.command"];
+		[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"wiimote.left.control"];
+		[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"wiimote.left.option"];
+		[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"wiimote.left.shift"];
+		[config setValue:[[NSNumber alloc] initWithInt:8] forKeyPath:@"wiimote.left.mode"];
+		
+		[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"wiimote.right.command"];
+		[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"wiimote.right.control"];
+		[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"wiimote.right.option"];
+		[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"wiimote.right.shift"];
+		[config setValue:[[NSNumber alloc] initWithInt:9] forKeyPath:@"wiimote.right.mode"];
+		
+		[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"wiimote.a.command"];
+		[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"wiimote.a.control"];
+		[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"wiimote.a.option"];
+		[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"wiimote.a.shift"];
+		[config setValue:[[NSNumber alloc] initWithInt:24] forKeyPath:@"wiimote.a.mode"];
+		
+		[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"wiimote.b.command"];
+		[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"wiimote.b.control"];
+		[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"wiimote.b.option"];
+		[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"wiimote.b.shift"];
+		[config setValue:[[NSNumber alloc] initWithInt:2] forKeyPath:@"wiimote.b.mode"];
+		
+		[config setValue:[[NSNumber alloc] initWithBool:YES] forKeyPath:@"wiimote.plus.command"];
+		[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"wiimote.plus.control"];
+		[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"wiimote.plus.option"];
+		[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"wiimote.plus.shift"];
+		[config setValue:[[NSNumber alloc] initWithInt:9] forKeyPath:@"wiimote.plus.mode"];
+		
+		[config setValue:[[NSNumber alloc] initWithBool:YES] forKeyPath:@"wiimote.minus.command"];
+		[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"wiimote.minus.control"];
+		[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"wiimote.minus.option"];
+		[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"wiimote.minus.shift"];
+		[config setValue:[[NSNumber alloc] initWithInt:8] forKeyPath:@"wiimote.minus.mode"];
+		
+		[config setValue:[[NSNumber alloc] initWithBool:YES] forKeyPath:@"wiimote.home.command"];
+		[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"wiimote.home.control"];
+		[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"wiimote.home.option"];
+		[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"wiimote.home.shift"];
+		[config setValue:[[NSNumber alloc] initWithInt:4] forKeyPath:@"wiimote.home.mode"];
+		
+		[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"wiimote.one.command"];
+		[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"wiimote.one.control"];
+		[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"wiimote.one.option"];
+		[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"wiimote.one.shift"];
+		[config setValue:[[NSNumber alloc] initWithInt:28] forKeyPath:@"wiimote.one.mode"];
+		
+		[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"wiimote.two.command"];
+		[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"wiimote.two.control"];
+		[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"wiimote.two.option"];
+		[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"wiimote.two.shift"];
+		[config setValue:[[NSNumber alloc] initWithInt:29] forKeyPath:@"wiimote.two.mode"];
 	}
 	
-	
-	NSManagedObject* config = [self createNewConfigration:@"Apple Remote"];
-	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"wiimote.up.command"];
-	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"wiimote.up.control"];
-	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"wiimote.up.option"];
-	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"wiimote.up.shift"];
-	[config setValue:[[NSNumber alloc] initWithInt:6] forKeyPath:@"wiimote.up.mode"];
-	
-	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"wiimote.down.command"];
-	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"wiimote.down.control"];
-	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"wiimote.down.option"];
-	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"wiimote.down.shift"];
-	[config setValue:[[NSNumber alloc] initWithInt:7] forKeyPath:@"wiimote.down.mode"];
-	
-	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"wiimote.left.command"];
-	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"wiimote.left.control"];
-	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"wiimote.left.option"];
-	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"wiimote.left.shift"];
-	[config setValue:[[NSNumber alloc] initWithInt:8] forKeyPath:@"wiimote.left.mode"];
-
-	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"wiimote.right.command"];
-	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"wiimote.right.control"];
-	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"wiimote.right.option"];
-	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"wiimote.right.shift"];
-	[config setValue:[[NSNumber alloc] initWithInt:9] forKeyPath:@"wiimote.right.mode"];
-	
-	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"wiimote.a.command"];
-	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"wiimote.a.control"];
-	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"wiimote.a.option"];
-	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"wiimote.a.shift"];
-	[config setValue:[[NSNumber alloc] initWithInt:12] forKeyPath:@"wiimote.a.mode"];
-	
-	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"wiimote.b.command"];
-	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"wiimote.b.control"];
-	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"wiimote.b.option"];
-	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"wiimote.b.shift"];
-	[config setValue:[[NSNumber alloc] initWithInt:2] forKeyPath:@"wiimote.b.mode"];
-	
-	[config setValue:[[NSNumber alloc] initWithBool:YES] forKeyPath:@"wiimote.plus.command"];
-	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"wiimote.plus.control"];
-	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"wiimote.plus.option"];
-	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"wiimote.plus.shift"];
-	[config setValue:[[NSNumber alloc] initWithInt:9] forKeyPath:@"wiimote.plus.mode"];
-	
-	[config setValue:[[NSNumber alloc] initWithBool:YES] forKeyPath:@"wiimote.minus.command"];
-	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"wiimote.minus.control"];
-	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"wiimote.minus.option"];
-	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"wiimote.minus.shift"];
-	[config setValue:[[NSNumber alloc] initWithInt:8] forKeyPath:@"wiimote.minus.mode"];
-	
-	[config setValue:[[NSNumber alloc] initWithBool:YES] forKeyPath:@"wiimote.home.command"];
-	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"wiimote.home.control"];
-	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"wiimote.home.option"];
-	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"wiimote.home.shift"];
-	[config setValue:[[NSNumber alloc] initWithInt:4] forKeyPath:@"wiimote.home.mode"];
-	
-	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"wiimote.one.command"];
-	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"wiimote.one.control"];
-	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"wiimote.one.option"];
-	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"wiimote.one.shift"];
-	[config setValue:[[NSNumber alloc] initWithInt:16] forKeyPath:@"wiimote.one.mode"];
-	
-	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"wiimote.two.command"];
-	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"wiimote.two.control"];
-	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"wiimote.two.option"];
-	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"wiimote.two.shift"];
-	[config setValue:[[NSNumber alloc] initWithInt:17] forKeyPath:@"wiimote.two.mode"];
-	
-
-
 	[appDelegate saveAction:nil];
 	
 }
@@ -1073,43 +1166,46 @@
 	NSManagedObject* config = [NSEntityDescription insertNewObjectForEntityForName:@"KeyConfiguration" inManagedObjectContext: context];
 	NSManagedObject* wiimote = [NSEntityDescription insertNewObjectForEntityForName:@"Wiimote" inManagedObjectContext: context];
 	NSManagedObject* nunchuk = [NSEntityDescription insertNewObjectForEntityForName:@"Nunchuk" inManagedObjectContext: context];
+	NSManagedObject* ccontroller = [NSEntityDescription insertNewObjectForEntityForName:@"ClassicController" inManagedObjectContext: context];			
+	
+	[wiimote setValue:[NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context] forKey:@"one"];
+	[wiimote setValue:[NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context] forKey:@"two"];
+	[wiimote setValue:[NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context] forKey:@"a"];
+	[wiimote setValue:[NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context] forKey:@"b"];
+	[wiimote setValue:[NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context] forKey:@"minus"];
+	[wiimote setValue:[NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context] forKey:@"home"];
+	[wiimote setValue:[NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context] forKey:@"plus"];
+	[wiimote setValue:[NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context] forKey:@"up"];
+	[wiimote setValue:[NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context] forKey:@"down"];
+	[wiimote setValue:[NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context] forKey:@"left"];
+	[wiimote setValue:[NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context] forKey:@"right"];
+
+	[nunchuk setValue:[NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context] forKey:@"c"];
+	[nunchuk setValue:[NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context] forKey:@"z"];
+	[nunchuk setValue:[NSEntityDescription insertNewObjectForEntityForName:@"JoyStickMapping" inManagedObjectContext: context] forKey:@"joystick"];
 
 	
-	NSManagedObject* one = [NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context];
-	NSManagedObject* two = [NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context];
-	NSManagedObject* a = [NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context];
-	NSManagedObject* b = [NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context];
-	NSManagedObject* minus = [NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context];
-	NSManagedObject* plus = [NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context];
-	NSManagedObject* home = [NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context];
-	NSManagedObject* up = [NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context];
-	NSManagedObject* down = [NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context];
-	NSManagedObject* left = [NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context];
-	NSManagedObject* right = [NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context];
-	
-	[wiimote setValue:one forKey:@"one"];
-	[wiimote setValue:two forKey:@"two"];
-	[wiimote setValue:a forKey:@"a"];
-	[wiimote setValue:b forKey:@"b"];
-	[wiimote setValue:minus forKey:@"minus"];
-	[wiimote setValue:home forKey:@"home"];
-	[wiimote setValue:plus forKey:@"plus"];
-	[wiimote setValue:up forKey:@"up"];
-	[wiimote setValue:down forKey:@"down"];
-	[wiimote setValue:left forKey:@"left"];
-	[wiimote setValue:right forKey:@"right"];
-	
-	
-	NSManagedObject* c = [NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context];
-	NSManagedObject* z = [NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context];
-
-	[nunchuk setValue:c forKey:@"c"];
-	[nunchuk setValue:z forKey:@"z"];
-	
+	[ccontroller setValue:[NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context] forKey:@"l"];
+	[ccontroller setValue:[NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context] forKey:@"r"];
+	[ccontroller setValue:[NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context] forKey:@"a"];
+	[ccontroller setValue:[NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context] forKey:@"b"];
+	[ccontroller setValue:[NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context] forKey:@"minus"];
+	[ccontroller setValue:[NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context] forKey:@"plus"];
+	[ccontroller setValue:[NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context] forKey:@"home"];
+	[ccontroller setValue:[NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context] forKey:@"up"];
+	[ccontroller setValue:[NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context] forKey:@"down"];
+	[ccontroller setValue:[NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context] forKey:@"left"];
+	[ccontroller setValue:[NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context] forKey:@"right"];
+	[ccontroller setValue:[NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context] forKey:@"zl"];
+	[ccontroller setValue:[NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context] forKey:@"zr"];
+	[ccontroller setValue:[NSEntityDescription insertNewObjectForEntityForName:@"JoyStickMapping" inManagedObjectContext: context] forKey:@"joystickL"];
+	[ccontroller setValue:[NSEntityDescription insertNewObjectForEntityForName:@"JoyStickMapping" inManagedObjectContext: context] forKey:@"joystickR"];
 	
 	[config setValue:wiimote forKey:@"wiimote"];
 	[config setValue:nunchuk forKey:@"nunchuk"];
+	[config setValue:ccontroller forKey:@"classiccontroller"];
 	[config setValue:name forKey:@"name"];
+	[config setValue:[NSNumber numberWithFloat:[[[[NSBundle mainBundle] infoDictionary] valueForKey:@"CFBundleVersion"] floatValue]] forKey:@"version"];
 	
 	
 	return config;
