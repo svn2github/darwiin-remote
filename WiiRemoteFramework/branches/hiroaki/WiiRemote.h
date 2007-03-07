@@ -166,13 +166,13 @@ enum{
 
 @interface NSObject( WiiRemoteDelegate )
 
-- (void) irPointMovedX:(float)px Y:(float)py;
-- (void) rawIRData: (IRData[4])irData;
-- (void) buttonChanged:(WiiButtonType)type isPressed:(BOOL)isPressed;
-- (void) accelerationChanged:(WiiAccelerationSensorType)type accX:(unsigned char)accX accY:(unsigned char)accY accZ:(unsigned char)accZ;
-- (void) joyStickChanged:(WiiJoyStickType)type tiltX:(unsigned char)tiltX tiltY:(unsigned char)tiltY;
-- (void) analogButtonChanged:(WiiButtonType)type amount:(unsigned)press;
-- (void) wiiRemoteDisconnected:(IOBluetoothDevice*)device;
+- (void) irPointMovedX:(float)px Y:(float)py wiiRemote:(WiiRemote*)wiiRemote;
+- (void) rawIRData: (IRData[4])irData wiiRemote:(WiiRemote*)wiiRemote;
+- (void) buttonChanged:(WiiButtonType)type isPressed:(BOOL)isPressed wiiRemote:(WiiRemote*)wiiRemote;
+- (void) accelerationChanged:(WiiAccelerationSensorType)type accX:(unsigned char)accX accY:(unsigned char)accY accZ:(unsigned char)accZ wiiRemote:(WiiRemote*)wiiRemote;
+- (void) joyStickChanged:(WiiJoyStickType)type tiltX:(unsigned char)tiltX tiltY:(unsigned char)tiltY wiiRemote:(WiiRemote*)wiiRemote;
+- (void) analogButtonChanged:(WiiButtonType)type amount:(unsigned)press wiiRemote:(WiiRemote*)wiiRemote;
+- (void) wiiRemoteDisconnected:(IOBluetoothDevice*)device wiiRemote:(WiiRemote*)wiiRemote;
 
 
 //- (void) dataChanged:(unsigned short)buttonData accX:(unsigned char)accX accY:(unsigned char)accY accZ:(unsigned char)accZ mouseX:(float)mx mouseY:(float)my;

@@ -737,15 +737,24 @@ typedef unsigned char darr[];
 	if (isExpansionPortEnabled) {
 		if (expType == WiiNunchuk) {
 			[self sendWiiNunchukButtonEvent:nButtonData];
-			[_delegate accelerationChanged:WiiNunchukAccelerationSensor accX:nAccX accY:nAccY accZ:nAccZ];
-			[_delegate joyStickChanged:WiiNunchukJoyStick tiltX:nStickX tiltY:nStickY];
+			if ([_delegate respondsToSelector:@selector(accelerationChanged:accX:accY:accZ:)])
+				[_delegate accelerationChanged:WiiNunchukAccelerationSensor accX:nAccX accY:nAccY accZ:nAccZ];
+			
+			if ([_delegate respondsToSelector:@selector(joyStickChanged:tiltX:tiltY:)])
+				[_delegate joyStickChanged:WiiNunchukJoyStick tiltX:nStickX tiltY:nStickY];
 		} else if (expType == WiiClassicController){
 			[self sendWiiClassicControllerButtonEvent:cButtonData];
-			[_delegate joyStickChanged:WiiClassicControllerLeftJoyStick tiltX:cStickX1 tiltY:cStickY1];
-			[_delegate joyStickChanged:WiiClassicControllerRightJoyStick tiltX:cStickX2 tiltY:cStickY2];
 			
-			[_delegate analogButtonChanged:WiiClassicControllerLeftButton amount:cAnalogL];
-			[_delegate analogButtonChanged:WiiClassicControllerRightButton amount:cAnalogR];
+			if ([_delegate respondsToSelector:@selector(joyStickChanged:tiltX:tiltY:)]){
+				[_delegate joyStickChanged:WiiClassicControllerLeftJoyStick tiltX:cStickX1 tiltY:cStickY1];
+				[_delegate joyStickChanged:WiiClassicControllerRightJoyStick tiltX:cStickX2 tiltY:cStickY2];				
+			}
+
+			if ([_delegate respondsToSelector:@selector(analogButtonChanged:amount:)]){
+				[_delegate analogButtonChanged:WiiClassicControllerLeftButton amount:cAnalogL];
+				[_delegate analogButtonChanged:WiiClassicControllerRightButton amount:cAnalogR];
+			}
+
 
 		}			
 	}
@@ -833,8 +842,12 @@ typedef unsigned char darr[];
 		}
 	}
 	
-	[_delegate irPointMovedX:ox Y:oy];
-	[_delegate rawIRData: irData];
+	if ([_delegate respondsToSelector:@selector(irPointMovedX:Y:wiiRemote:)]){
+		[_delegate irPointMovedX:ox Y:oy wiiRemote:self];
+	}
+	if ([_delegate respondsToSelector:@selector(rawIRData:wiiRemote:)]){
+		[_delegate rawIRData: irData wiiRemote:self];
+	}
 	
 } // handleIRData
 
@@ -934,120 +947,141 @@ typedef unsigned char darr[];
 	if (data & kWiiRemoteTwoButton){
 		if (!buttonState[WiiRemoteTwoButton]){
 			buttonState[WiiRemoteTwoButton] = YES;
-			[_delegate buttonChanged:WiiRemoteTwoButton isPressed:buttonState[WiiRemoteTwoButton]];
+			
+			if ([_delegate respondsToSelector:@selector(buttonChanged:isPressed: wiiRemote:)])
+				[_delegate buttonChanged:WiiRemoteTwoButton isPressed:buttonState[WiiRemoteTwoButton] wiiRemote:self];
 		}
 	}else{
 		if (buttonState[WiiRemoteTwoButton]){
 			buttonState[WiiRemoteTwoButton] = NO;
-			[_delegate buttonChanged:WiiRemoteTwoButton isPressed:buttonState[WiiRemoteTwoButton]];
+			if ([_delegate respondsToSelector:@selector(buttonChanged:isPressed: wiiRemote:)])
+				[_delegate buttonChanged:WiiRemoteTwoButton isPressed:buttonState[WiiRemoteTwoButton] wiiRemote:self];
 		}
 	}
 
 	if (data & kWiiRemoteOneButton){
 		if (!buttonState[WiiRemoteOneButton]){
 			buttonState[WiiRemoteOneButton] = YES;
-			[_delegate buttonChanged:WiiRemoteOneButton isPressed:buttonState[WiiRemoteOneButton]];
+			if ([_delegate respondsToSelector:@selector(buttonChanged:isPressed: wiiRemote:)])
+				[_delegate buttonChanged:WiiRemoteOneButton isPressed:buttonState[WiiRemoteOneButton] wiiRemote:self];
 		}
 	}else{
 		if (buttonState[WiiRemoteOneButton]){
 			buttonState[WiiRemoteOneButton] = NO;
-			[_delegate buttonChanged:WiiRemoteOneButton isPressed:buttonState[WiiRemoteOneButton]];
+			if ([_delegate respondsToSelector:@selector(buttonChanged:isPressed: wiiRemote:)])
+				[_delegate buttonChanged:WiiRemoteOneButton isPressed:buttonState[WiiRemoteOneButton] wiiRemote:self];
 		}
 	}
 	
 	if (data & kWiiRemoteAButton){
 		if (!buttonState[WiiRemoteAButton]){
 			buttonState[WiiRemoteAButton] = YES;
-			[_delegate buttonChanged:WiiRemoteAButton isPressed:buttonState[WiiRemoteAButton]];
+			if ([_delegate respondsToSelector:@selector(buttonChanged:isPressed: wiiRemote:)])
+				[_delegate buttonChanged:WiiRemoteAButton isPressed:buttonState[WiiRemoteAButton] wiiRemote:self];
 		}
 	}else{
 		if (buttonState[WiiRemoteAButton]){
 			buttonState[WiiRemoteAButton] = NO;
-			[_delegate buttonChanged:WiiRemoteAButton isPressed:buttonState[WiiRemoteAButton]];
+			if ([_delegate respondsToSelector:@selector(buttonChanged:isPressed: wiiRemote:)])
+				[_delegate buttonChanged:WiiRemoteAButton isPressed:buttonState[WiiRemoteAButton] wiiRemote:self];
 		}
 	}
 	
 	if (data & kWiiRemoteBButton){
 		if (!buttonState[WiiRemoteBButton]){
 			buttonState[WiiRemoteBButton] = YES;
-			[_delegate buttonChanged:WiiRemoteBButton isPressed:buttonState[WiiRemoteBButton]];
+			if ([_delegate respondsToSelector:@selector(buttonChanged:isPressed: wiiRemote:)])
+				[_delegate buttonChanged:WiiRemoteBButton isPressed:buttonState[WiiRemoteBButton] wiiRemote:self];
 		}
 	}else{
 		if (buttonState[WiiRemoteBButton]){
 			buttonState[WiiRemoteBButton] = NO;
-			[_delegate buttonChanged:WiiRemoteBButton isPressed:buttonState[WiiRemoteBButton]];
+			if ([_delegate respondsToSelector:@selector(buttonChanged:isPressed: wiiRemote:)])
+				[_delegate buttonChanged:WiiRemoteBButton isPressed:buttonState[WiiRemoteBButton] wiiRemote:self];
 		}
 	}
 	
 	if (data & kWiiRemoteMinusButton){
 		if (!buttonState[WiiRemoteMinusButton]){
 			buttonState[WiiRemoteMinusButton] = YES;
-			[_delegate buttonChanged:WiiRemoteMinusButton isPressed:buttonState[WiiRemoteMinusButton]];
+			if ([_delegate respondsToSelector:@selector(buttonChanged:isPressed: wiiRemote:)])
+				[_delegate buttonChanged:WiiRemoteMinusButton isPressed:buttonState[WiiRemoteMinusButton] wiiRemote:self];
 		}
 	}else{
 		if (buttonState[WiiRemoteMinusButton]){
 			buttonState[WiiRemoteMinusButton] = NO;
-			[_delegate buttonChanged:WiiRemoteMinusButton isPressed:buttonState[WiiRemoteMinusButton]];
+			if ([_delegate respondsToSelector:@selector(buttonChanged:isPressed: wiiRemote:)])
+				[_delegate buttonChanged:WiiRemoteMinusButton isPressed:buttonState[WiiRemoteMinusButton] wiiRemote:self];
 		}
 	}
 	
 	if (data & kWiiRemoteHomeButton){
 		if (!buttonState[WiiRemoteHomeButton]){
 			buttonState[WiiRemoteHomeButton] = YES;
-			[_delegate buttonChanged:WiiRemoteHomeButton isPressed:buttonState[WiiRemoteHomeButton]];
+			if ([_delegate respondsToSelector:@selector(buttonChanged:isPressed: wiiRemote:)])
+				[_delegate buttonChanged:WiiRemoteHomeButton isPressed:buttonState[WiiRemoteHomeButton] wiiRemote:self];
 		}
 	}else{
 		if (buttonState[WiiRemoteHomeButton]){
 			buttonState[WiiRemoteHomeButton] = NO;
-			[_delegate buttonChanged:WiiRemoteHomeButton isPressed:buttonState[WiiRemoteHomeButton]];
+			if ([_delegate respondsToSelector:@selector(buttonChanged:isPressed: wiiRemote:)])
+				[_delegate buttonChanged:WiiRemoteHomeButton isPressed:buttonState[WiiRemoteHomeButton] wiiRemote:self];
 		}
 	}
 	
 	if (data & kWiiRemotePlusButton){
 		if (!buttonState[WiiRemotePlusButton]){
 			buttonState[WiiRemotePlusButton] = YES;
-			[_delegate buttonChanged:WiiRemotePlusButton isPressed:buttonState[WiiRemotePlusButton]];
+			if ([_delegate respondsToSelector:@selector(buttonChanged:isPressed: wiiRemote:)])
+				[_delegate buttonChanged:WiiRemotePlusButton isPressed:buttonState[WiiRemotePlusButton] wiiRemote:self];
 		}
 	}else{
 		if (buttonState[WiiRemotePlusButton]){
 			buttonState[WiiRemotePlusButton] = NO;
-			[_delegate buttonChanged:WiiRemotePlusButton isPressed:buttonState[WiiRemotePlusButton]];
+			if ([_delegate respondsToSelector:@selector(buttonChanged:isPressed: wiiRemote:)])
+				[_delegate buttonChanged:WiiRemotePlusButton isPressed:buttonState[WiiRemotePlusButton] wiiRemote:self];
 		}
 	}
 	
 	if (data & kWiiRemoteUpButton){
 		if (!buttonState[WiiRemoteUpButton]){
 			buttonState[WiiRemoteUpButton] = YES;
-			[_delegate buttonChanged:WiiRemoteUpButton isPressed:buttonState[WiiRemoteUpButton]];
+			if ([_delegate respondsToSelector:@selector(buttonChanged:isPressed: wiiRemote:)])
+				[_delegate buttonChanged:WiiRemoteUpButton isPressed:buttonState[WiiRemoteUpButton] wiiRemote:self];
 		}
 	}else{
 		if (buttonState[WiiRemoteUpButton]){
 			buttonState[WiiRemoteUpButton] = NO;
-			[_delegate buttonChanged:WiiRemoteUpButton isPressed:buttonState[WiiRemoteUpButton]];
+			if ([_delegate respondsToSelector:@selector(buttonChanged:isPressed: wiiRemote:)])
+				[_delegate buttonChanged:WiiRemoteUpButton isPressed:buttonState[WiiRemoteUpButton] wiiRemote:self];
 		}
 	}
 	
 	if (data & kWiiRemoteDownButton){
 		if (!buttonState[WiiRemoteDownButton]){
 			buttonState[WiiRemoteDownButton] = YES;
-			[_delegate buttonChanged:WiiRemoteDownButton isPressed:buttonState[WiiRemoteDownButton]];
+			if ([_delegate respondsToSelector:@selector(buttonChanged:isPressed: wiiRemote:)])
+				[_delegate buttonChanged:WiiRemoteDownButton isPressed:buttonState[WiiRemoteDownButton] wiiRemote:self];
 		}
 	}else{
 		if (buttonState[WiiRemoteDownButton]){
 			buttonState[WiiRemoteDownButton] = NO;
-			[_delegate buttonChanged:WiiRemoteDownButton isPressed:buttonState[WiiRemoteDownButton]];
+			if ([_delegate respondsToSelector:@selector(buttonChanged:isPressed: wiiRemote:)])
+				[_delegate buttonChanged:WiiRemoteDownButton isPressed:buttonState[WiiRemoteDownButton] wiiRemote:self];
 		}
 	}
 
 	if (data & kWiiRemoteLeftButton){
 		if (!buttonState[WiiRemoteLeftButton]){
 			buttonState[WiiRemoteLeftButton] = YES;
-			[_delegate buttonChanged:WiiRemoteLeftButton isPressed:buttonState[WiiRemoteLeftButton]];
+			if ([_delegate respondsToSelector:@selector(buttonChanged:isPressed: wiiRemote:)])
+				[_delegate buttonChanged:WiiRemoteLeftButton isPressed:buttonState[WiiRemoteLeftButton] wiiRemote:self];
 		}
 	}else{
 		if (buttonState[WiiRemoteLeftButton]){
 			buttonState[WiiRemoteLeftButton] = NO;
-			[_delegate buttonChanged:WiiRemoteLeftButton isPressed:buttonState[WiiRemoteLeftButton]];
+			if ([_delegate respondsToSelector:@selector(buttonChanged:isPressed: wiiRemote:)])
+				[_delegate buttonChanged:WiiRemoteLeftButton isPressed:buttonState[WiiRemoteLeftButton] wiiRemote:self];
 		}
 	}
 	
@@ -1055,12 +1089,14 @@ typedef unsigned char darr[];
 	if (data & kWiiRemoteRightButton){
 		if (!buttonState[WiiRemoteRightButton]){
 			buttonState[WiiRemoteRightButton] = YES;
-			[_delegate buttonChanged:WiiRemoteRightButton isPressed:buttonState[WiiRemoteRightButton]];
+			if ([_delegate respondsToSelector:@selector(buttonChanged:isPressed: wiiRemote:)])
+				[_delegate buttonChanged:WiiRemoteRightButton isPressed:buttonState[WiiRemoteRightButton] wiiRemote:self];
 		}
 	}else{
 		if (buttonState[WiiRemoteRightButton]){
 			buttonState[WiiRemoteRightButton] = NO;
-			[_delegate buttonChanged:WiiRemoteRightButton isPressed:buttonState[WiiRemoteRightButton]];
+			if ([_delegate respondsToSelector:@selector(buttonChanged:isPressed: wiiRemote:)])
+				[_delegate buttonChanged:WiiRemoteRightButton isPressed:buttonState[WiiRemoteRightButton] wiiRemote:self];
 		}
 	}
 }
@@ -1069,12 +1105,14 @@ typedef unsigned char darr[];
 	if (!(data & kWiiNunchukCButton)){
 		if (!buttonState[WiiNunchukCButton]){
 			buttonState[WiiNunchukCButton] = YES;
-			[_delegate buttonChanged:WiiNunchukCButton isPressed:buttonState[WiiNunchukCButton]];
+			if ([_delegate respondsToSelector:@selector(buttonChanged:isPressed: wiiRemote:)])
+				[_delegate buttonChanged:WiiNunchukCButton isPressed:buttonState[WiiNunchukCButton] wiiRemote:self];
 		}
 	}else{
 		if (buttonState[WiiNunchukCButton]){
 			buttonState[WiiNunchukCButton] = NO;
-			[_delegate buttonChanged:WiiNunchukCButton isPressed:buttonState[WiiNunchukCButton]];
+			if ([_delegate respondsToSelector:@selector(buttonChanged:isPressed: wiiRemote:)])
+				[_delegate buttonChanged:WiiNunchukCButton isPressed:buttonState[WiiNunchukCButton] wiiRemote:self];
 		}
 	}
 	
@@ -1082,12 +1120,14 @@ typedef unsigned char darr[];
 
 		if (!buttonState[WiiNunchukZButton]){
 			buttonState[WiiNunchukZButton] = YES;
-			[_delegate buttonChanged:WiiNunchukZButton isPressed:buttonState[WiiNunchukZButton]];
+			if ([_delegate respondsToSelector:@selector(buttonChanged:isPressed: wiiRemote:)])
+				[_delegate buttonChanged:WiiNunchukZButton isPressed:buttonState[WiiNunchukZButton] wiiRemote:self];
 		}
 	}else{
 		if (buttonState[WiiNunchukZButton]){
 			buttonState[WiiNunchukZButton] = NO;
-			[_delegate buttonChanged:WiiNunchukZButton isPressed:buttonState[WiiNunchukZButton]];
+			if ([_delegate respondsToSelector:@selector(buttonChanged:isPressed: wiiRemote:)])
+				[_delegate buttonChanged:WiiNunchukZButton isPressed:buttonState[WiiNunchukZButton] wiiRemote:self];
 		}
 	}
 }
@@ -1097,12 +1137,14 @@ typedef unsigned char darr[];
 		
 		if (!buttonState[WiiClassicControllerXButton]){
 			buttonState[WiiClassicControllerXButton] = YES;
-			[_delegate buttonChanged:WiiClassicControllerXButton isPressed:buttonState[WiiClassicControllerXButton]];
+			if ([_delegate respondsToSelector:@selector(buttonChanged:isPressed: wiiRemote:)])
+				[_delegate buttonChanged:WiiClassicControllerXButton isPressed:buttonState[WiiClassicControllerXButton] wiiRemote:self];
 		}
 	}else{
 		if (buttonState[WiiClassicControllerXButton]){
 			buttonState[WiiClassicControllerXButton] = NO;
-			[_delegate buttonChanged:WiiClassicControllerXButton isPressed:buttonState[WiiClassicControllerXButton]];
+			if ([_delegate respondsToSelector:@selector(buttonChanged:isPressed: wiiRemote:)])
+				[_delegate buttonChanged:WiiClassicControllerXButton isPressed:buttonState[WiiClassicControllerXButton] wiiRemote:self];
 			
 		}
 	}
@@ -1111,12 +1153,14 @@ typedef unsigned char darr[];
 		
 		if (!buttonState[WiiClassicControllerYButton]){
 			buttonState[WiiClassicControllerYButton] = YES;
-			[_delegate buttonChanged:WiiClassicControllerYButton isPressed:buttonState[WiiClassicControllerYButton]];
+			if ([_delegate respondsToSelector:@selector(buttonChanged:isPressed: wiiRemote:)])
+				[_delegate buttonChanged:WiiClassicControllerYButton isPressed:buttonState[WiiClassicControllerYButton] wiiRemote:self];
 		}
 	}else{
 		if (buttonState[WiiClassicControllerYButton]){
 			buttonState[WiiClassicControllerYButton] = NO;
-			[_delegate buttonChanged:WiiClassicControllerYButton isPressed:buttonState[WiiClassicControllerYButton]];
+			if ([_delegate respondsToSelector:@selector(buttonChanged:isPressed: wiiRemote:)])
+				[_delegate buttonChanged:WiiClassicControllerYButton isPressed:buttonState[WiiClassicControllerYButton] wiiRemote:self];
 			
 		}
 	}
@@ -1125,12 +1169,14 @@ typedef unsigned char darr[];
 		
 		if (!buttonState[WiiClassicControllerAButton]){
 			buttonState[WiiClassicControllerAButton] = YES;
-			[_delegate buttonChanged:WiiClassicControllerAButton isPressed:buttonState[WiiClassicControllerAButton]];
+			if ([_delegate respondsToSelector:@selector(buttonChanged:isPressed: wiiRemote:)])
+				[_delegate buttonChanged:WiiClassicControllerAButton isPressed:buttonState[WiiClassicControllerAButton] wiiRemote:self];
 		}
 	}else{
 		if (buttonState[WiiClassicControllerAButton]){
 			buttonState[WiiClassicControllerAButton] = NO;
-			[_delegate buttonChanged:WiiClassicControllerAButton isPressed:buttonState[WiiClassicControllerAButton]];
+			if ([_delegate respondsToSelector:@selector(buttonChanged:isPressed: wiiRemote:)])
+				[_delegate buttonChanged:WiiClassicControllerAButton isPressed:buttonState[WiiClassicControllerAButton] wiiRemote:self];
 			
 		}
 	}
@@ -1139,12 +1185,14 @@ typedef unsigned char darr[];
 		
 		if (!buttonState[WiiClassicControllerBButton]){
 			buttonState[WiiClassicControllerBButton] = YES;
-			[_delegate buttonChanged:WiiClassicControllerBButton isPressed:buttonState[WiiClassicControllerBButton]];
+			if ([_delegate respondsToSelector:@selector(buttonChanged:isPressed: wiiRemote:)])
+				[_delegate buttonChanged:WiiClassicControllerBButton isPressed:buttonState[WiiClassicControllerBButton] wiiRemote:self];
 		}
 	}else{
 		if (buttonState[WiiClassicControllerBButton]){
 			buttonState[WiiClassicControllerBButton] = NO;
-			[_delegate buttonChanged:WiiClassicControllerBButton isPressed:buttonState[WiiClassicControllerBButton]];
+			if ([_delegate respondsToSelector:@selector(buttonChanged:isPressed: wiiRemote:)])
+				[_delegate buttonChanged:WiiClassicControllerBButton isPressed:buttonState[WiiClassicControllerBButton] wiiRemote:self];
 			
 		}
 	}
@@ -1153,12 +1201,14 @@ typedef unsigned char darr[];
 		
 		if (!buttonState[WiiClassicControllerLButton]){
 			buttonState[WiiClassicControllerLButton] = YES;
-			[_delegate buttonChanged:WiiClassicControllerLButton isPressed:buttonState[WiiClassicControllerLButton]];
+			if ([_delegate respondsToSelector:@selector(buttonChanged:isPressed: wiiRemote:)])
+				[_delegate buttonChanged:WiiClassicControllerLButton isPressed:buttonState[WiiClassicControllerLButton] wiiRemote:self];
 		}
 	}else{
 		if (buttonState[WiiClassicControllerLButton]){
 			buttonState[WiiClassicControllerLButton] = NO;
-			[_delegate buttonChanged:WiiClassicControllerLButton isPressed:buttonState[WiiClassicControllerLButton]];
+			if ([_delegate respondsToSelector:@selector(buttonChanged:isPressed: wiiRemote:)])
+				[_delegate buttonChanged:WiiClassicControllerLButton isPressed:buttonState[WiiClassicControllerLButton] wiiRemote:self];
 			
 		}
 	}
@@ -1167,12 +1217,14 @@ typedef unsigned char darr[];
 		
 		if (!buttonState[WiiClassicControllerRButton]){
 			buttonState[WiiClassicControllerRButton] = YES;
-			[_delegate buttonChanged:WiiClassicControllerRButton isPressed:buttonState[WiiClassicControllerRButton]];
+			if ([_delegate respondsToSelector:@selector(buttonChanged:isPressed: wiiRemote:)])
+				[_delegate buttonChanged:WiiClassicControllerRButton isPressed:buttonState[WiiClassicControllerRButton] wiiRemote:self];
 		}
 	}else{
 		if (buttonState[WiiClassicControllerRButton]){
 			buttonState[WiiClassicControllerRButton] = NO;
-			[_delegate buttonChanged:WiiClassicControllerRButton isPressed:buttonState[WiiClassicControllerRButton]];
+			if ([_delegate respondsToSelector:@selector(buttonChanged:isPressed: wiiRemote:)])
+				[_delegate buttonChanged:WiiClassicControllerRButton isPressed:buttonState[WiiClassicControllerRButton] wiiRemote:self];
 			
 		}
 	}
@@ -1181,12 +1233,14 @@ typedef unsigned char darr[];
 		
 		if (!buttonState[WiiClassicControllerZLButton]){
 			buttonState[WiiClassicControllerZLButton] = YES;
-			[_delegate buttonChanged:WiiClassicControllerZLButton isPressed:buttonState[WiiClassicControllerZLButton]];
+			if ([_delegate respondsToSelector:@selector(buttonChanged:isPressed: wiiRemote:)])
+				[_delegate buttonChanged:WiiClassicControllerZLButton isPressed:buttonState[WiiClassicControllerZLButton] wiiRemote:self];
 		}
 	}else{
 		if (buttonState[WiiClassicControllerZLButton]){
 			buttonState[WiiClassicControllerZLButton] = NO;
-			[_delegate buttonChanged:WiiClassicControllerZLButton isPressed:buttonState[WiiClassicControllerZLButton]];
+			if ([_delegate respondsToSelector:@selector(buttonChanged:isPressed: wiiRemote:)])
+				[_delegate buttonChanged:WiiClassicControllerZLButton isPressed:buttonState[WiiClassicControllerZLButton] wiiRemote:self];
 			
 		}
 	}
@@ -1195,12 +1249,14 @@ typedef unsigned char darr[];
 		
 		if (!buttonState[WiiClassicControllerZRButton]){
 			buttonState[WiiClassicControllerZRButton] = YES;
-			[_delegate buttonChanged:WiiClassicControllerZRButton isPressed:buttonState[WiiClassicControllerZRButton]];
+			if ([_delegate respondsToSelector:@selector(buttonChanged:isPressed: wiiRemote:)])
+				[_delegate buttonChanged:WiiClassicControllerZRButton isPressed:buttonState[WiiClassicControllerZRButton] wiiRemote:self];
 		}
 	}else{
 		if (buttonState[WiiClassicControllerZRButton]){
 			buttonState[WiiClassicControllerZRButton] = NO;
-			[_delegate buttonChanged:WiiClassicControllerZRButton isPressed:buttonState[WiiClassicControllerZRButton]];
+			if ([_delegate respondsToSelector:@selector(buttonChanged:isPressed: wiiRemote:)])
+				[_delegate buttonChanged:WiiClassicControllerZRButton isPressed:buttonState[WiiClassicControllerZRButton] wiiRemote:self];
 			
 		}
 	}
@@ -1210,12 +1266,14 @@ typedef unsigned char darr[];
 		
 		if (!buttonState[WiiClassicControllerUpButton]){
 			buttonState[WiiClassicControllerUpButton] = YES;
-			[_delegate buttonChanged:WiiClassicControllerUpButton isPressed:buttonState[WiiClassicControllerUpButton]];
+			if ([_delegate respondsToSelector:@selector(buttonChanged:isPressed: wiiRemote:)])
+				[_delegate buttonChanged:WiiClassicControllerUpButton isPressed:buttonState[WiiClassicControllerUpButton] wiiRemote:self];
 		}
 	}else{
 		if (buttonState[WiiClassicControllerUpButton]){
 			buttonState[WiiClassicControllerUpButton] = NO;
-			[_delegate buttonChanged:WiiClassicControllerUpButton isPressed:buttonState[WiiClassicControllerUpButton]];
+			if ([_delegate respondsToSelector:@selector(buttonChanged:isPressed: wiiRemote:)])
+				[_delegate buttonChanged:WiiClassicControllerUpButton isPressed:buttonState[WiiClassicControllerUpButton] wiiRemote:self];
 			
 		}
 	}
@@ -1225,12 +1283,14 @@ typedef unsigned char darr[];
 		
 		if (!buttonState[WiiClassicControllerDownButton]){
 			buttonState[WiiClassicControllerDownButton] = YES;
-			[_delegate buttonChanged:WiiClassicControllerDownButton isPressed:buttonState[WiiClassicControllerDownButton]];
+			if ([_delegate respondsToSelector:@selector(buttonChanged:isPressed: wiiRemote:)])
+				[_delegate buttonChanged:WiiClassicControllerDownButton isPressed:buttonState[WiiClassicControllerDownButton] wiiRemote:self];
 		}
 	}else{
 		if (buttonState[WiiClassicControllerDownButton]){
 			buttonState[WiiClassicControllerDownButton] = NO;
-			[_delegate buttonChanged:WiiClassicControllerDownButton isPressed:buttonState[WiiClassicControllerDownButton]];
+			if ([_delegate respondsToSelector:@selector(buttonChanged:isPressed: wiiRemote:)])
+				[_delegate buttonChanged:WiiClassicControllerDownButton isPressed:buttonState[WiiClassicControllerDownButton] wiiRemote:self];
 			
 		}
 	}
@@ -1239,12 +1299,14 @@ typedef unsigned char darr[];
 		
 		if (!buttonState[WiiClassicControllerLeftButton]){
 			buttonState[WiiClassicControllerLeftButton] = YES;
-			[_delegate buttonChanged:WiiClassicControllerLeftButton isPressed:buttonState[WiiClassicControllerLeftButton]];
+			if ([_delegate respondsToSelector:@selector(buttonChanged:isPressed: wiiRemote:)])
+				[_delegate buttonChanged:WiiClassicControllerLeftButton isPressed:buttonState[WiiClassicControllerLeftButton] wiiRemote:self];
 		}
 	}else{
 		if (buttonState[WiiClassicControllerLeftButton]){
 			buttonState[WiiClassicControllerLeftButton] = NO;
-			[_delegate buttonChanged:WiiClassicControllerLeftButton isPressed:buttonState[WiiClassicControllerLeftButton]];
+			if ([_delegate respondsToSelector:@selector(buttonChanged:isPressed: wiiRemote:)])
+				[_delegate buttonChanged:WiiClassicControllerLeftButton isPressed:buttonState[WiiClassicControllerLeftButton] wiiRemote:self];
 			
 		}
 	}
@@ -1253,12 +1315,14 @@ typedef unsigned char darr[];
 		
 		if (!buttonState[WiiClassicControllerRightButton]){
 			buttonState[WiiClassicControllerRightButton] = YES;
-			[_delegate buttonChanged:WiiClassicControllerRightButton isPressed:buttonState[WiiClassicControllerRightButton]];
+			if ([_delegate respondsToSelector:@selector(buttonChanged:isPressed: wiiRemote:)])
+				[_delegate buttonChanged:WiiClassicControllerRightButton isPressed:buttonState[WiiClassicControllerRightButton] wiiRemote:self];
 		}
 	}else{
 		if (buttonState[WiiClassicControllerRightButton]){
 			buttonState[WiiClassicControllerRightButton] = NO;
-			[_delegate buttonChanged:WiiClassicControllerRightButton isPressed:buttonState[WiiClassicControllerRightButton]];
+			if ([_delegate respondsToSelector:@selector(buttonChanged:isPressed: wiiRemote:)])
+				[_delegate buttonChanged:WiiClassicControllerRightButton isPressed:buttonState[WiiClassicControllerRightButton] wiiRemote:self];
 			
 		}
 	}
@@ -1267,12 +1331,14 @@ typedef unsigned char darr[];
 		
 		if (!buttonState[WiiClassicControllerMinusButton]){
 			buttonState[WiiClassicControllerMinusButton] = YES;
-			[_delegate buttonChanged:WiiClassicControllerMinusButton isPressed:buttonState[WiiClassicControllerMinusButton]];
+			if ([_delegate respondsToSelector:@selector(buttonChanged:isPressed: wiiRemote:)])
+				[_delegate buttonChanged:WiiClassicControllerMinusButton isPressed:buttonState[WiiClassicControllerMinusButton] wiiRemote:self];
 		}
 	}else{
 		if (buttonState[WiiClassicControllerMinusButton]){
 			buttonState[WiiClassicControllerMinusButton] = NO;
-			[_delegate buttonChanged:WiiClassicControllerMinusButton isPressed:buttonState[WiiClassicControllerMinusButton]];
+			if ([_delegate respondsToSelector:@selector(buttonChanged:isPressed: wiiRemote:)])
+				[_delegate buttonChanged:WiiClassicControllerMinusButton isPressed:buttonState[WiiClassicControllerMinusButton] wiiRemote:self];
 			
 		}
 	}
@@ -1281,12 +1347,14 @@ typedef unsigned char darr[];
 		
 		if (!buttonState[WiiClassicControllerHomeButton]){
 			buttonState[WiiClassicControllerHomeButton] = YES;
-			[_delegate buttonChanged:WiiClassicControllerHomeButton isPressed:buttonState[WiiClassicControllerHomeButton]];
+			if ([_delegate respondsToSelector:@selector(buttonChanged:isPressed: wiiRemote:)])
+				[_delegate buttonChanged:WiiClassicControllerHomeButton isPressed:buttonState[WiiClassicControllerHomeButton] wiiRemote:self];
 		}
 	}else{
 		if (buttonState[WiiClassicControllerHomeButton]){
 			buttonState[WiiClassicControllerHomeButton] = NO;
-			[_delegate buttonChanged:WiiClassicControllerHomeButton isPressed:buttonState[WiiClassicControllerHomeButton]];
+			if ([_delegate respondsToSelector:@selector(buttonChanged:isPressed: wiiRemote:)])
+				[_delegate buttonChanged:WiiClassicControllerHomeButton isPressed:buttonState[WiiClassicControllerHomeButton] wiiRemote:self];
 			
 		}
 	}
@@ -1295,12 +1363,14 @@ typedef unsigned char darr[];
 		
 		if (!buttonState[WiiClassicControllerPlusButton]){
 			buttonState[WiiClassicControllerPlusButton] = YES;
-			[_delegate buttonChanged:WiiClassicControllerPlusButton isPressed:buttonState[WiiClassicControllerPlusButton]];
+			if ([_delegate respondsToSelector:@selector(buttonChanged:isPressed: wiiRemote:)])
+				[_delegate buttonChanged:WiiClassicControllerPlusButton isPressed:buttonState[WiiClassicControllerPlusButton] wiiRemote:self];
 		}
 	}else{
 		if (buttonState[WiiClassicControllerPlusButton]){
 			buttonState[WiiClassicControllerPlusButton] = NO;
-			[_delegate buttonChanged:WiiClassicControllerPlusButton isPressed:buttonState[WiiClassicControllerPlusButton]];
+			if ([_delegate respondsToSelector:@selector(buttonChanged:isPressed: wiiRemote:)])
+				[_delegate buttonChanged:WiiClassicControllerPlusButton isPressed:buttonState[WiiClassicControllerPlusButton] wiiRemote:self];
 			
 		}
 	}
