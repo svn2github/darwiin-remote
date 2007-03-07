@@ -737,22 +737,22 @@ typedef unsigned char darr[];
 	if (isExpansionPortEnabled) {
 		if (expType == WiiNunchuk) {
 			[self sendWiiNunchukButtonEvent:nButtonData];
-			if ([_delegate respondsToSelector:@selector(accelerationChanged:accX:accY:accZ:)])
-				[_delegate accelerationChanged:WiiNunchukAccelerationSensor accX:nAccX accY:nAccY accZ:nAccZ];
+			if ([_delegate respondsToSelector:@selector(accelerationChanged:accX:accY:accZ:wiiRemote:)])
+				[_delegate accelerationChanged:WiiNunchukAccelerationSensor accX:nAccX accY:nAccY accZ:nAccZ wiiRemote:self];
 			
-			if ([_delegate respondsToSelector:@selector(joyStickChanged:tiltX:tiltY:)])
-				[_delegate joyStickChanged:WiiNunchukJoyStick tiltX:nStickX tiltY:nStickY];
+			if ([_delegate respondsToSelector:@selector(joyStickChanged:tiltX:tiltY:wiiRemote:)])
+				[_delegate joyStickChanged:WiiNunchukJoyStick tiltX:nStickX tiltY:nStickY wiiRemote:self];
 		} else if (expType == WiiClassicController){
 			[self sendWiiClassicControllerButtonEvent:cButtonData];
 			
-			if ([_delegate respondsToSelector:@selector(joyStickChanged:tiltX:tiltY:)]){
-				[_delegate joyStickChanged:WiiClassicControllerLeftJoyStick tiltX:cStickX1 tiltY:cStickY1];
-				[_delegate joyStickChanged:WiiClassicControllerRightJoyStick tiltX:cStickX2 tiltY:cStickY2];				
+			if ([_delegate respondsToSelector:@selector(joyStickChanged:tiltX:tiltY:wiiRemote:)]){
+				[_delegate joyStickChanged:WiiClassicControllerLeftJoyStick tiltX:cStickX1 tiltY:cStickY1 wiiRemote:self];
+				[_delegate joyStickChanged:WiiClassicControllerRightJoyStick tiltX:cStickX2 tiltY:cStickY2 wiiRemote:self];				
 			}
 
-			if ([_delegate respondsToSelector:@selector(analogButtonChanged:amount:)]){
-				[_delegate analogButtonChanged:WiiClassicControllerLeftButton amount:cAnalogL];
-				[_delegate analogButtonChanged:WiiClassicControllerRightButton amount:cAnalogR];
+			if ([_delegate respondsToSelector:@selector(analogButtonChanged:amount:wiiRemote:)]){
+				[_delegate analogButtonChanged:WiiClassicControllerLeftButton amount:cAnalogL wiiRemote:self];
+				[_delegate analogButtonChanged:WiiClassicControllerRightButton amount:cAnalogR wiiRemote:self];
 			}
 
 
@@ -878,7 +878,7 @@ typedef unsigned char darr[];
 			accY = dp[5];
 			accZ = dp[6];
 			
-			[_delegate accelerationChanged:WiiRemoteAccelerationSensor accX:accX accY:accY accZ:accZ];
+			[_delegate accelerationChanged:WiiRemoteAccelerationSensor accX:accX accY:accY accZ:accZ wiiRemote:self];
 			
 			lowZ = lowZ * 0.9 + accZ * 0.1;
 			lowX = lowX * 0.9 + accX * 0.1;
