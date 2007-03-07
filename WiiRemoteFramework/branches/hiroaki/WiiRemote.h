@@ -87,7 +87,6 @@ enum{
 	WiiClassicControllerRightJoyStick	//not available
 };
 
-
 @interface WiiRemote : NSObject {
 	
 	IOBluetoothDevice* wiiDevice;
@@ -143,7 +142,6 @@ enum{
 	unsigned char cAnalogR;
 	
 } 
-
 - (NSString*) address;
 - (void)setDelegate:(id)delegate;
 - (double)batteryLevel;
@@ -163,17 +161,8 @@ enum{
 - (IOReturn)setMotionSensorEnabled:(BOOL)enabled;
 - (IOReturn)setExpansionPortEnabled:(BOOL)enabled;
 - (IOReturn)setLEDEnabled1:(BOOL)enabled1 enabled2:(BOOL)enabled2 enabled3:(BOOL)enabled3 enabled4:(BOOL)enabled4;
-- (IOReturn)writeData:(const unsigned char*)data at:(unsigned long)address length:(size_t)length;
-- (IOReturn)readData:(unsigned long)address length:(unsigned short)length;
-- (IOReturn)sendCommand:(const unsigned char*)data length:(size_t)length;
 
-- (void)getCurrentStatus:(NSTimer*)timer;
-- (void)sendWiiRemoteButtonEvent:(UInt16)data;
-- (void)sendWiiNunchukButtonEvent:(UInt16)data;
-- (void)sendWiiClassicControllerButtonEvent:(UInt16)data;
-- (unsigned char)decrypt:(unsigned char)data;
 @end
-
 
 @interface NSObject( WiiRemoteDelegate )
 
