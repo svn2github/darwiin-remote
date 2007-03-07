@@ -208,7 +208,7 @@ typedef unsigned char darr[];
 		[self disconnected: nil fromDevice:wiiDevice];
 	}
 	
-	NSLog(@"IOReturn for command x%00X = %i", buf[1], ret);
+	//NSLog(@"IOReturn for command x%00X = %i", buf[1], ret);
 	return ret;
 }
 
@@ -320,12 +320,14 @@ typedef unsigned char darr[];
 - (IOReturn)setExpansionPortEnabled:(BOOL)enabled{
 	
 	IOReturn ret;
+	/**
 	
 	if (enabled) {
 		NSLog(@"Enabling expansion port.");
 	} else {
 		NSLog(@"Disabling expansion port.");	
 	}
+	 **/
 	
 	isExpansionPortEnabled = enabled;
 
@@ -341,12 +343,13 @@ typedef unsigned char darr[];
 		}
 				
 	}
-
+	/**
 	if (isExpansionPortEnabled) {
 		NSLog(@"Expansion port enabled.");
 	} else {
 		NSLog(@"Expansion port disabled.");
 	}
+	**/
 	
 	ret = [self requestUpdates];
 
@@ -374,8 +377,9 @@ typedef unsigned char darr[];
 	if (ret = [self sendCommand:cmd2 length:2]) return ret;
 	usleep(10000);
 
+	
 	if(enabled){
-		NSLog(@"Enabling IR Sensor");
+		//NSLog(@"Enabling IR Sensor");
 		
 		// based on marcan's method, found on wiili wiki:
 		// tweaked to include some aspects of cliff's setup procedure in the hopes
@@ -554,16 +558,16 @@ typedef unsigned char darr[];
 	 
 	// specify attached expasion device
 	if ((dp[5] == 0x00) && (dp[6] == 0xF0)){
-		NSLog(@"Expansion device connected.");
+		//NSLog(@"Expansion device connected.");
 		
 		if ([self decrypt:dp[21]] == 0x00){
-				NSLog(@"Nunchuk connected.");
+				//NSLog(@"Nunchuk connected.");
 			if (expType != WiiNunchuk){
 				expType = WiiNunchuk;
 				[[NSNotificationCenter defaultCenter] postNotificationName:@"WiiRemoteExpansionPortChangedNotification" object:self];
 			}
 		}else if ([self decrypt:dp[21]] == 0x01){
-			NSLog(@"Classic Controller connected.");
+			//NSLog(@"Classic Controller connected.");
 			if (expType != WiiClassicController){
 				expType = WiiClassicController;
 				[[NSNotificationCenter defaultCenter] postNotificationName:@"WiiRemoteExpansionPortChangedNotification" object:self];					
@@ -624,7 +628,7 @@ typedef unsigned char darr[];
 
 -(void) handleStatusReport:(unsigned char *)dp length:(size_t)dataLength {
 
-		NSLog(@"Status Report");
+		//NSLog(@"Status Report");
 		
 		batteryLevel = (double)dp[7];
 		batteryLevel /= (double)0xC0; // C0 = fully charged.
@@ -635,7 +639,7 @@ typedef unsigned char darr[];
 		
 		if ((dp[4] & 0x02)) { //some device attached to Wiimote
 
-			NSLog(@"Device Attached");
+			//NSLog(@"Device Attached");
 			if (isExpansionPortAttached == NO) {
 				
 				isExpansionPortAttached = YES;
@@ -655,11 +659,11 @@ typedef unsigned char darr[];
 				if (ret != kIOReturnSuccess) {
 					isExpansionPortAttached = NO;
 				}
-				NSLog(@"Expansion Device initialized");
+				//NSLog(@"Expansion Device initialized");
 			}
 		} else { // unplugged
 			if (isExpansionPortAttached != NO) {
-				NSLog(@"Device Detached");
+				//NSLog(@"Device Detached");
 				isExpansionPortAttached = NO;
 				expType = WiiExpNotAttached;
 
@@ -926,7 +930,7 @@ typedef unsigned char darr[];
 	}
 
 	if (dp[1] == 0x22) { // Write data response
-		NSLog(@"Write data response: %00x %00x %00x %00x", dp[2], dp[3], dp[4], dp[5]);
+		//NSLog(@"Write data response: %00x %00x %00x %00x", dp[2], dp[3], dp[4], dp[5]);
 		return;
 	}
 	
