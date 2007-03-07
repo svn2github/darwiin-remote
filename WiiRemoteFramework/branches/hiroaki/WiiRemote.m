@@ -563,6 +563,7 @@ typedef unsigned char darr[];
 				[[NSNotificationCenter defaultCenter] postNotificationName:@"WiiRemoteExpansionPortChangedNotification" object:self];
 			}
 		}else if ([self decrypt:dp[21]] == 0x01){
+			NSLog(@"Classic Controller connected.");
 			if (expType != WiiClassicController){
 				expType = WiiClassicController;
 				[[NSNotificationCenter defaultCenter] postNotificationName:@"WiiRemoteExpansionPortChangedNotification" object:self];					
@@ -721,17 +722,18 @@ typedef unsigned char darr[];
 			nAccZ   = [self decrypt:dp[startByte +4]];
 			nButtonData = [self decrypt:dp[startByte +5]];
 		} else if (expType == WiiClassicController) {
-			cButtonData = (unsigned short)([self decrypt:dp[21]] << 8) + [self decrypt:dp[22]];
+			cButtonData = (unsigned short)([self decrypt:dp[startByte + 4]] << 8) + [self decrypt:dp[startByte + 5]];
+			
 			
 			cStickX1 = [self decrypt:dp[startByte]] & 0x3F;
 			cStickY1 = [self decrypt:dp[startByte +1]] & 0x3F;
 			
 			cStickX2 = ([self decrypt:dp[startByte]] & 0xC0) >> 3 + 
 						([self decrypt:dp[startByte +2]] & 0xC0) >> 5 + ([self decrypt:dp[startByte +3]] & 0x80) >> 7; 
-			cStickY2 =  [self decrypt:dp[startByte +3]] & 0x0F;
+			cStickY2 =  [self decrypt:dp[startByte +2]] & 0x0F;
 			
-			cAnalogR =  [self decrypt:dp[startByte +4]] & 0x0F;
-			cAnalogL = ( [self decrypt:dp[startByte +4]] & 0xE0) >> 5 + ( [self decrypt:dp[startByte +3]] & 0x60) >> 2;
+			cAnalogR =  [self decrypt:dp[startByte +3]] & 0x0F;
+			cAnalogL = ( [self decrypt:dp[startByte +3]] & 0xE0) >> 5 + ( [self decrypt:dp[startByte +2]] & 0x60) >> 2;
 		}
 
 	if (isExpansionPortEnabled) {
@@ -1133,6 +1135,7 @@ typedef unsigned char darr[];
 }
 
 - (void)sendWiiClassicControllerButtonEvent:(UInt16)data{
+		
 	if (!(data & kWiiClassicControllerXButton)){
 		
 		if (!buttonState[WiiClassicControllerXButton]){
@@ -1166,7 +1169,7 @@ typedef unsigned char darr[];
 	}
 	
 	if (!(data & kWiiClassicControllerAButton)){
-		
+
 		if (!buttonState[WiiClassicControllerAButton]){
 			buttonState[WiiClassicControllerAButton] = YES;
 			if ([_delegate respondsToSelector:@selector(buttonChanged:isPressed: wiiRemote:)])
