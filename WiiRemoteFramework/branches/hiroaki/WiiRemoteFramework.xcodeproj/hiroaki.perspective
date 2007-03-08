@@ -185,48 +185,7 @@
 	<key>Notifications</key>
 	<array/>
 	<key>OpenEditors</key>
-	<array>
-		<dict>
-			<key>Content</key>
-			<dict>
-				<key>PBXProjectModuleGUID</key>
-				<string>53439AF30B9F0AA00031D80E</string>
-				<key>PBXProjectModuleLabel</key>
-				<string>WiiRemote.m</string>
-				<key>PBXSplitModuleInNavigatorKey</key>
-				<dict>
-					<key>Split0</key>
-					<dict>
-						<key>PBXProjectModuleGUID</key>
-						<string>53439AF40B9F0AA00031D80E</string>
-						<key>PBXProjectModuleLabel</key>
-						<string>WiiRemote.m</string>
-						<key>_historyCapacity</key>
-						<integer>0</integer>
-						<key>bookmark</key>
-						<string>53439B1F0B9F0E550031D80E</string>
-						<key>history</key>
-						<array>
-							<string>53439A9C0B9F02BD0031D80E</string>
-						</array>
-					</dict>
-					<key>SplitCount</key>
-					<string>1</string>
-				</dict>
-				<key>StatusBarVisibility</key>
-				<true/>
-			</dict>
-			<key>Geometry</key>
-			<dict>
-				<key>Frame</key>
-				<string>{{0, 20}, {1014, 819}}</string>
-				<key>PBXModuleWindowStatusBarHidden2</key>
-				<false/>
-				<key>RubberWindowFrame</key>
-				<string>487 161 1014 860 0 0 1920 1178 </string>
-			</dict>
-		</dict>
-	</array>
+	<array/>
 	<key>PerspectiveWidths</key>
 	<array>
 		<integer>1129</integer>
@@ -263,8 +222,6 @@
 			<key>Layout</key>
 			<array>
 				<dict>
-					<key>BecomeActive</key>
-					<true/>
 					<key>ContentConfiguration</key>
 					<dict>
 						<key>PBXBottomSmartGroupGIDs</key>
@@ -310,7 +267,7 @@
 							<key>PBXSmartGroupTreeModuleOutlineStateSelectionKey</key>
 							<array>
 								<array>
-									<integer>3</integer>
+									<integer>5</integer>
 									<integer>1</integer>
 									<integer>0</integer>
 								</array>
@@ -361,12 +318,12 @@
 										<key>_historyCapacity</key>
 										<integer>0</integer>
 										<key>bookmark</key>
-										<string>53439B1E0B9F0E550031D80E</string>
+										<string>5345B75C0BA0741E00791E96</string>
 										<key>history</key>
 										<array>
 											<string>53A1C0FF0B9D9B8700AEE7A2</string>
 											<string>53A1C10B0B9D9BA600AEE7A2</string>
-											<string>5335E6000B9EF848005F5FF0</string>
+											<string>53439B9D0B9F241D0031D80E</string>
 										</array>
 										<key>prevStack</key>
 										<array>
@@ -433,6 +390,8 @@
 									<string>PBXProjectFindModule</string>
 								</dict>
 								<dict>
+									<key>BecomeActive</key>
+									<true/>
 									<key>ContentConfiguration</key>
 									<dict>
 										<key>PBXProjectModuleGUID</key>
@@ -472,11 +431,11 @@
 			</array>
 			<key>TableOfContents</key>
 			<array>
-				<string>53439AEC0B9F0AA00031D80E</string>
+				<string>5345B75D0BA0741E00791E96</string>
 				<string>1CA23ED40692098700951B8B</string>
-				<string>53439AED0B9F0AA00031D80E</string>
+				<string>5345B75E0BA0741E00791E96</string>
 				<string>5318930B0B2C392E00277BC3</string>
-				<string>53439AEE0B9F0AA00031D80E</string>
+				<string>5345B75F0BA0741E00791E96</string>
 				<string>1CA23EDF0692099D00951B8B</string>
 				<string>1CA23EE00692099D00951B8B</string>
 				<string>1CA23EE10692099D00951B8B</string>
@@ -894,7 +853,6 @@
 	<key>WindowOrderList</key>
 	<array>
 		<string>/Users/hiroaki/projects/darwiin-remote/WiiRemoteFramework/branches/hiroaki/WiiRemoteFramework.xcodeproj</string>
-		<string>53439AF30B9F0AA00031D80E</string>
 	</array>
 	<key>WindowString</key>
 	<string>559 250 1129 617 0 0 1920 1178 </string>
