@@ -1,3 +1,11 @@
+0.5 (2007.3.8)
+====================
+	o New Features:
+		- supports Classic Controller
+	o Bug  Fixes:
+		- #1623337 PPC bugs (WiiRemote framework have fixed this bug)
+		- #1622395 IR mouse was not work with Nunchuk (WiiRemote framework have fixed this bug)
+
 0.4 (2006.12.26)
 ====================
 	o New Features:
