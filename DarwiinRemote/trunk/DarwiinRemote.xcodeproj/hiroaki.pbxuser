@@ -21,7 +21,7 @@
 			534B14E50B24C84F003598E7 /* GraphView.m:39 */,
 			532D8E6C0B29E4290061F822 /* AppController.m:159 */,
 			5334B4770B38260B009632C3 /* AppController.m:163 */,
-			535C33020B481D7D00DC52B9 /* AppController.m:1049 */,
+			535C33020B481D7D00DC52B9 /* AppController.m:1053 */,
 		);
 		breakpointsGroup = 531744DE0B24178900579963 /* XCBreakpointsBucket */;
 		codeSenseManager = 5317445B0B240A1C00579963 /* Code sense */;
@@ -62,7 +62,7 @@
 				PBXFileTableDataSourceColumnSortingKey = PBXFileDataSource_Filename_ColumnID;
 				PBXFileTableDataSourceColumnWidthsKey = (
 					20,
-					682,
+					1000,
 					20,
 					48,
 					43,
@@ -113,7 +113,7 @@
 				PBXFileTableDataSourceColumnWidthsKey = (
 					20,
 					20,
-					658,
+					1000,
 					20,
 					48,
 					43,
@@ -153,13 +153,8 @@
 					PBXFileDataSource_Warnings_ColumnID,
 				);
 			};
-			PBXPerProjectTemplateStateSaveDate = 194967630;
-			PBXWorkspaceStateSaveDate = 194967630;
-		};
-		perUserProjectItems = {
-			5335E5330B9EF501005F5FF0 = 5335E5330B9EF501005F5FF0 /* PBXBookmark */;
-			5335E6120B9EF848005F5FF0 = 5335E6120B9EF848005F5FF0 /* PBXTextBookmark */;
-			53439A640B9EF89C0031D80E /* PBXTextBookmark */ = 53439A640B9EF89C0031D80E /* PBXTextBookmark */;
+			PBXPerProjectTemplateStateSaveDate = 195065484;
+			PBXWorkspaceStateSaveDate = 195065484;
 		};
 		sourceControlManager = 5317445A0B240A1C00579963 /* Source Control */;
 		userBuildSettings = {
@@ -256,10 +251,10 @@
 	};
 	5317449A0B240DD500579963 /* AppController.m */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {1183, 18158}}";
-			sepNavSelRange = "{24946, 0}";
-			sepNavVisRect = "{{0, 11438}, {1183, 743}}";
-			sepNavWindowFrame = "{{553, 307}, {1228, 857}}";
+			sepNavIntBoundsRect = "{{0, 0}, {1183, 18214}}";
+			sepNavSelRange = "{60, 0}";
+			sepNavVisRect = "{{0, 0}, {1183, 743}}";
+			sepNavWindowFrame = "{{551, 321}, {1228, 857}}";
 		};
 	};
 	531744DE0B24178900579963 /* XCBreakpointsBucket */ = {
@@ -271,7 +266,7 @@
 			534B14E50B24C84F003598E7 /* GraphView.m:39 */,
 			532D8E6C0B29E4290061F822 /* AppController.m:159 */,
 			5334B4770B38260B009632C3 /* AppController.m:163 */,
-			535C33020B481D7D00DC52B9 /* AppController.m:1049 */,
+			535C33020B481D7D00DC52B9 /* AppController.m:1053 */,
 		);
 	};
 	5317459E0B2426A800579963 /* WiiRemote.m:307 */ = {
@@ -285,7 +280,7 @@
 		functionName = "-l2capChannelData:data:length:";
 		hitCount = 1;
 		lineNumber = 307;
-		modificationTime = 189582052.640696;
+		modificationTime = 194973123.268274;
 		state = 1;
 	};
 	532D8E6C0B29E4290061F822 /* AppController.m:159 */ = {
@@ -300,7 +295,7 @@
 		hitCount = 1;
 		lineNumber = 159;
 		location = DarwiinRemote;
-		modificationTime = 189582052.640654;
+		modificationTime = 194973123.268578;
 		state = 1;
 	};
 	5334B4770B38260B009632C3 /* AppController.m:163 */ = {
@@ -315,50 +310,8 @@
 		hitCount = 1;
 		lineNumber = 163;
 		location = DarwiinRemote;
-		modificationTime = 189582052.640681;
+		modificationTime = 194973123.267999;
 		state = 1;
-	};
-	5335E4990B9EF4C8005F5FF0 /* WiiRemote.h */ = {
-		isa = PBXFileReference;
-		lastKnownFileType = sourcecode.c.h;
-		path = WiiRemote.h;
-		sourceTree = "<group>";
-	};
-	5335E5330B9EF501005F5FF0 /* PBXBookmark */ = {
-		isa = PBXBookmark;
-		fRef = 5335E4990B9EF4C8005F5FF0 /* WiiRemote.h */;
-	};
-	5335E6120B9EF848005F5FF0 /* PBXTextBookmark */ = {
-		isa = PBXTextBookmark;
-		fRef = 5335E6130B9EF848005F5FF0 /* WiiRemote.h */;
-		name = "(null): 182";
-		rLen = 0;
-		rLoc = 4832;
-		rType = 0;
-		vrLen = 2058;
-		vrLoc = 2774;
-	};
-	5335E6130B9EF848005F5FF0 /* WiiRemote.h */ = {
-		isa = PBXFileReference;
-		lastKnownFileType = sourcecode.c.h;
-		name = WiiRemote.h;
-		path = "/Users/hiroaki/projects/darwiin-remote/WiiRemoteFramework/branches/hiroaki/build/Release/WiiRemote.framework/Headers/WiiRemote.h";
-		sourceTree = "<absolute>";
-		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {1046, 2548}}";
-			sepNavSelRange = "{4832, 0}";
-			sepNavVisRect = "{{0, 1774}, {1046, 764}}";
-		};
-	};
-	53439A640B9EF89C0031D80E /* PBXTextBookmark */ = {
-		isa = PBXTextBookmark;
-		fRef = 5335E6130B9EF848005F5FF0 /* WiiRemote.h */;
-		name = "WiiRemote.h: 182";
-		rLen = 0;
-		rLoc = 4832;
-		rType = 0;
-		vrLen = 2069;
-		vrLoc = 2763;
 	};
 	534B14E50B24C84F003598E7 /* GraphView.m:39 */ = {
 		isa = PBXFileBreakpoint;
@@ -372,7 +325,7 @@
 		hitCount = 1;
 		lineNumber = 39;
 		location = DarwiinRemote;
-		modificationTime = 189582052.640639;
+		modificationTime = 194973123.267645;
 		state = 1;
 	};
 	535197AB0B39657F007184B2 /* WidgetsEnableTransformer2.h */ = {
@@ -391,7 +344,7 @@
 			sepNavWindowFrame = "{{427, 0}, {876, 878}}";
 		};
 	};
-	535C33020B481D7D00DC52B9 /* AppController.m:1049 */ = {
+	535C33020B481D7D00DC52B9 /* AppController.m:1053 */ = {
 		isa = PBXFileBreakpoint;
 		actions = (
 		);
@@ -401,9 +354,9 @@
 		fileReference = 5317449A0B240DD500579963 /* AppController.m */;
 		functionName = "-setupInitialKeyMappings";
 		hitCount = 1;
-		lineNumber = 1049;
+		lineNumber = 1053;
 		location = DarwiinRemote;
-		modificationTime = 189582052.640662;
+		modificationTime = 194973123.268836;
 		state = 1;
 	};
 	536852960B33172200A38BE5 /* KeyConfiguration_AppDelegate.h */ = {
@@ -451,7 +404,7 @@
 					chosenTableWidths = (
 						100.000000,
 						26.000000,
-						101.080078,
+						100.080078,
 					);
 				};
 				UIContextForLayoutManager = {
@@ -481,8 +434,8 @@
 						_percentageOfCollapsedView = 0;
 						isCollapsed = yes;
 						sizes = (
-							"{{0, 0}, {252, 220}}",
-							"{{257, 0}, {574, 220}}",
+							"{{0, 0}, {251, 220}}",
+							"{{256, 0}, {574, 220}}",
 						);
 					};
 				};
@@ -581,7 +534,7 @@
 				"xdesign model browser state key - shown/hidden" = 1;
 				"xdesign model diagram view visible rect key" = "{{0, 0}, {1271, 690}}";
 			};
-			sepNavWindowFrame = "{{97, 81}, {1286, 1044}}";
+			sepNavWindowFrame = "{{308, 4}, {1286, 1044}}";
 		};
 	};
 	539021E30B383F61004E3DE7 /* WidgetsEnableTransformer.h */ = {
@@ -635,7 +588,7 @@
 		functionName = "-connect";
 		hitCount = 1;
 		lineNumber = 103;
-		modificationTime = 189582052.640672;
+		modificationTime = 194973123.269353;
 		state = 1;
 	};
 	53C576F70B24999B00D36527 /* GraphPoint.h */ = {

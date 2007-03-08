@@ -221,6 +221,7 @@
 	[textView setString:[NSString stringWithFormat:@"%@\n===== lost connection with WiiRemote =====", [textView string]]];
 	[wii release];
 	wii = nil;
+
 	[discovery start];
 	[textView setString:[NSString stringWithFormat:@"%@\nPlease press the synchronize button", [textView string]]];
 }
@@ -329,7 +330,8 @@
 
 
 - (void) buttonChanged:(WiiButtonType)type isPressed:(BOOL)isPressed wiiRemote:(WiiRemote*)wiiRemote{
-		 
+	
+	
 	id mappings = [mappingController selection];
 	id map = nil;
 	if (type == WiiRemoteAButton){
@@ -385,6 +387,8 @@
 	}else if (type == WiiClassicControllerYButton){
 		map = [mappings valueForKeyPath:@"classiccontroller.y"];
 	}else if (type == WiiClassicControllerAButton){
+		NSLog(@"changed! %d", isPressed);
+
 		map = [mappings valueForKeyPath:@"classiccontroller.a"];
 	}else if (type == WiiClassicControllerBButton){
 		map = [mappings valueForKeyPath:@"classiccontroller.b"];
