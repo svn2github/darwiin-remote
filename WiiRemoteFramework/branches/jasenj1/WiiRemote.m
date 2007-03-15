@@ -8,6 +8,14 @@
 
 #import "WiiRemote.h"
 
+// define some constants
+#define kWiiIRPixelsWidth 1024.0
+#define kWiiIRPixelsHeight 768.0
+
+// shall we use another bit of precision for the wiimote?
+// note that the calibration is not yet updated to 9 bits of precision
+#define USE_ACC_NINTH_LSB_BIT 1
+
 // this type is used a lot (data array):
 typedef unsigned char darr[];
 
@@ -54,44 +62,47 @@ enum {
 
 - (id) init{
 
+	self = [super init];
 	
-	accX = 0x10;
-	accY = 0x10;
-	accZ = 0x10;
-	buttonData = 0;
-	leftPoint = -1;
-	batteryLevel = 0;
-	warningBatteryLevel = 0.05;
+	NSLogDebug (@"Wii instantiated");
 
-	
-	_delegate = nil;
-	wiiDevice = nil;
-	
-	ichan = nil;
-	cchan = nil;
-	
-	isIRSensorEnabled = NO;
-	wiiIRMode = kWiiIRModeExtended;
+	if (self != nil) {
+		accX = 0x10;
+		accY = 0x10;
+		accZ = 0x10;
+		buttonData = 0;
+		leftPoint = -1;
+		_batteryLevel = 0;
+		_warningBatteryLevel = 0.05;
 
-	isMotionSensorEnabled = NO;
-	isVibrationEnabled = NO;
-	
-	isExpansionPortEnabled = NO;
-	isExpansionPortAttached = NO;
-	expType = WiiExpNotAttached;
-//	initExpPort = NO;
-	
+		_lock = [NSLock new];	
+		_delegate = nil;
+		wiiDevice = nil;
+		
+		ichan = nil;
+		cchan = nil;
+		
+		isIRSensorEnabled = NO;
+		wiiIRMode = kWiiIRModeExtended;
+
+		isMotionSensorEnabled = NO;
+		isVibrationEnabled = NO;
+		
+		isExpansionPortEnabled = NO;
+		isExpansionPortAttached = NO;
+		expType = WiiExpNotAttached;
+	}
 	return self;
 }
 
-- (void)dealloc{
+- (void)dealloc {
+	NSLogDebug (@"wii released");
 	[self closeConnection];
-
-
+	[_lock release];
 	[super dealloc];
 }
 
-- (void)setDelegate:(id)delegate{
+- (void)setDelegate:(id)delegate {
 	_delegate = delegate;
 }
 
@@ -103,102 +114,130 @@ enum {
 }
 
 - (IOReturn)openIChan {
-	int trycount = 0;
-	IOReturn ret;
-	
-	while ((ret = [wiiDevice openL2CAPChannelSync:&ichan withPSM:19 delegate:self]) != kIOReturnSuccess){	// this "19" is magic number ;-)
-		if (trycount == 10){
-			NSLog(@"could not open L2CAP channel ichan");
-			ichan = nil;
-			[cchan closeChannel];
-			[cchan release];
-			[wiiDevice closeConnection];
-			
-			return ret;			
-		}
-		trycount++;
-		usleep(10000); //  wait 10ms
-	}
+
+	IOReturn ret; 
+
+	CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.5, NO);
+
+	[_lock lock];
+
+	NSLogDebug(@"Open L2CAP 2 ...");
+
+	if ((ret = [wiiDevice openL2CAPChannelAsync:&ichan withPSM:19 delegate:self]) != kIOReturnSuccess) {
+		NSLog(@"Could not open L2CAP channel ichan (0x%x)", ret);
+		LogIOReturn (ret);
+		[self closeConnection];
+		return ret;   
+	} 
+
+	do {
+		CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.01, NO);
+	} while (![_lock tryLock]);
+	[_lock unlock];
 	[ichan retain];
-	
-	return ret;
+
+	if (!ichan) {
+		return kIOReturnNotOpen;
+	} else {
+		return kIOReturnSuccess;	
+	}	
 }
 
 - (IOReturn) openCChan {
-	int trycount = 0;
-	IOReturn ret;
-	
-	while ((ret = [wiiDevice openL2CAPChannelSync:&cchan withPSM:17 delegate:self]) != kIOReturnSuccess){
-		if (trycount == 10){
-			NSLog(@"could not open L2CAP channel cchan (%d)", ret);
-			cchan = nil;
-			[wiiDevice closeConnection];
-			return ret;			
-		}
-		trycount++;
-		usleep(10000); //  wait 10ms
-	}	
-	[cchan retain];
 
-	return ret;
+    IOReturn ret; 
+
+	CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.5, NO);
+
+	[_lock lock];
+
+	NSLogDebug(@"Open L2CAP 1 ...");
+
+	if ((ret = [wiiDevice openL2CAPChannelAsync:&cchan withPSM:17 delegate:self]) != kIOReturnSuccess) {
+		NSLog(@"Could not open L2CAP channel cchan (0x%x)", ret);
+		LogIOReturn (ret);
+		[self closeConnection];
+		return ret;   
+	} 
+
+	do {
+		CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.01, NO);
+	} while (![_lock tryLock]);
+	[_lock unlock];
+
+	[cchan retain];
+	if (!cchan) {
+		return kIOReturnNotOpen;
+	} else {
+		return kIOReturnSuccess;	
+	}	
 }
 
+- (IOReturn) connectTo:(IOBluetoothDevice *) device
+{ 
 
-- (IOReturn)connectTo:(IOBluetoothDevice*)device{
-	
-	wiiDevice = device;
-	
-	int trycount = 0;
-	IOReturn ret;
-	
-	if (wiiDevice == nil){
-		return kIOReturnBadArgument;
-	}
-	
-	trycount = 0;
-	while ((ret = [wiiDevice openConnection]) != kIOReturnSuccess){
-		if (trycount >= 10){
-			NSLog(@"could not open the connection (%d)...", ret);
-			return ret;
-		}
-		trycount++;
-		usleep(10000); //  wait 10ms
-	}
-	
+      wiiDevice = device; 
+	  
+      IOReturn ret; 
+
+      if (wiiDevice == nil)
+            return kIOReturnBadArgument; 
+
+      NSLogDebug(@"Open device ...");
+
+      if ((ret = [wiiDevice openConnection:nil]) != kIOReturnSuccess) {
+            NSLog (@"Could not open connection to the Wii (0x%x)", ret);
+            LogIOReturn (ret);
+            return ret;
+      }
+	   
 	disconnectNotification = [wiiDevice registerForDisconnectNotification:self selector:@selector(disconnected:fromDevice:)];
-	
-	trycount = 0;
-	while ((ret = [wiiDevice performSDPQuery:nil]) != kIOReturnSuccess){
-		if (trycount == 10){
-			NSLog(@"could not perform SDP Query (%d)...", ret);
-			[wiiDevice closeConnection];
-			return ret;
-		}
-		trycount++;
-		usleep(10000); //  wait 10ms
-	}
-	
-	ret = [self openIChan];
-	
-	ret = [self openCChan];
 
-	//turn LEDs off
-	if (kIOReturnSuccess == ret)
-		ret = [self setLEDEnabled1:NO enabled2:NO enabled3:NO enabled4:NO];
+	// need to wait a little bit because for lower values, wiimote is not always responding fast enough
+	// use CFRunLoopRunInMode to wait in order to process sources generated by the Bluetooth Framework
+	//
+	// ps: if we use lower values than 0.5 s, and if the window is not frontmost, the wii can't connect
+	CFRunLoopRunInMode(kCFRunLoopDefaultMode, 1.0, NO);
+
+	if ((ret = [self openCChan]) != kIOReturnSuccess) return ret;
 	
-	if (kIOReturnSuccess != ret) {
-		[self closeConnection];
-		return ret;
-	}
+	if ((ret = [self openIChan]) != kIOReturnSuccess) return ret;
+
+	CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.5, NO);
+		
+      //sensor enable...
+      ret = [self setMotionSensorEnabled:NO];
+
+      if (kIOReturnSuccess == ret)
+            ret = [self setIRSensorEnabled:NO];
+
+      //stop force feedback
+      if (kIOReturnSuccess == ret)
+            ret = [self setForceFeedbackEnabled:NO];
+
+      //turn LEDs off
+      if (kIOReturnSuccess == ret)
+            ret = [self setLEDEnabled1:NO enabled2:NO enabled3:NO enabled4:NO]; 
+
+      if (kIOReturnSuccess != ret) {
+
+            NSLog (@"A problem occured during initialization of the device.");
+
+            LogIOReturn (ret);
+
+            [self closeConnection];
+
+      } else {
+
+//            statusTimer = [[NSTimer scheduledTimerWithTimeInterval:60 target:self selector:@selector(getCurrentStatus:) userInfo:nil repeats:YES] retain];
+
+		[self getCurrentStatus:nil];
 	
-	// Get current status every 60 seconds.
-//	statusTimer = [[NSTimer scheduledTimerWithTimeInterval:10 target:self selector:@selector(getCurrentStatus:) userInfo:nil repeats:YES] retain];
-	
-	[self getCurrentStatus:nil];
-	
-	[self readData:0x0020 length:7]; // Get Accelerometer calibration data
-	
-	return ret;
+		[self readData:0x0020 length:7]; // Get Accelerometer calibration data
+
+      } 
+
+      return ret;
 }
 
 - (void)disconnected: (IOBluetoothUserNotification*)note fromDevice: (IOBluetoothDevice*)device {
@@ -231,16 +270,18 @@ enum {
 	
 	IOReturn ret;
 	
-	usleep(10000);  // Done to make sure commands don't happen too fast.
+//	CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.1, NO);
 	
 	for (i = 0; i < 10; i++){
 		ret = [cchan writeSync:buf length:length];		
 		if (kIOReturnSuccess == ret)
 			break;
-		usleep(10000);
+		CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.1, NO);
 //	NSLog(@"IOReturn for command x%00X = %i", buf[1], ret);		
 	}
 	
+    LogIOReturn (ret);
+
 	if (ret != kIOReturnSuccess) {
 		[self disconnected: nil fromDevice:wiiDevice];
 	}
@@ -252,7 +293,7 @@ enum {
 
 - (double)batteryLevel{
 	
-	return batteryLevel;
+	return _batteryLevel;
 }
 
 - (NSString*)address{
@@ -356,7 +397,7 @@ enum {
 
 - (IOReturn)setExpansionPortEnabled:(BOOL)enabled{
 	
-	IOReturn ret;
+	IOReturn ret = kIOReturnSuccess;
 	
 	if (enabled) {
 		NSLog(@"Enabling expansion port.");
@@ -372,10 +413,10 @@ enum {
 			
 //		ret = [self writeData:(darr){0x00} at:(unsigned long)0x04A40040 length:1]; // Init expansion device.
 		
-		if (ret == kIOReturnSuccess){
+//		if (ret == kIOReturnSuccess){
 			// get calib data
 			ret = [self readData:0x04A40020 length: 16];
-		}
+//		}
 				
 	}
 
@@ -385,7 +426,7 @@ enum {
 		NSLog(@"Expansion port disabled.");
 	}
 	
-	ret = [self requestUpdates];
+//	ret = [self requestUpdates];
 
 	return ret;
 }
@@ -517,8 +558,7 @@ enum {
 		[disconnectNotification unregister];
 		disconnectNotification = nil;
 	}
-	
-	
+		
 	if (cchan){
 		if ([wiiDevice isConnected]) do {
 			[cchan setDelegate:nil];
@@ -526,8 +566,8 @@ enum {
 			trycount++;
 		}while(ret != kIOReturnSuccess && trycount < 10);
 			[cchan release];
+			cchan = nil;
 	}
-
 	
 	trycount = 0;
 	
@@ -538,8 +578,8 @@ enum {
 			trycount++;
 		}while(ret != kIOReturnSuccess && trycount < 10);
 		[ichan release];
+		ichan = nil;
 	}
-
 	
 	trycount = 0;
 	
@@ -551,7 +591,6 @@ enum {
 		//NSLog(@"closed");
 	}
 	
-	ichan = cchan = nil;
 	wiiDevice = nil;
 	
 	// no longer a delegate
@@ -561,7 +600,6 @@ enum {
 		statusTimer = nil;
 
 	}
-
 	
 	return ret;
 }
@@ -588,9 +626,26 @@ enum {
 		}
 		printf("\n");
 	}**/
-	 
+
+	unsigned short addr = (dp[5] * 256) + dp[6];
+	NSLog(@"0x21 addr=%@",addr);
+	
+	//mii data
+	if ((dataLength >= 20) && (addr >= WIIMOTE_MII_DATA_BEGIN_ADDR) && (addr <= WIIMOTE_MII_CHECKSUM1_ADDR)) { 
+		int slot = MII_SLOT(addr);
+		int len = dataLength - 7;
+		memcpy(&mii_data_buf[mii_data_offset], &dp[7], len);
+		mii_data_offset += len;
+		if (mii_data_offset >= WIIMOTE_MII_DATA_BYTES_PER_SLOT) {
+			if ([_delegate respondsToSelector:@selector(gotMiidata:at:)]){
+				[_delegate gotMiiData: (Mii*)mii_data_buf at: slot];
+			}
+		}		
+	}
+	
+	
 	// specify attached expasion device
-	if ((dp[5] == 0x00) && (dp[6] == 0xF0)){
+	if (addr == 0x00F0){
 		NSLog(@"Expansion device connected.");
 		
 		if ([self decrypt:dp[21]] == 0x00){
@@ -613,7 +668,7 @@ enum {
 	}
 		
 	// wiimote calibration data
-	if (!readingRegister && dp[5] == 0x00 && dp[6] == 0x20){
+	if (!readingRegister && (addr == 0x0020)){
 		wiiCalibData.accX_zero = dp[7];
 		wiiCalibData.accY_zero = dp[8];
 		wiiCalibData.accZ_zero = dp[9];
@@ -627,7 +682,7 @@ enum {
 	}
 	
 	// expansion device calibration data.		
-	if (readingRegister && dp[5] == 0x00 && dp[6] == 0x20){
+	if (readingRegister && (addr == 0x0020)){
 		if (expType == WiiNunchuk) {
 			//nunchuk calibration data
 			nunchukCalibData.accX_zero =  [self decrypt:dp[7]];
@@ -662,21 +717,26 @@ enum {
 
 		NSLog(@"Status Report");
 		
-		batteryLevel = (double)dp[7];
-		batteryLevel /= (double)0xC0; // C0 = fully charged.
+		double level = (double)dp[7];
+		level /= (double)0xC0; // C0 = fully charged.
+
+		if (level != _batteryLevel) {
+			_batteryLevel = level;
+			if ([_delegate respondsToSelector:@selector(batteryLevelChanged:)]){
+				[_delegate batteryLevelChanged:_batteryLevel];
+			}
+		}
 		
-		if (batteryLevel < warningBatteryLevel) {
+		if (_batteryLevel < _warningBatteryLevel) {
 			[[NSNotificationCenter defaultCenter] postNotificationName:@"WiiRemoteBatteryLowNotification" object:self];
 		}
 		
 		if ((dp[4] & 0x02)) { //some device attached to Wiimote
 
 			NSLog(@"Device Attached");
-			if (isExpansionPortAttached == NO) {
+			if (!isExpansionPortAttached) {
 				
 				isExpansionPortAttached = YES;
-				
-//				initExpPort = YES;
 				
 				IOReturn ret = [self writeData:(darr){0x00} at:(unsigned long)0x04A40040 length:1]; // Initialize the device
 				
@@ -694,7 +754,7 @@ enum {
 				NSLog(@"Expansion Device initialized");
 			}
 		} else { // unplugged
-			if (isExpansionPortAttached != NO) {
+			if (isExpansionPortAttached) {
 				NSLog(@"Device Detached");
 				isExpansionPortAttached = NO;
 				expType = WiiExpNotAttached;
@@ -832,7 +892,7 @@ enum {
 
 //	NSLog(@"IR Data %00x,%00x  %00x,%00x", irData[0].x, irData[0].y, irData[1].x, irData[1].y);
 
-	float ox, oy;
+	double ox, oy;
 	if (irData[0].s < 0x0F && irData[1].s < 0x0F) {
 		int l = leftPoint, r;
 		if (leftPoint == -1) {
@@ -846,21 +906,35 @@ enum {
 		}
 		r = 1-l;
 		
-		float dx = irData[r].x - irData[l].x;
-		float dy = irData[r].y - irData[l].y;
+		double dx = irData[r].x - irData[l].x;
+		double dy = irData[r].y - irData[l].y;
 		
-		float d = sqrt(dx*dx+dy*dy);
+		double d = sqrt(dx*dx+dy*dy);
 		
 		dx /= d;
 		dy /= d;
 		
-		float cx = (irData[l].x+irData[r].x)/1024.0 - 1;
-		float cy = (irData[l].y+irData[r].y)/1024.0 - .75;
-		
-		float angle = atan2(dy, dx);
-		
+		double cx = (irData[l].x+irData[r].x)/kWiiIRPixelsWidth - 1;
+		double cy = (irData[l].y+irData[r].y)/kWiiIRPixelsHeight - 1;
+
 		ox = -dy*cy-dx*cx;
 		oy = -dx*cy+dy*cx;
+		
+//		double angle = atan2(dy, dx);
+		
+		// cam:
+		// Compensate for distance. There must be fewer than 0.75*768 pixels between the spots for this to work.
+		// In other words, you have to be far enough away from the sensor bar for the two spots to have enough
+		// space on the image sensor to travel without one of
+		// the points going off the image.
+		// note: it is working very well ...
+		double gain = 4;
+		if (d < (0.75 * kWiiIRPixelsHeight)) {
+			gain = 1 / (1 - d/kWiiIRPixelsHeight);
+        }
+		
+		ox *= gain;
+		oy *= gain;		
 //		NSLog(@"x:%5.2f;  y: %5.2f;  angle: %5.1f\n", ox, oy, angle*180/M_PI);
 	} else {
 		ox = oy = -100;
@@ -898,9 +972,18 @@ enum {
 		// report contains motion sensor data
 		if (dp[1] & 0x01) {
 			
+#if USE_ACC_NINTH_LSB_BIT
+			// cam: added 9th bit of resolution to the wii acceleration
+			// see http://www.wiili.org/index.php/Talk:Wiimote#Remaining_button_state_bits
+			//
+			accX = (dp[4] << 1) | (buttonData & 0x0040) >> 6;
+			accY = (dp[5] << 1) | (buttonData & 0x2000) >> 13;
+			accZ = (dp[6] << 1) | (buttonData & 0x4000) >> 14;
+#else
 			accX = dp[4];
 			accY = dp[5];
 			accZ = dp[6];
+#endif
 			
 			[_delegate accelerationChanged:WiiRemoteAccelerationSensor accX:accX accY:accY accZ:accZ];
 			
@@ -924,43 +1007,6 @@ enum {
 		} // report contains motion sensor data
 		
 } // handleButtonReport
-
-
-// thanks to Ian!
--(void)l2capChannelData:(IOBluetoothL2CAPChannel*)l2capChannel data:(void *)dataPointer length:(size_t)dataLength{
-	
-	if (!wiiDevice) {
-		return;
-	}
-	
-	unsigned char* dp = (unsigned char*)dataPointer;
-	
-	//controller status (expansion port and battery level data) - received when report 0x15 sent to Wiimote (getCurrentStatus:) or status of expansion port changes.
-	if (dp[1] == 0x20 && dataLength >= 8) {
-		[self handleStatusReport:dp length:dataLength];
-		[self requestUpdates]; // Make sure we keep getting state change reports.
-		return;
-	}
-
-	if (dp[1] == 0x21) {
-		[self handleRAMData:dp length:dataLength];
-		return;
-	}
-
-	if (dp[1] == 0x22) { // Write data response
-		NSLog(@"Write data response: %00x %00x %00x %00x", dp[2], dp[3], dp[4], dp[5]);
-		return;
-	}
-	
-	// report contains button info
-	if ((dp[1] & 0xF0) == 0x30) {
-		[self handleButtonReport:dp length:dataLength];
-	} 	// report contains button info
-	
-	//if (nil != _delegate)
-		//[_delegate dataChanged:buttonData accX:accX accY:accY accZ:accZ mouseX:ox mouseY:oy];
-	//[_delegate dataChanged:buttonData accX:irData[0].x/4 accY:irData[0].y/3 accZ:irData[0].s*16];
-} // l2capChannelData
 
 - (unsigned char)decrypt:(unsigned char)data {
 		return (data ^ 0x17) + 0x17;
@@ -1343,6 +1389,10 @@ enum {
 	}
 }
 
+- (IOReturn)getMii:(unsigned int)slot {
+		mii_data_offset = 0;
+		return [self readData: MII_OFFSET(slot) length: WIIMOTE_MII_DATA_BYTES_PER_SLOT];
+}
 
 - (void)getCurrentStatus:(NSTimer*)timer{
 	unsigned char cmd[] = {0x15, 0x00};
@@ -1383,5 +1433,75 @@ enum {
 			return data;
 	}
 }
+
+/*============= BluetoothChannel Delegate methods ================*/
+
+- (void)l2capChannelReconfigured:(IOBluetoothL2CAPChannel*)l2capChannel {
+      NSLog (@"l2capChannelReconfigured");
+}
+
+- (void)l2capChannelWriteComplete:(IOBluetoothL2CAPChannel*)l2capChannel refcon:(void*)refcon status:(IOReturn)error {
+      NSLog (@"l2capChannelWriteComplete");
+}
+
+- (void)l2capChannelQueueSpaceAvailable:(IOBluetoothL2CAPChannel*)l2capChannel {
+      NSLog (@"l2capChannelQueueSpaceAvailable");
+}
+
+- (void)l2capChannelOpenComplete:(IOBluetoothL2CAPChannel*)l2capChannel status:(IOReturn)error
+{
+      NSLogDebug (@"l2capChannelOpenComplete");
+	  
+      [_lock unlock];
+} 
+
+- (void)l2capChannelClosed:(IOBluetoothL2CAPChannel*)l2capChannel
+{
+	NSLogDebug (@"l2capChannelClosed");
+	
+	if (l2capChannel == cchan) {
+		cchan = nil;
+	} else if (l2capChannel == ichan) {
+		ichan = nil;
+	}
+
+	[_lock unlock];
+} 
+
+// thanks to Ian!
+-(void)l2capChannelData:(IOBluetoothL2CAPChannel*)l2capChannel data:(void *)dataPointer length:(size_t)dataLength 
+{	
+	if (!wiiDevice) {
+		return;
+	}
+	
+	unsigned char* dp = (unsigned char*)dataPointer;
+	
+	//controller status (expansion port and battery level data) - received when report 0x15 sent to Wiimote (getCurrentStatus:) or status of expansion port changes.
+	if (dp[1] == 0x20 && dataLength >= 8) {
+		[self handleStatusReport:dp length:dataLength];
+//		[self requestUpdates]; // Make sure we keep getting state change reports.
+		return;
+	}
+
+	if (dp[1] == 0x21) {
+		[self handleRAMData:dp length:dataLength];
+		return;
+	}
+
+	if (dp[1] == 0x22) { // Write data response
+		NSLog(@"Write data response: %00x %00x %00x %00x", dp[2], dp[3], dp[4], dp[5]);
+		return;
+	}
+	
+	// report contains button info
+	if ((dp[1] & 0xF0) == 0x30) {
+		[self handleButtonReport:dp length:dataLength];
+	} 	// report contains button info
+	
+	//if (nil != _delegate)
+		//[_delegate dataChanged:buttonData accX:accX accY:accY accZ:accZ mouseX:ox mouseY:oy];
+	//[_delegate dataChanged:buttonData accX:irData[0].x/4 accY:irData[0].y/3 accZ:irData[0].s*16];
+} // l2capChannelData
 
 @end

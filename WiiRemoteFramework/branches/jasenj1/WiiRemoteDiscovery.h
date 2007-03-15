@@ -12,20 +12,26 @@
 
 
 @interface WiiRemoteDiscovery : NSObject {
-	IOBluetoothDeviceInquiry* inquiry;
+	IOBluetoothDeviceInquiry* _inquiry;
+	BOOL _isDiscovering;
+
 	id _delegate;
 }
 
 + (WiiRemoteDiscovery*) discoveryWithDelegate:(id)delegate;
+- (id) delegate;
 - (void) setDelegate:(id)delegate;
+
 - (IOReturn)start;
 - (IOReturn)stop;
 
+- (void) connectToFoundDevices;
 @end
 
 
 @interface NSObject( WiiRemoteDiscoveryDelegate )
 
+- (void) willStartWiimoteConnections;
 - (void) WiiRemoteDiscovered:(WiiRemote*)wiimote;
 - (void) WiiRemoteDiscoveryError:(int)code;
 
