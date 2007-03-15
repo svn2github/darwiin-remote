@@ -3,6 +3,7 @@
 #import <Cocoa/Cocoa.h>
 #import <ApplicationServices/ApplicationServices.h>
 #import <QuartzComposer/QCView.h>
+#import <WiiRemote/Mii.h>
 #import <WiiRemote/WiiRemote.h>
 #import <WiiRemote/WiiRemoteDiscovery.h>
 #import "GraphView.h"
@@ -104,6 +105,7 @@
 
 }
 
+- (void)setupInitialKeyMappings;
 
 - (IBAction)doCalibration:(id)sender;
 - (IBAction)setForceFeedbackEnabled:(id)sender;
@@ -119,7 +121,13 @@
 - (IBAction)enterSaveName:(id)sender;
 - (IBAction)cancelEnterSaveName:(id)sender;
 
+- (void)gotMiiData: (Mii*)m at:(int)slot;
 - (IBAction)showHideIRWindow:(id)sender;
 
 - (void) sendModifierKeys:(id)map isPressed:(BOOL)isPressed;
+
+#pragma mark -
+#pragma mark WiiRemoteDiscovery delegates
+
+- (void) willStartWiimoteConnections;
 @end

@@ -210,39 +210,15 @@
 }
 
 
-//delegats implementation
-
-- (void) WiiRemoteDiscovered:(WiiRemote*)wiimote {
-	wii = wiimote;
-	[wiimote setDelegate:self];
-	[textView setString:[NSString stringWithFormat:@"%@\n===== Connected to WiiRemote =====", [textView string]]];
-	
-	[wiimote setLEDEnabled1:YES enabled2:NO enabled3:NO enabled4:NO];
-	[wiimoteQCView setValue:[NSNumber numberWithBool:[led1 state] ] forInputKey:[NSString stringWithString:@"LED_1"]];
-
-	[wiimote setMotionSensorEnabled:YES];
-//	[wiimote setIRSensorEnabled:YES];
-	[discovery stop];
-	[graphView startTimer];
-	[graphView2 startTimer];
-
-	
-	
-	NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
-	[mappingController setSelectionIndex:[[defaults objectForKey:@"selection"] intValue]];
-	
-
-
-}
-
-- (void) WiiRemoteDiscoveryError:(int)code {
-	[textView setString:[NSString stringWithFormat:@"%@\n===== WiiRemoteDiscovery error (%d) =====", [textView string], code]];
-}
 
 - (void) wiiRemoteDisconnected:(IOBluetoothDevice*)device {
 	[textView setString:[NSString stringWithFormat:@"%@\n===== lost connection with WiiRemote =====", [textView string]]];
 	[wii release];
+
+	CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.5, NO);
+
 	wii = nil;
+	// [discovery stop];
 	[discovery start];
 	[textView setString:[NSString stringWithFormat:@"%@\nPlease press the synchronize button", [textView string]]];
 }
@@ -480,11 +456,9 @@
 		map = [mappings valueForKeyPath:@"nunchuk.c"];
 		[joystickQCView setValue:[NSNumber numberWithBool: isPressed] forInputKey:[NSString stringWithString:@"CEnable"]];
 
-		NSLog(@"C Button");
 	}else if (type == WiiNunchukZButton){
 		map = [mappings valueForKeyPath:@"nunchuk.z"];
 		[joystickQCView setValue:[NSNumber numberWithBool: isPressed] forInputKey:[NSString stringWithString:@"ZEnable"]];
-		NSLog(@"Z Button");
 	}
 	
 	
@@ -1329,6 +1303,62 @@
 			[textView setString:[NSString stringWithFormat:@"%@\n===== Mouse Mode On (IR Sensor) =====", [textView string]]];
 			
 	}
+}
+
+- (IBAction)getMii: (id)sender
+{
+       NSLog(@"Requesting Mii...");
+       [wii getMii:0];
+}
+
+- (void)gotMiiData: (Mii*)m at:(int)slot
+{
+       Mii mii = *m;
+
+       NSLog(@"Got Mii named %@ ", mii.creatorName);
+       NSLog(@" at %@",slot);
+
+       // save Mii binary file
+       NSData* miiData = [NSData dataWithBytes:(void*)m length: MII_DATA_SIZE];
+       NSSavePanel* theSavePanel = [NSSavePanel new];
+       [theSavePanel setPrompt:NSLocalizedString(@"Save", @"Save")];
+       if (NSFileHandlingPanelOKButton == [theSavePanel runModalForDirectory:NULL file:@"Untitled.mii"]) {
+               NSURL *selectedFileURL = [theSavePanel URL];
+               [miiData writeToURL:selectedFileURL atomically:NO];
+       }
+}
+
+#pragma mark -
+#pragma mark WiiRemoteDiscovery delegates
+
+- (void) WiiRemoteDiscoveryError:(int)code {
+	[textView setString:[NSString stringWithFormat:@"%@\n===== WiiRemoteDiscovery error (%d) =====", [textView string], code]];
+}
+
+- (void) willStartWiimoteConnections {
+	[textView setString:[NSString stringWithFormat:@"%@\n===== WiiRemote discovered.  Opening connection. =====", [textView string]]];
+}
+
+- (void) WiiRemoteDiscovered:(WiiRemote*)wiimote {
+	
+	[discovery stop];
+	
+	wii = wiimote;
+	[wiimote setDelegate:self];
+	
+	[textView setString:[NSString stringWithFormat:@"%@\n===== Connected to WiiRemote =====", [textView string]]];
+	
+	[wiimote setLEDEnabled1:YES enabled2:NO enabled3:NO enabled4:NO];
+	[wiimoteQCView setValue:[NSNumber numberWithBool:[led1 state] ] forInputKey:[NSString stringWithString:@"LED_1"]];
+
+	[wiimote setMotionSensorEnabled:YES];
+//	[wiimote setIRSensorEnabled:YES];
+
+	[graphView startTimer];
+	[graphView2 startTimer];
+
+	NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
+	[mappingController setSelectionIndex:[[defaults objectForKey:@"selection"] intValue]];
 }
 
 @end
