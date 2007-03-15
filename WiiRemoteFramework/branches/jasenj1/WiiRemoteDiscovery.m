@@ -86,7 +86,7 @@
 	// the returned inquiry is autoreleased, we will have to retain it if we decide to keep it
 	_inquiry = [IOBluetoothDeviceInquiry inquiryWithDelegate:self];
 	[_inquiry setInquiryLength:20];
-//	[_inquiry setSearchCriteria:kBluetoothServiceClassMajorAny majorDeviceClass:0x05 minorDeviceClass:0x01];
+	[_inquiry setSearchCriteria:kBluetoothServiceClassMajorAny majorDeviceClass:0x05 minorDeviceClass:0x01];
 	[_inquiry setUpdateNewDeviceNames:NO];
 	
 	IOReturn status = [_inquiry start];
