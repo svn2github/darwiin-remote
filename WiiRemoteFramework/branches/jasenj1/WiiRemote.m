@@ -365,7 +365,7 @@ typedef enum {
 	usleep(10000);
 
 	if (enabled) {
-		NSLog(@"Enabling IR Sensor");
+		NSLogDebug (@"Enabling IR Sensor");
 		
 		// based on marcan's method, found on wiili wiki:
 		// tweaked to include some aspects of cliff's setup procedure in the hopes
@@ -493,7 +493,7 @@ typedef enum {
 
 - (void) handleWriteResponse:(unsigned char *) dp length:(size_t) dataLength
 {
-	NSLog(@"Write data response: %00x %00x %00x %00x", dp[2], dp[3], dp[4], dp[5]);
+	NSLogDebug (@"Write data response: %00x %00x %00x %00x", dp[2], dp[3], dp[4], dp[5]);
 
 	switch (_expectedWriteResponse) {
 		case kWiiPortAttached:
@@ -556,21 +556,25 @@ typedef enum {
 	if (addr == 0x00F0) {
 		NSLogDebug (@"Expansion device connected.");
 		
-		if (WII_DECRYPT(dp[21]) == 0x00) {
-			NSLogDebug (@"Nunchuk connected.");
-			if (expType != WiiNunchuk) {
-				expType = WiiNunchuk;
-				[[NSNotificationCenter defaultCenter] postNotificationName:WiiRemoteExpansionPortChangedNotification object:self];
-			}
-		} else if (WII_DECRYPT(dp[21]) == 0x01) {
-			NSLogDebug (@"Classic controller connected.");
-			if (expType != WiiClassicController) {
-				expType = WiiClassicController;
-				[[NSNotificationCenter defaultCenter] postNotificationName:WiiRemoteExpansionPortChangedNotification object:self];					
-			}
-		} else {
-			NSLogDebug (@"Unknown device connected (0x%x). ", WII_DECRYPT(dp[21]));
-			expType = WiiExpNotAttached;
+		switch (WII_DECRYPT(dp[21])) {
+			case 0x00:
+				NSLogDebug (@"Nunchuk connected.");
+				if (expType != WiiNunchuk) {
+					expType = WiiNunchuk;
+					[[NSNotificationCenter defaultCenter] postNotificationName:WiiRemoteExpansionPortChangedNotification object:self];
+				}
+				break;
+			case 0x01:
+				NSLogDebug (@"Classic controller connected.");
+				if (expType != WiiClassicController) {
+					expType = WiiClassicController;
+					[[NSNotificationCenter defaultCenter] postNotificationName:WiiRemoteExpansionPortChangedNotification object:self];					
+				}
+				break;
+			default:
+				NSLogDebug (@"Unknown device connected (0x%x). ", WII_DECRYPT(dp[21]));
+				expType = WiiExpNotAttached;
+				break;
 		}
 
 		return;
@@ -635,7 +639,7 @@ typedef enum {
 
 -(void) handleStatusReport:(unsigned char *) dp length:(size_t) dataLength
 {
-	NSLogDebug (@"Status Report");
+	NSLogDebug (@"Status Report (0x%x)", dp[4]);
 		
 	double level = (double) dp[7];
 	level /= (double) 0xC0; // C0 = fully charged.
@@ -724,14 +728,7 @@ typedef enum {
 			
 		case WiiClassicController:
 			cButtonData = (unsigned short)((WII_DECRYPT(dp[21]) << 8) + WII_DECRYPT(dp[22]));
-			/*
-			 cStickX1 = WII_DECRYPT(dp[startByte]) & 0x3F;
-			 cStickY1 = WII_DECRYPT(dp[startByte +1]) & 0x3F;
-			 
-			 cStickX2 = (WII_DECRYPT(dp[startByte]) & 0xC0) >> 3 + 
-			 (WII_DECRYPT(dp[startByte +2]) & 0xC0) >> 5 + (WII_DECRYPT(dp[startByte +3]) & 0x80) >> 7; 
-			 cStickY2 =  WII_DECRYPT(dp[startByte +3]) & 0x0F;
-			 */
+
 			cStickX1 = WII_DECRYPT(dp[startByte +0]) & 0x3F;
 			cStickY1 = WII_DECRYPT(dp[startByte +1]) & 0x3F;
 			
@@ -765,48 +762,39 @@ typedef enum {
 {
 //	NSLog(@"Handling IR Data for 0x%00x", dp[1]);	
 	if (dp[1] == 0x33) { // 12 IR bytes
-			int i;
-			for(i=0 ; i < 4 ; i++) { 
-				irData[i].x = dp[7 + 3 * i];
-				irData[i].y = dp[8 + 3 * i];
-				irData[i].s = dp[9 + 3 * i];
-				irData[i].x += (irData[i].s & 0x30) << 4;
-				irData[i].y += (irData[i].s & 0xC0) << 2;
-				irData[i].s &= 0x0F;
-			} 	
+		int startByte = 0;
+		int i;
+		for(i=0 ; i < 4 ; i++) { 
+			startByte = 7 + 3 * i;
+			irData[i].x = (dp[startByte +0] | ((dp[startByte +2] & 0x30) << 4)) & 0x3FF;
+			irData[i].y = (dp[startByte +1] | ((dp[startByte +2] & 0xC0) << 2)) & 0x3FF;
+			irData[i].s =  dp[startByte +2] & 0x0F;
+		} 	
  	} else { // 10 IR bytes
-		unsigned char startByte;
-		if (dp[1] == 36) {
-			startByte = 4;
-		} else {
-			startByte = 7;
-		}
-		
+		int shift = (dp[1] == 0x36) ? 4 : 7;
+		int startByte = 0;
 		int i;
 		for (i=0; i < 2; i++) {
-		 	irData[2 * i].x  =  dp[startByte + (5 * i)];
-			irData[2 * i].x += (dp[(startByte +2) + (5 * i)] & 0x30) << 4;
-			
-			irData[2*i].y  =  dp[(startByte +1) + (5 * i)];
-			irData[2*i].y += (dp[(startByte +2) + (5 * i)] & 0xC0) << 2;
-			
+			startByte = shift + 5 * i;
+			irData[2*i].x = (dp[startByte +0] | ((dp[startByte +2] & 0x30) << 4)) & 0x3FF;
+			irData[2*i].y = (dp[startByte +1] | ((dp[startByte +2] & 0xC0) << 2)) & 0x3FF;			
 			irData[2*i].s = 0x05;  // No size is given in 10 byte report.
-			
-			irData[(2*i)+1].x  =  dp[(startByte +3) + (5 * i)];
-			irData[(2*i)+1].x += (dp[(startByte +2) + (5 * i)] & 0x03) << 8;
-			
-			irData[(2*i)+1].y  =  dp[(startByte +4) + (5 * i)];
-			irData[(2*i)+1].y += (dp[(startByte +2) + (5 * i)] & 0x0C) << 6;
-			
+
+			irData[(2*i)+1].x = (dp[startByte +3] | ((dp[startByte +2] & 0x03) << 8)) & 0x3FF;
+			irData[(2*i)+1].y = (dp[startByte +4] | ((dp[startByte +2] & 0x0C) << 6)) & 0x3FF;
 			irData[(2*i)+1].s = 0x05;  // No size is given in 10 byte report.
 		}
 	}
 
-//	NSLog(@"IR Data %00x,%00x  %00x,%00x", irData[0].x, irData[0].y, irData[1].x, irData[1].y);
+//	NSLogDebug (@"IR Data (%i, %i) (%i, %i) (%i, %i) (%i, %i)",
+//		  irData[0].x, irData[0].y,
+//		  irData[1].x, irData[1].y,
+//		  irData[2].x, irData[2].y,
+//		  irData[3].x, irData[3].y);
 
 	double ox, oy;
-	if (irData[0].s < 0x0F && irData[1].s < 0x0F) {
-		int l = leftPoint, r;
+	if ((irData[0].s < 0x0F) && (irData[1].s < 0x0F)) {
+		int l = leftPoint;
 		if (leftPoint == -1) {
 			switch (orientation) {
 				case 0: l = (irData[0].x < irData[1].x)?0:1; break;
@@ -814,9 +802,11 @@ typedef enum {
 				case 2: l = (irData[0].x > irData[1].x)?0:1; break;
 				case 3: l = (irData[0].y < irData[1].y)?0:1; break;
 			}
+
 			leftPoint = l;
 		}
-		r = 1-l;
+
+		int r = 1-l;
 		
 		double dx = irData[r].x - irData[l].x;
 		double dy = irData[r].y - irData[l].y;
@@ -830,9 +820,7 @@ typedef enum {
 
 		ox = -dy*cy-dx*cx;
 		oy = -dx*cy+dy*cx;
-		
-//		double angle = atan2(dy, dx);
-		
+
 		// cam:
 		// Compensate for distance. There must be fewer than 0.75*768 pixels between the spots for this to work.
 		// In other words, you have to be far enough away from the sensor bar for the two spots to have enough
@@ -906,7 +894,8 @@ typedef enum {
 		lowZ = lowZ * 0.9 + accZ * 0.1;
 		lowX = lowX * 0.9 + accX * 0.1;
 		
-		float absx = abs(lowX-128), absz = abs(lowZ-128);
+		float absx = abs(lowX-128);
+		float absz = abs(lowZ-128);
 		
 		if (orientation == 0 || orientation == 2) absx -= 5;
 		if (orientation == 1 || orientation == 3) absz -= 5;
