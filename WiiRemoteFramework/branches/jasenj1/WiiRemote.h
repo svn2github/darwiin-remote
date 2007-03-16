@@ -95,9 +95,9 @@ typedef enum {
 
 
 typedef enum {
-	WiiNunchukJoyStick,
-	WiiClassicControllerLeftJoyStick,	//not available
-	WiiClassicControllerRightJoyStick	//not available
+	WiiNunchukJoyStick					= 0,
+	WiiClassicControllerLeftJoyStick	= 1,
+	WiiClassicControllerRightJoyStick	= 2
 } WiiJoyStickType;
 
 typedef enum {
@@ -137,10 +137,10 @@ typedef enum {
 	WiiExpectedWriteResponseType _expectedWriteResponse;
 	BOOL readingRegister;
 	BOOL isMotionSensorEnabled, isIRSensorEnabled, isVibrationEnabled, isExpansionPortEnabled;
-	BOOL isExpansionPortAttached, initExpPort;
+	BOOL isExpansionPortAttached;
 	BOOL isLED1Illuminated, isLED2Illuminated, isLED3Illuminated, isLED4Illuminated;
-	NSTimer* statusTimer;
-	IOBluetoothUserNotification *disconnectNotification;
+	NSTimer * statusTimer;
+	IOBluetoothUserNotification * disconnectNotification;
 	BOOL buttonState[28];
 	
 	//nunchuk
@@ -151,7 +151,7 @@ typedef enum {
 	unsigned short nAccZ;
 	unsigned short nButtonData;
 	
-	//classic controller
+	// classic controller
 	unsigned short cButtonData;
 	unsigned short cStickX1;
 	unsigned short cStickY1;
@@ -202,7 +202,7 @@ typedef enum {
 - (void) buttonChanged:(WiiButtonType) type isPressed:(BOOL) isPressed;
 - (void) accelerationChanged:(WiiAccelerationSensorType) type accX:(unsigned short) accX accY:(unsigned short) accY accZ:(unsigned short) accZ;
 - (void) joyStickChanged:(WiiJoyStickType) type tiltX:(unsigned short) tiltX tiltY:(unsigned short) tiltY;
-- (void) analogButtonChanged:(WiiButtonType) type amount:(unsigned) press;
+- (void) analogButtonChanged:(WiiButtonType) type amount:(unsigned short) press;
 - (void) batteryLevelChanged:(double) level;
 - (void) wiiRemoteDisconnected:(IOBluetoothDevice*) device;
 - (void) gotMiiData: (Mii*) mii_data_buf at: (int) slot;

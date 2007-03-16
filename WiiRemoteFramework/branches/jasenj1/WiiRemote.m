@@ -302,9 +302,8 @@ typedef enum {
 		[self writeData:(darr){ wiiIRMode } at:0x04B00033 length:1];
 		usleep(10000);
 	 } else {
-	 
 		if (isExpansionPortEnabled) {
-			 cmd[2] = 0x34;	// Buttons, 19 Extension Bytes	 
+			cmd[2] = 0x34;	// Buttons, 19 Extension Bytes	 
 		} else {
 			cmd[2] = 0x30; // Buttons
 		}
@@ -312,7 +311,7 @@ typedef enum {
 
 	if (isMotionSensorEnabled)	cmd[2] |= 0x01;	// Add Accelerometer
 	
-	usleep(10000);
+//	usleep(10000);
 	return [self sendCommand:cmd length:3];
 
 } // requestUpdates
@@ -492,7 +491,7 @@ typedef enum {
 	return ret;
 }
 
-- (void) handleWriteReponse:(unsigned char *) dp length:(size_t) dataLength
+- (void) handleWriteResponse:(unsigned char *) dp length:(size_t) dataLength
 {
 	NSLog(@"Write data response: %00x %00x %00x %00x", dp[2], dp[3], dp[4], dp[5]);
 
@@ -564,6 +563,7 @@ typedef enum {
 				[[NSNotificationCenter defaultCenter] postNotificationName:WiiRemoteExpansionPortChangedNotification object:self];
 			}
 		} else if (WII_DECRYPT(dp[21]) == 0x01) {
+			NSLogDebug (@"Classic controller connected.");
 			if (expType != WiiClassicController) {
 				expType = WiiClassicController;
 				[[NSNotificationCenter defaultCenter] postNotificationName:WiiRemoteExpansionPortChangedNotification object:self];					
@@ -573,7 +573,6 @@ typedef enum {
 			expType = WiiExpNotAttached;
 		}
 
-		//		initExpPort = NO;
 		return;
 	}
 		
@@ -704,41 +703,61 @@ typedef enum {
 			return; // This shouldn't ever happen.
 	}
 	
-	if (expType == WiiNunchuk) {
-		nStickX = WII_DECRYPT(dp[startByte]);
-		nStickY = WII_DECRYPT(dp[startByte +1]);
-		nAccX   = WII_DECRYPT(dp[startByte +2]);
-		nAccY   = WII_DECRYPT(dp[startByte +3]);
-		nAccZ   = WII_DECRYPT(dp[startByte +4]);
-		nButtonData = WII_DECRYPT(dp[startByte +5]);
-	} else if (expType == WiiClassicController) {
-		cButtonData = (unsigned short)(WII_DECRYPT(dp[21]) << 8) + WII_DECRYPT(dp[22]);
-		
-		cStickX1 = WII_DECRYPT(dp[startByte]) & 0x3F;
-		cStickY1 = WII_DECRYPT(dp[startByte +1]) & 0x3F;
-		
-		cStickX2 = (WII_DECRYPT(dp[startByte]) & 0xC0) >> 3 + 
-			(WII_DECRYPT(dp[startByte +2]) & 0xC0) >> 5 + (WII_DECRYPT(dp[startByte +3]) & 0x80) >> 7; 
-		cStickY2 =  WII_DECRYPT(dp[startByte +3]) & 0x0F;
-		
-		cAnalogR =  WII_DECRYPT(dp[startByte +4]) & 0x0F;
-		cAnalogL = ( WII_DECRYPT(dp[startByte +4]) & 0xE0) >> 5 + (WII_DECRYPT(dp[startByte +3]) & 0x60) >> 2;
-	}
-	
-	if (isExpansionPortEnabled) {
-		if (expType == WiiNunchuk) {
+	switch (expType) {
+		case WiiNunchuk:
+			nStickX		= WII_DECRYPT(dp[startByte +0]);
+			nStickY		= WII_DECRYPT(dp[startByte +1]);
+			nAccX		= WII_DECRYPT(dp[startByte +2]);
+			nAccY		= WII_DECRYPT(dp[startByte +3]);
+			nAccZ		= WII_DECRYPT(dp[startByte +4]);
+			nButtonData	= WII_DECRYPT(dp[startByte +5]);
+
 			[self sendWiiNunchukButtonEvent:nButtonData];
-			[_delegate accelerationChanged:WiiNunchukAccelerationSensor accX:nAccX accY:nAccY accZ:nAccZ];
-			[_delegate joyStickChanged:WiiNunchukJoyStick tiltX:nStickX tiltY:nStickY];
-		} else if (expType == WiiClassicController){
+			
+			if ([_delegate respondsToSelector:@selector (accelerationChanged:accX:accY:accZ:)])
+				[_delegate accelerationChanged:WiiNunchukAccelerationSensor accX:nAccX accY:nAccY accZ:nAccZ];
+				
+			if ([_delegate respondsToSelector:@selector (joyStickChanged:tiltX:tiltY:)])
+				[_delegate joyStickChanged:WiiNunchukJoyStick tiltX:nStickX tiltY:nStickY];
+			
+			break;
+			
+		case WiiClassicController:
+			cButtonData = (unsigned short)((WII_DECRYPT(dp[21]) << 8) + WII_DECRYPT(dp[22]));
+			/*
+			 cStickX1 = WII_DECRYPT(dp[startByte]) & 0x3F;
+			 cStickY1 = WII_DECRYPT(dp[startByte +1]) & 0x3F;
+			 
+			 cStickX2 = (WII_DECRYPT(dp[startByte]) & 0xC0) >> 3 + 
+			 (WII_DECRYPT(dp[startByte +2]) & 0xC0) >> 5 + (WII_DECRYPT(dp[startByte +3]) & 0x80) >> 7; 
+			 cStickY2 =  WII_DECRYPT(dp[startByte +3]) & 0x0F;
+			 */
+			cStickX1 = WII_DECRYPT(dp[startByte +0]) & 0x3F;
+			cStickY1 = WII_DECRYPT(dp[startByte +1]) & 0x3F;
+			
+			cStickX2 =
+				(((WII_DECRYPT(dp[startByte +0]) & 0xC0) >> 3) |
+				 ((WII_DECRYPT(dp[startByte +1]) & 0xC0) >> 5) |
+				 ((WII_DECRYPT(dp[startByte +2]) & 0x80) >> 7)) & 0x1F;
+			cStickY2 = WII_DECRYPT(dp[startByte +2]) & 0x1F;
+			
+			cAnalogL =
+				(((WII_DECRYPT(dp[startByte +2]) & 0x60) >> 2) |
+				 ((WII_DECRYPT(dp[startByte +3]) & 0xE0) >> 5)) & 0x1F;
+			cAnalogR =  WII_DECRYPT(dp[startByte +3]) & 0x1F;
+			
 			[self sendWiiClassicControllerButtonEvent:cButtonData];
-			[_delegate joyStickChanged:WiiClassicControllerLeftJoyStick tiltX:cStickX1 tiltY:cStickY1];
-			[_delegate joyStickChanged:WiiClassicControllerRightJoyStick tiltX:cStickX2 tiltY:cStickY2];
-			
-			[_delegate analogButtonChanged:WiiClassicControllerLeftButton amount:cAnalogL];
-			[_delegate analogButtonChanged:WiiClassicControllerRightButton amount:cAnalogR];
-			
-		}			
+			if ([_delegate respondsToSelector:@selector (joyStickChanged:tiltX:tiltY:)]) {
+				[_delegate joyStickChanged:WiiClassicControllerLeftJoyStick tiltX:cStickX1 tiltY:cStickY1];
+				[_delegate joyStickChanged:WiiClassicControllerRightJoyStick tiltX:cStickX2 tiltY:cStickY2];
+			}
+				
+			if ([_delegate respondsToSelector:@selector (analogButtonChanged:amount:)]) {
+				[_delegate analogButtonChanged:WiiClassicControllerLButton amount:cAnalogL];
+				[_delegate analogButtonChanged:WiiClassicControllerRButton amount:cAnalogR];
+			}			
+
+			break;
 	}
 } // handleExtensionData
 
@@ -765,18 +784,18 @@ typedef enum {
 		
 		int i;
 		for (i=0; i < 2; i++) {
-		 	irData[2 * i].x = dp[startByte + (5 * i)];
+		 	irData[2 * i].x  =  dp[startByte + (5 * i)];
 			irData[2 * i].x += (dp[(startByte +2) + (5 * i)] & 0x30) << 4;
 			
-			irData[2*i].y = dp[(startByte +1) + (5 * i)];
+			irData[2*i].y  =  dp[(startByte +1) + (5 * i)];
 			irData[2*i].y += (dp[(startByte +2) + (5 * i)] & 0xC0) << 2;
 			
 			irData[2*i].s = 0x05;  // No size is given in 10 byte report.
 			
-			irData[(2*i)+1].x = dp[(startByte +3)+ (5 * i)];
+			irData[(2*i)+1].x  =  dp[(startByte +3) + (5 * i)];
 			irData[(2*i)+1].x += (dp[(startByte +2) + (5 * i)] & 0x03) << 8;
 			
-			irData[(2*i)+1].y = dp[(startByte +4) + (5 * i)];
+			irData[(2*i)+1].y  =  dp[(startByte +4) + (5 * i)];
 			irData[(2*i)+1].y += (dp[(startByte +2) + (5 * i)] & 0x0C) << 6;
 			
 			irData[(2*i)+1].s = 0x05;  // No size is given in 10 byte report.
@@ -801,12 +820,11 @@ typedef enum {
 		
 		double dx = irData[r].x - irData[l].x;
 		double dy = irData[r].y - irData[l].y;
-		
-		double d = sqrt(dx*dx+dy*dy);
-		
+		double d = hypot (dx, dy);
+
 		dx /= d;
 		dy /= d;
-		
+
 		double cx = (irData[l].x+irData[r].x)/kWiiIRPixelsWidth - 1;
 		double cy = (irData[l].y+irData[r].y)/kWiiIRPixelsHeight - 1;
 
@@ -822,9 +840,8 @@ typedef enum {
 		// the points going off the image.
 		// note: it is working very well ...
 		double gain = 4;
-		if (d < (0.75 * kWiiIRPixelsHeight)) {
+		if (d < (0.75 * kWiiIRPixelsHeight)) 
 			gain = 1 / (1 - d/kWiiIRPixelsHeight);
-        }
 		
 		ox *= gain;
 		oy *= gain;		
@@ -853,13 +870,13 @@ typedef enum {
 				
 	// report contains extension data		
 	switch (dp[1]) {
-		case 0x32:  //
+//		case 0x32:  //
 		case 0x34:
 		case 0x35:
 		case 0x36:
 		case 0x37:
-		case 0x3D:  //
-			[self handleExtensionData: dp length: dataLength];
+//		case 0x3D:  //
+			[self handleExtensionData:dp length:dataLength];
 			break;
 	}
 	
@@ -1289,46 +1306,50 @@ typedef enum {
 	return [self readData:MII_OFFSET(slot) length:WIIMOTE_MII_DATA_BYTES_PER_SLOT];
 }
 
-- (void)getCurrentStatus:(NSTimer*)timer{
+- (void) getCurrentStatus:(NSTimer*) timer
+{
 	unsigned char cmd[] = {0x15, 0x00};
 	[self sendCommand:cmd length:2];
 }
 
-- (WiiExpansionPortType)expansionPortType{
+- (WiiExpansionPortType) expansionPortType
+{
 	return expType;
 }
 
-- (BOOL)isExpansionPortAttached{
+- (BOOL) isExpansionPortAttached
+{
 	return isExpansionPortAttached;
 }
 
-- (BOOL)isButtonPressed:(WiiButtonType)type{
+- (BOOL)isButtonPressed:(WiiButtonType) type
+{
 	return buttonState[type];
 }
 
+static WiiJoyStickCalibData kWiiNullJoystickCalibData = {0, 0, 0, 0, 0, 0};
+
 - (WiiJoyStickCalibData) joyStickCalibData:(WiiJoyStickType) type
 {
-	WiiJoyStickCalibData data;
-	
 	switch (type) {
 		case WiiNunchukJoyStick:
 			return nunchukJoyStickCalibData;
 		default:
-			return data;
+			return kWiiNullJoystickCalibData;
 	}
 }
 
+static WiiAccCalibData kWiiNullAccCalibData = {0, 0, 0, 0, 0, 0};
+
 - (WiiAccCalibData) accCalibData:(WiiAccelerationSensorType) type
 {
-	WiiAccCalibData data;
-	
 	switch (type) {
 		case WiiRemoteAccelerationSensor:
 			return wiiCalibData;
 		case WiiNunchukAccelerationSensor:
 			return nunchukCalibData;
 		default:
-			return data;
+			return kWiiNullAccCalibData;
 	}
 }
 
@@ -1385,7 +1406,7 @@ typedef enum {
 	}
 
 	if (dp[1] == 0x22) { // Write data response
-		[self handleWriteReponse:dp length:dataLength];
+		[self handleWriteResponse:dp length:dataLength];
 		return;
 	}
 	
