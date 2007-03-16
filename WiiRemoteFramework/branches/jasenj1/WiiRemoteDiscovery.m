@@ -71,9 +71,9 @@
 		NSLog (@"Warning: starting WiiRemoteDiscovery without delegate set");
 	}
 	
-	// to start all over again, first get rid of the discovery, that is stop and release it
+	// to start all over again, first stop the discovery
 	[self close];
-	
+
 	// setup the inquiry for best performance and results, ie:
 	//  limit the serach in time
 	//  limit the serach in quality
@@ -83,7 +83,7 @@
 	[_inquiry setInquiryLength:20];
 	[_inquiry setSearchCriteria:kBluetoothServiceClassMajorAny majorDeviceClass:0x05 minorDeviceClass:0x01];
 	[_inquiry setUpdateNewDeviceNames:NO];
-	
+
 	IOReturn status = [_inquiry start];
 	if (status == kIOReturnSuccess) {
 		[_inquiry retain];
