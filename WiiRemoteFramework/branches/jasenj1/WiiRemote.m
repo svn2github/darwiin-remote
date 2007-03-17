@@ -295,10 +295,11 @@ typedef enum {
 			wiiIRMode = kWiiIRModeBasic;
 		} else {
 			cmd[2] = 0x33; // Buttons, Accelerometer, and 12 IR Bytes.
-			wiiIRMode = kWiiIRModeExtended;		
+			wiiIRMode = kWiiIRModeExtended;
 		}
 		
 		// Set IR Mode
+		NSLogDebug (@"Setting IR Mode to finish initialization.");
 		[self writeData:(darr){ wiiIRMode } at:0x04B00033 length:1];
 		usleep(10000);
 	 } else {
@@ -311,7 +312,7 @@ typedef enum {
 
 	if (isMotionSensorEnabled)	cmd[2] |= 0x01;	// Add Accelerometer
 	
-//	usleep(10000);
+	usleep(10000);
 	return [self sendCommand:cmd length:3];
 
 } // requestUpdates
@@ -335,9 +336,9 @@ typedef enum {
 		ret = [self readData:0x04A40020 length: 16];
 	}
 
-	if (isExpansionPortEnabled)
+	if (isExpansionPortEnabled) {
 		NSLogDebug (@"Expansion port enabled.");
-	else
+	} else
 		NSLogDebug (@"Expansion port disabled.");
 	
 	ret = [self requestUpdates];
@@ -387,7 +388,7 @@ typedef enum {
 		// finish initializing camera
 		if (ret = [self writeData:(darr){0x08} at:0x04B00030 length:1]) return ret;
 		usleep(10000);
-		
+	
 		[self requestUpdates];
 	}else{
 		// probably should do some writes to power down the camera, save battery
@@ -671,14 +672,14 @@ typedef enum {
 		}
 	} else { // unplugged
 		if (isExpansionPortAttached) {
-			NSLog(@"Device Detached");
+			NSLogDebug (@"Device Detached");
 			isExpansionPortAttached = NO;
 			expType = WiiExpNotAttached;
 
 			[[NSNotificationCenter defaultCenter] postNotificationName:WiiRemoteExpansionPortChangedNotification object:self];
 		}
 	}
-	
+
 	isLED1Illuminated = (dp[4] & 0x10);
 	isLED2Illuminated = (dp[4] & 0x20);
 	isLED3Illuminated = (dp[4] & 0x40);
@@ -761,9 +762,9 @@ typedef enum {
 - (void) handleIRData:(unsigned char *) dp length:(size_t) dataLength
 {
 //	NSLog(@"Handling IR Data for 0x%00x", dp[1]);	
+	int i = 0;
 	if (dp[1] == 0x33) { // 12 IR bytes
 		int startByte = 0;
-		int i;
 		for(i=0 ; i < 4 ; i++) { 
 			startByte = 7 + 3 * i;
 			irData[i].x = (dp[startByte +0] | ((dp[startByte +2] & 0x30) << 4)) & 0x3FF;
@@ -777,37 +778,54 @@ typedef enum {
 		for (i=0; i < 2; i++) {
 			startByte = shift + 5 * i;
 			irData[2*i].x = (dp[startByte +0] | ((dp[startByte +2] & 0x30) << 4)) & 0x3FF;
-			irData[2*i].y = (dp[startByte +1] | ((dp[startByte +2] & 0xC0) << 2)) & 0x3FF;			
-			irData[2*i].s = 0x05;  // No size is given in 10 byte report.
+			irData[2*i].y = (dp[startByte +1] | ((dp[startByte +2] & 0xC0) << 2)) & 0x3FF;
+			irData[2*i].s = ((irData[2*i].x == irData[2*i].y) && (irData[2*i].x == 0x3FF)) ? 0x0F : 0x05;  // No size is given in 10 byte report.
 
 			irData[(2*i)+1].x = (dp[startByte +3] | ((dp[startByte +2] & 0x03) << 8)) & 0x3FF;
 			irData[(2*i)+1].y = (dp[startByte +4] | ((dp[startByte +2] & 0x0C) << 6)) & 0x3FF;
-			irData[(2*i)+1].s = 0x05;  // No size is given in 10 byte report.
+			irData[(2*i)+1].s = ((irData[(2*i)+1].x == irData[(2*i)+1].y) && (irData[(2*i)+1].x == 0x3FF)) ? 0x0F : 0x05;  // No size is given in 10 byte report.
 		}
 	}
 
-//	NSLogDebug (@"IR Data (%i, %i) (%i, %i) (%i, %i) (%i, %i)",
-//		  irData[0].x, irData[0].y,
-//		  irData[1].x, irData[1].y,
-//		  irData[2].x, irData[2].y,
-//		  irData[3].x, irData[3].y);
+//	NSLogDebug (@"IR Data (%i, %i, %i) (%i, %i, %i) (%i, %i, %i) (%i, %i, %i)",
+//		  irData[0].x, irData[0].y, irData[0].s,
+//		  irData[1].x, irData[1].y, irData[1].s,
+//		  irData[2].x, irData[2].y, irData[2].s,
+//		  irData[3].x, irData[3].y, irData[3].s);
+
+	int p1 = -1;
+	int p2 = -1;
+	// we should modify this loop to take the points with the lowest s (the brightest ones)
+	for (i=0 ; i<4 ; i++) {
+		if (p1 == -1) {
+			if (irData [i].s < 0x0F)
+				p1 = i;
+		} else {
+			if (irData [i].s < 0x0F) {
+				p2 = i;
+				break;
+			}
+		}
+	}
+	
+//	NSLogDebug (@"p1=%i ; p2=%i", p1, p2);
 
 	double ox, oy;
-	if ((irData[0].s < 0x0F) && (irData[1].s < 0x0F)) {
+	if ((p1 > -1) && (p2 > -1)) {
 		int l = leftPoint;
 		if (leftPoint == -1) {
 			switch (orientation) {
-				case 0: l = (irData[0].x < irData[1].x)?0:1; break;
-				case 1: l = (irData[0].y > irData[1].y)?0:1; break;
-				case 2: l = (irData[0].x > irData[1].x)?0:1; break;
-				case 3: l = (irData[0].y < irData[1].y)?0:1; break;
+				case 0: l = (irData[p1].x < irData[p2].x) ? 0 : 1; break;
+				case 1: l = (irData[p1].y > irData[p2].y) ? 0 : 1; break;
+				case 2: l = (irData[p1].x > irData[p2].x) ? 0 : 1; break;
+				case 3: l = (irData[p1].y < irData[p2].y) ? 0 : 1; break;
 			}
 
 			leftPoint = l;
 		}
 
 		int r = 1-l;
-		
+
 		double dx = irData[r].x - irData[l].x;
 		double dy = irData[r].y - irData[l].y;
 		double d = hypot (dx, dy);
@@ -815,8 +833,8 @@ typedef enum {
 		dx /= d;
 		dy /= d;
 
-		double cx = (irData[l].x+irData[r].x)/kWiiIRPixelsWidth - 1;
-		double cy = (irData[l].y+irData[r].y)/kWiiIRPixelsHeight - 1;
+		double cx = (irData[l].x + irData[r].x)/kWiiIRPixelsWidth - 1;
+		double cy = (irData[l].y + irData[r].y)/kWiiIRPixelsHeight - 1;
 
 		ox = -dy*cy-dx*cx;
 		oy = -dx*cy+dy*cx;
@@ -824,8 +842,7 @@ typedef enum {
 		// cam:
 		// Compensate for distance. There must be fewer than 0.75*768 pixels between the spots for this to work.
 		// In other words, you have to be far enough away from the sensor bar for the two spots to have enough
-		// space on the image sensor to travel without one of
-		// the points going off the image.
+		// space on the image sensor to travel without one of the points going off the image.
 		// note: it is working very well ...
 		double gain = 4;
 		if (d < (0.75 * kWiiIRPixelsHeight)) 
@@ -858,12 +875,10 @@ typedef enum {
 				
 	// report contains extension data		
 	switch (dp[1]) {
-//		case 0x32:  //
 		case 0x34:
 		case 0x35:
 		case 0x36:
 		case 0x37:
-//		case 0x3D:  //
 			[self handleExtensionData:dp length:dataLength];
 			break;
 	}
@@ -875,7 +890,6 @@ typedef enum {
 	
 	// report contains motion sensor data
 	if (dp[1] & 0x01) {
-		
 #if USE_ACC_NINTH_LSB_BIT
 		// cam: added 9th bit of resolution to the wii acceleration
 		// see http://www.wiili.org/index.php/Talk:Wiimote#Remaining_button_state_bits
@@ -894,21 +908,26 @@ typedef enum {
 		lowZ = lowZ * 0.9 + accZ * 0.1;
 		lowX = lowX * 0.9 + accX * 0.1;
 		
-		float absx = abs(lowX-128);
-		float absz = abs(lowZ-128);
+#if USE_ACC_NINTH_LSB_BIT
+#	define WIR_HALFRANGE 256
+#	define WIR_INTERVAL  10
+#else
+#	define WIR_HALFRANGE 128
+#	define WIR_INTERVAL  5
+#endif
+		float absx = abs(lowX - WIR_HALFRANGE);
+		float absz = abs(lowZ - WIR_HALFRANGE);
 		
-		if (orientation == 0 || orientation == 2) absx -= 5;
-		if (orientation == 1 || orientation == 3) absz -= 5;
+		if (orientation == 0 || orientation == 2) absx -= WIR_INTERVAL;
+		if (orientation == 1 || orientation == 3) absz -= WIR_INTERVAL;
 		
 		if (absz >= absx) {
-			if (absz > 5)
-				orientation = (lowZ > 128)?0:2;
+			if (absz > WIR_INTERVAL)
+				orientation = (lowZ > WIR_HALFRANGE) ? 0 : 2;
 		} else {
-			if (absx > 5)
-				orientation = (lowX > 128)?3:1;
+			if (absx > WIR_INTERVAL)
+				orientation = (lowX > WIR_HALFRANGE) ? 3 : 1;
 		}
-		
-		//	printf("orientation: %d\n", orientation);
 	} // report contains motion sensor data
 } // handleButtonReport
 
