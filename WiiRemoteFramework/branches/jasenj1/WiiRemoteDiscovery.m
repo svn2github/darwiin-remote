@@ -107,12 +107,14 @@
 	IOReturn ret = kIOReturnSuccess;
 	
 	ret = [_inquiry stop];
-	LogIOReturn (ret);
+	if (ret != kIOReturnNotPermitted)
+		LogIOReturn (ret);
 	
 	[_inquiry setDelegate:nil];
 	[_inquiry release];
 	_inquiry = nil;
 	
+	NSLogDebug (@"Discovery closed");
 	return ret;
 }
 
@@ -159,7 +161,7 @@
 		[_delegate WiiRemoteDiscoveryError:error];
 		return;
 	}
-	
+
 	// tell our delegate that we are going to connect to the found devices.
 	// as it takes some time to do it, the delegate could for example display a
 	// animated hourglass cursor during the connection process.
@@ -181,11 +183,10 @@
 		WiiRemote * wii = [[[WiiRemote alloc] init] autorelease];
 		IOReturn ret = [wii connectTo:device];
 		
-		if (ret == kIOReturnSuccess) {
+		if (ret == kIOReturnSuccess)
 			[_delegate WiiRemoteDiscovered:wii];
-		} else {
+		else
 			[_delegate WiiRemoteDiscoveryError:ret];
-		}	
 	}
 	
 	// we passed through all devices, clear the search for now
