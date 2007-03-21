@@ -100,11 +100,6 @@ typedef enum {
 	WiiClassicControllerRightJoyStick	= 2
 } WiiJoyStickType;
 
-typedef enum {
-	kWiiNoResponse,
-	kWiiPortAttached
-} WiiExpectedWriteResponseType;
-
 @interface WiiRemote : NSObject
 {
 #ifdef DEBUG
@@ -131,7 +126,6 @@ typedef enum {
 	double _batteryLevel;
 	double _warningBatteryLevel;
 	
-	WiiExpectedWriteResponseType _expectedWriteResponse;
 	BOOL readingRegister;
 	BOOL isMotionSensorEnabled, isIRSensorEnabled, isVibrationEnabled, isExpansionPortEnabled;
 	BOOL isExpansionPortAttached;

@@ -129,19 +129,15 @@ typedef enum {
 		return kIOReturnBadArgument; 
 
 	IOReturn ret = kIOReturnSuccess;
-//	NSLogDebug(@"Open device ...");
-
 
 	// it seems like it is not needed to call openConnection in order to open L2CAP channels ...
 	cchan = [self openL2CAPChannelWithPSM:kBluetoothL2CAPPSMHIDControl delegate:self];
 	if (!cchan)
 		return kIOReturnNotOpen;
-//	[cchan retain];
 	
 	ichan = [self openL2CAPChannelWithPSM:kBluetoothL2CAPPSMHIDInterrupt delegate:self];
 	if (!ichan)
 		return kIOReturnNotOpen;
-//	[ichan retain];
 	
 	ret = [self setMotionSensorEnabled:NO];
 	if (kIOReturnSuccess == ret)	ret = [self setIRSensorEnabled:NO];
@@ -155,9 +151,6 @@ typedef enum {
 	} else {
 //            statusTimer = [[NSTimer scheduledTimerWithTimeInterval:60 target:self selector:@selector(getCurrentStatus:) userInfo:nil repeats:YES] retain];
 		disconnectNotification = [wiiDevice registerForDisconnectNotification:self selector:@selector(disconnected:fromDevice:)];
-//		[ichan setDelegate:self];
-//		[cchan setDelegate:self];
-
 		[self getCurrentStatus:nil];	
 		[self readData:0x0020 length:7]; // Get Accelerometer calibration data
 	}
@@ -493,23 +486,6 @@ usleep(10000);
 - (void) handleWriteResponse:(unsigned char *) dp length:(size_t) dataLength
 {
 	NSLogDebug (@"Write data response: %00x %00x %00x %00x", dp[2], dp[3], dp[4], dp[5]);
-
-	switch (_expectedWriteResponse) {
-		case kWiiPortAttached:
-			NSLogDebug (@"Got reponse from initialization of the attached device!");
-			IOReturn ret = [self readData:0x04A400F0 length:16]; // read expansion device type
-			LogIOReturn (ret);
-		
-			isExpansionPortAttached = (ret == kIOReturnSuccess);
-		
-			if (ret == kIOReturnSuccess) {
-				NSLogDebug (@"Expansion Device initialized");
-			} else
-				NSLogDebug (@"Failed to initialize Expansion Device");
-			break;
-	}
-	
-	_expectedWriteResponse = kWiiNoResponse;
 }
 
 	/**
@@ -657,6 +633,7 @@ usleep(10000);
 		NSLogDebug (@"Device Attached");
 		if (!isExpansionPortAttached) {
 			ret = [self writeData:(darr){0x00} at:(unsigned long)0x04A40040 length:1]; // Initialize the device
+			usleep (10000);
 
 			if (ret != kIOReturnSuccess) {
 				NSLogDebug (@"Problem occured while initializing the expansion port.");
@@ -664,8 +641,16 @@ usleep(10000);
 				return;
 			}
 
-			isExpansionPortAttached = YES;
-			_expectedWriteResponse = kWiiPortAttached;
+			IOReturn ret = [self readData:0x04A400F0 length:16]; // read expansion device type
+			LogIOReturn (ret);
+			
+			isExpansionPortAttached = (ret == kIOReturnSuccess);
+			
+			if (ret == kIOReturnSuccess) {
+				NSLogDebug (@"Expansion Device initialized");
+			} else
+				NSLogDebug (@"Failed to initialize Expansion Device");
+			
 			return;
 		}
 	} else { // unplugged
@@ -1445,7 +1430,7 @@ static WiiAccCalibData kWiiNullAccCalibData = {0, 0, 0, 0, 0, 0};
 	NSLogDebug(@"Open channel (PSM:%i) ...", psm);
 	if ((ret = [wiiDevice openL2CAPChannelSync:&channel withPSM:psm delegate:delegate]) != kIOReturnSuccess) {
 //	if ((ret = [wiiDevice openL2CAPChannel:psm findExisting:NO newChannel:&channel]) != kIOReturnSuccess) {
-		NSLog (@"Could not open L2CAP channel (psm:%i)", psm);
+		NSLogDebug (@"Could not open L2CAP channel (psm:%i)", psm);
 		LogIOReturn (ret);
 		channel = nil;
 		[self closeConnection];
