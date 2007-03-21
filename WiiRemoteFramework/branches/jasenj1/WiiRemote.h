@@ -110,18 +110,15 @@ typedef enum {
 #ifdef DEBUG
 	BOOL _dump;
 #endif
-
+	
+	BOOL _opened;
+	
 	IOBluetoothDevice * wiiDevice;
 	IOBluetoothL2CAPChannel * ichan;
 	IOBluetoothL2CAPChannel * cchan;
 
 	id _delegate;
-	
-	unsigned short accX;
-	unsigned short accY;
-	unsigned short accZ;
-	unsigned short buttonData;
-	
+
 	float lowZ, lowX;
 	int orientation;
 	int leftPoint; // is point 0 or 1 on the left. -1 when not tracking.
@@ -143,6 +140,12 @@ typedef enum {
 	IOBluetoothUserNotification * disconnectNotification;
 	BOOL buttonState[28];
 	
+	//wiimote
+	unsigned short accX;
+	unsigned short accY;
+	unsigned short accZ;
+	unsigned short buttonData;	
+	
 	//nunchuk
 	unsigned short nStickX;
 	unsigned short nStickY;
@@ -159,12 +162,11 @@ typedef enum {
 	unsigned short cStickY2;
 	unsigned short cAnalogL;
 	unsigned short cAnalogR;
-	
 } 
 
 - (NSString*) address;
-- (void)setDelegate:(id) delegate;
-- (double)batteryLevel;
+- (void) setDelegate:(id) delegate;
+- (double) batteryLevel;
 
 - (WiiExpansionPortType) expansionPortType;
 - (BOOL) isExpansionPortAttached;
@@ -196,6 +198,9 @@ typedef enum {
 
 
 @interface NSObject (WiiRemoteDelegate)
+
+- (void) wiimoteWillSendData;
+- (void) wiimoteDidSendData;
 
 - (void) irPointMovedX:(float) px Y:(float) py;
 - (void) rawIRData: (IRData[4]) irData;

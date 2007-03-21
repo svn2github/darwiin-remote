@@ -105,10 +105,6 @@ typedef enum {
 
 - (void) dealloc
 {
-	[cchan release], cchan = nil;
-	
-	[ichan release], ichan = nil;
-	
 	NSLogDebug (@"wii released");
 	[super dealloc];
 }
@@ -133,22 +129,20 @@ typedef enum {
 		return kIOReturnBadArgument; 
 
 	IOReturn ret = kIOReturnSuccess;
-	NSLogDebug(@"Open device ...");
+//	NSLogDebug(@"Open device ...");
 
-	if ((ret = [wiiDevice openConnection:nil]) != kIOReturnSuccess) {
-		NSLog (@"Could not open connection to the Wii (0x%x)", ret);
-		LogIOReturn (ret);
-		return ret;
-	}
 
-	cchan = [[self openL2CAPChannelWithPSM:17 delegate:self] retain];
+	// it seems like it is not needed to call openConnection in order to open L2CAP channels ...
+	cchan = [self openL2CAPChannelWithPSM:kBluetoothL2CAPPSMHIDControl delegate:self];
 	if (!cchan)
 		return kIOReturnNotOpen;
-
-	ichan = [[self openL2CAPChannelWithPSM:19 delegate:self] retain];
+//	[cchan retain];
+	
+	ichan = [self openL2CAPChannelWithPSM:kBluetoothL2CAPPSMHIDInterrupt delegate:self];
 	if (!ichan)
 		return kIOReturnNotOpen;
-		
+//	[ichan retain];
+	
 	ret = [self setMotionSensorEnabled:NO];
 	if (kIOReturnSuccess == ret)	ret = [self setIRSensorEnabled:NO];
 	if (kIOReturnSuccess == ret)	ret = [self setForceFeedbackEnabled:NO];
@@ -159,30 +153,34 @@ typedef enum {
 		LogIOReturn (ret);
 		[self closeConnection];
 	} else {
-
 //            statusTimer = [[NSTimer scheduledTimerWithTimeInterval:60 target:self selector:@selector(getCurrentStatus:) userInfo:nil repeats:YES] retain];
+		disconnectNotification = [wiiDevice registerForDisconnectNotification:self selector:@selector(disconnected:fromDevice:)];
+//		[ichan setDelegate:self];
+//		[cchan setDelegate:self];
+
 		[self getCurrentStatus:nil];	
 		[self readData:0x0020 length:7]; // Get Accelerometer calibration data
-		disconnectNotification = [wiiDevice registerForDisconnectNotification:self selector:@selector(disconnected:fromDevice:)];
-	} 
+	}
 
 	return ret;
 }
 
 - (void) disconnected:(IOBluetoothUserNotification*) note fromDevice:(IOBluetoothDevice*) device
 {
-	if ([[device getAddressString] isEqualToString:[self address]]) {
+	NSLogDebug (@"Disconnected.");
+	if (device == wiiDevice) {
 		[self closeConnection];
 		[_delegate wiiRemoteDisconnected:device];
+		_delegate = nil;
 	}
 }
 
 - (IOReturn) sendCommand:(const unsigned char *) data length:(size_t) length
 {		
 	unsigned char buf[40];
-	memset(buf,0,40);
+	memset(buf, 0, 40);
 	buf[0] = 0x52;
-	memcpy(buf+1, data, length);
+	memcpy (buf+1, data, length);
 	if (buf[1] == 0x16) length=23;
 	else				length++;
 
@@ -199,12 +197,8 @@ typedef enum {
 	//	for (i = 0; i < 10; i++) {
 	ret = [cchan writeSync:buf length:length];		
 	if (ret != kIOReturnSuccess) {
-		NSLogDebug(@"IOReturn for command x%00X = %i", buf[1], ret);		
+		NSLogDebug(@"Write Error for command 0x%x:", buf[1], ret);		
 		LogIOReturn (ret);
-
-		// cam: the disconnect notification is sent from the notification, no need to call 'disconnect' here.
-//		if (ret == kIOReturnTimeout)
-//			[self disconnected:nil fromDevice:wiiDevice];
 	}
 
 	return ret;
@@ -213,19 +207,24 @@ typedef enum {
 
 - (double) batteryLevel
 {
-	
 	return _batteryLevel;
 }
 
-- (NSString*) address
+- (NSString *) address
 {
 	return [wiiDevice getAddressString];
 }
 
 - (IOReturn) setMotionSensorEnabled:(BOOL) enabled
 {
+	if (enabled) {
+		NSLogDebug (@"Set motion sensor enabled");
+	} else {
+		NSLogDebug (@"Set motion sensor disabled");
+	}
+
 	// this variable indicate a desire, and should be updated regardless of the sucess of sending the command
-	isMotionSensorEnabled = enabled;
+	isMotionSensorEnabled = enabled;	
 	return [self requestUpdates];
 }
 
@@ -301,7 +300,7 @@ typedef enum {
 		// Set IR Mode
 		NSLogDebug (@"Setting IR Mode to finish initialization.");
 		[self writeData:(darr){ wiiIRMode } at:0x04B00033 length:1];
-		usleep(10000);
+////		usleep(10000);
 	 } else {
 		if (isExpansionPortEnabled) {
 			cmd[2] = 0x34;	// Buttons, 19 Extension Bytes	 
@@ -312,7 +311,7 @@ typedef enum {
 
 	if (isMotionSensorEnabled)	cmd[2] |= 0x01;	// Add Accelerometer
 	
-	usleep(10000);
+usleep(10000);
 	return [self sendCommand:cmd length:3];
 
 } // requestUpdates
@@ -464,7 +463,6 @@ typedef enum {
 - (IOReturn) closeConnection
 {
 	IOReturn ret = 0;
-	//	int trycount = 0;
 	
 	[disconnectNotification unregister];
 	disconnectNotification = nil;
@@ -472,17 +470,17 @@ typedef enum {
 	// cam: set delegate to nil
 	[cchan setDelegate:nil];
 	ret = [cchan closeChannel];
+	cchan = nil;
 	LogIOReturn (ret);
 	
 	[ichan setDelegate:nil];
 	ret = [ichan closeChannel];
+	ichan = nil;
 	LogIOReturn (ret);
 
 	ret = [wiiDevice closeConnection];
-	LogIOReturn (ret);
-
-	// don't release it, it is owned by the inquiry
 	wiiDevice = nil;
+	LogIOReturn (ret);
 	
 	// no longer a delegate
 	[statusTimer invalidate];
@@ -1317,7 +1315,11 @@ typedef enum {
 - (void) getCurrentStatus:(NSTimer*) timer
 {
 	unsigned char cmd[] = {0x15, 0x00};
-	[self sendCommand:cmd length:2];
+	IOReturn ret = [self sendCommand:cmd length:2];
+	if (ret != kIOReturnSuccess) {
+		NSLogDebug (@"getCurrentStatus: failed:");
+		LogIOReturn (ret); 
+	}
 }
 
 - (WiiExpansionPortType) expansionPortType
@@ -1380,12 +1382,16 @@ static WiiAccCalibData kWiiNullAccCalibData = {0, 0, 0, 0, 0, 0};
 
 - (void) l2capChannelOpenComplete:(IOBluetoothL2CAPChannel*) l2capChannel status:(IOReturn) error
 {
-      NSLogDebug (@"l2capChannelOpenComplete");
+	NSLogDebug (@"l2capChannelOpenComplete");
 } 
 
 - (void) l2capChannelClosed:(IOBluetoothL2CAPChannel*) l2capChannel
 {
-	NSLogDebug (@"l2capChannelClosed");
+	if (l2capChannel == cchan)
+		cchan = nil;
+
+	if (l2capChannel == ichan)
+		ichan = nil;
 } 
 
 // thanks to Ian!
@@ -1401,30 +1407,26 @@ static WiiAccCalibData kWiiNullAccCalibData = {0, 0, 0, 0, 0, 0};
 		Debugger();
 	}*/
 
+	if ([_delegate respondsToSelector:@selector (wiimoteWillSendData)])
+		[_delegate wiimoteWillSendData];
+	
 	// controller status (expansion port and battery level data) - received when report 0x15 sent to Wiimote (getCurrentStatus:) or status of expansion port changes.
 	if (dp[1] == 0x20 && dataLength >= 8) {
 		[self handleStatusReport:dp length:dataLength];
 //		[self requestUpdates]; // Make sure we keep getting state change reports.
-		return;
-	}
-
-	if (dp[1] == 0x21) { // read data response
+	} else if (dp[1] == 0x21) { // read data response
 		[self handleRAMData:dp length:dataLength];
-		return;
-	}
-
-	if (dp[1] == 0x22) { // Write data response
+	} else if (dp[1] == 0x22) { // Write data response
 		[self handleWriteResponse:dp length:dataLength];
-		return;
+	} else if ((dp[1] & 0xF0) == 0x30) {
+		// report contains button info
+		[self handleButtonReport:dp length:dataLength];
 	}
 	
-	// report contains button info
-	if ((dp[1] & 0xF0) == 0x30) {
-		[self handleButtonReport:dp length:dataLength];
-		return;
-	} 	// report contains button info
-	
-	NSLogDebug (@"Unhandled data received: 0x%x", dp[1]);
+	if ([_delegate respondsToSelector:@selector (wiimoteDidSendData)])
+		[_delegate wiimoteDidSendData];
+
+//	NSLogDebug (@"Unhandled data received: 0x%x", dp[1]);
 	//if (nil != _delegate)
 		//[_delegate dataChanged:buttonData accX:accX accY:accY accZ:accZ mouseX:ox mouseY:oy];
 	//[_delegate dataChanged:buttonData accX:irData[0].x/4 accY:irData[0].y/3 accZ:irData[0].s*16];
@@ -1442,6 +1444,7 @@ static WiiAccCalibData kWiiNullAccCalibData = {0, 0, 0, 0, 0, 0};
 	
 	NSLogDebug(@"Open channel (PSM:%i) ...", psm);
 	if ((ret = [wiiDevice openL2CAPChannelSync:&channel withPSM:psm delegate:delegate]) != kIOReturnSuccess) {
+//	if ((ret = [wiiDevice openL2CAPChannel:psm findExisting:NO newChannel:&channel]) != kIOReturnSuccess) {
 		NSLog (@"Could not open L2CAP channel (psm:%i)", psm);
 		LogIOReturn (ret);
 		channel = nil;
