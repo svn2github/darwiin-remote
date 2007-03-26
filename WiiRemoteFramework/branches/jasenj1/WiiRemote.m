@@ -8,15 +8,17 @@
 
 #import "WiiRemote.h"
 
+static WiiJoyStickCalibData kWiiNullJoystickCalibData = {0, 0, 0, 0, 0, 0};
+static WiiAccCalibData kWiiNullAccCalibData = {0, 0, 0, 0, 0, 0};
+
 // define some constants
 #define kWiiIRPixelsWidth 1024.0
 #define kWiiIRPixelsHeight 768.0
 
 #define WII_DECRYPT(data) (((data ^ 0x17) + 0x17) & 0xFF)
 
-// shall we use another bit of precision for the wiimote?
-// note that the calibration is not yet updated to 9 bits of precision
-#define USE_ACC_NINTH_LSB_BIT 1
+#define WIR_HALFRANGE 256.0
+#define WIR_INTERVAL  10.0
 
 // Notification strings
 NSString * WiiRemoteExpansionPortChangedNotification = @"WiiRemoteExpansionPortChangedNotification";
@@ -38,12 +40,10 @@ typedef enum {
 	kWiiRemoteDownButton				= 0x0400,
 	kWiiRemoteUpButton					= 0x0800,
 	kWiiRemotePlusButton				= 0x1000,
-	
-	
+
 	kWiiNunchukZButton					= 0x0001,
 	kWiiNunchukCButton					= 0x0002,
-	
-	
+
 	kWiiClassicControllerUpButton		= 0x0001,
 	kWiiClassicControllerLeftButton		= 0x0002,
 	kWiiClassicControllerZRButton		= 0x0004,
@@ -85,19 +85,22 @@ typedef enum {
 		_warningBatteryLevel = 0.05;
 
 		_delegate = nil;
-		wiiDevice = nil;
+		_shouldUpdateReportMode = NO;
+		_shouldReadExpansionCalibration = NO;
+		_wiiDevice = nil;
 		
-		ichan = nil;
-		cchan = nil;
+		_opened = NO;
+	
+		_ichan = nil;
+		_cchan = nil;
 		
-		isIRSensorEnabled = NO;
+		_isIRSensorEnabled = NO;
+		_isMotionSensorEnabled = NO;
+		_isVibrationEnabled = NO;
+		_isExpansionPortEnabled = NO;
+		_isExpansionPortAttached = NO;
+		
 		wiiIRMode = kWiiIRModeExtended;
-
-		isMotionSensorEnabled = NO;
-		isVibrationEnabled = NO;
-		
-		isExpansionPortEnabled = NO;
-		isExpansionPortAttached = NO;
 		expType = WiiExpNotAttached;
 	}
 	return self;
@@ -105,7 +108,7 @@ typedef enum {
 
 - (void) dealloc
 {
-	NSLogDebug (@"wii released");
+	NSLogDebug (@"Wii released");
 	[super dealloc];
 }
 
@@ -116,7 +119,7 @@ typedef enum {
 
 - (BOOL) available
 {
-	if (wiiDevice != nil)
+	if ((_wiiDevice != nil) && _opened)
 		return YES;
 	
 	return NO;
@@ -124,35 +127,39 @@ typedef enum {
 
 - (IOReturn) connectTo:(IOBluetoothDevice *) device
 { 
-	wiiDevice = device; 
-	if (wiiDevice == nil)
+	_wiiDevice = device; 
+	if (_wiiDevice == nil)
 		return kIOReturnBadArgument; 
 
 	IOReturn ret = kIOReturnSuccess;
 
 	// it seems like it is not needed to call openConnection in order to open L2CAP channels ...
-	cchan = [self openL2CAPChannelWithPSM:kBluetoothL2CAPPSMHIDControl delegate:self];
-	if (!cchan)
+	_cchan = [self openL2CAPChannelWithPSM:kBluetoothL2CAPPSMHIDControl delegate:self];
+	if (!_cchan)
+		return kIOReturnNotOpen;
+
+	usleep (20000);
+	_ichan = [self openL2CAPChannelWithPSM:kBluetoothL2CAPPSMHIDInterrupt delegate:self];
+	if (!_ichan)
 		return kIOReturnNotOpen;
 	
-	ichan = [self openL2CAPChannelWithPSM:kBluetoothL2CAPPSMHIDInterrupt delegate:self];
-	if (!ichan)
-		return kIOReturnNotOpen;
+	usleep (20000);
 	
-	ret = [self setMotionSensorEnabled:NO];
-	if (kIOReturnSuccess == ret)	ret = [self setIRSensorEnabled:NO];
-	if (kIOReturnSuccess == ret)	ret = [self setForceFeedbackEnabled:NO];
-	if (kIOReturnSuccess == ret)	ret = [self setLEDEnabled1:NO enabled2:NO enabled3:NO enabled4:NO]; 
-	
-	if (kIOReturnSuccess != ret) {
-		NSLog (@"A problem occured during initialization of the device.");
-		LogIOReturn (ret);
-		[self closeConnection];
-	} else {
 //            statusTimer = [[NSTimer scheduledTimerWithTimeInterval:60 target:self selector:@selector(getCurrentStatus:) userInfo:nil repeats:YES] retain];
-		disconnectNotification = [wiiDevice registerForDisconnectNotification:self selector:@selector(disconnected:fromDevice:)];
-		[self getCurrentStatus:nil];	
-		[self readData:0x0020 length:7]; // Get Accelerometer calibration data
+	ret = [self getCurrentStatus:nil];	
+	ret = [self readData:0x0020 length:7]; // Get Accelerometer calibration data
+
+	if (ret == kIOReturnSuccess) {
+		disconnectNotification = [_wiiDevice registerForDisconnectNotification:self selector:@selector(disconnected:fromDevice:)];
+		[self updateReportMode];
+		[self setMotionSensorEnabled:NO];
+		[self setIRSensorEnabled:NO];
+		[self setForceFeedbackEnabled:NO];
+		[self setLEDEnabled1:NO enabled2:NO enabled3:NO enabled4:NO];
+		_opened = YES;
+	} else {
+		_opened = NO;
+		[self closeConnection];
 	}
 
 	return ret;
@@ -161,20 +168,22 @@ typedef enum {
 - (void) disconnected:(IOBluetoothUserNotification*) note fromDevice:(IOBluetoothDevice*) device
 {
 	NSLogDebug (@"Disconnected.");
-	if (device == wiiDevice) {
+	if (device == _wiiDevice) {
 		[self closeConnection];
 		[_delegate wiiRemoteDisconnected:device];
 		_delegate = nil;
+		_opened = NO;
 	}
 }
 
 - (IOReturn) sendCommand:(const unsigned char *) data length:(size_t) length
 {		
 	unsigned char buf[40];
-	memset(buf, 0, 40);
+	memset (buf, 0, 40);
+
 	buf[0] = 0x52;
 	memcpy (buf+1, data, length);
-	if (buf[1] == 0x16) length=23;
+	if (buf[1] == 0x16) length = 23;
 	else				length++;
 
 //	printf ("send%3d:", length);
@@ -185,18 +194,22 @@ typedef enum {
 	
 	IOReturn ret = kIOReturnSuccess;
 	
-	// cam: there is no need to do the loop many times in order to see there is an error
+	// cam: i think there is no need to do the loop many times in order to see there is an error
 	// if there's an error it must be managed right away
-	//	for (i = 0; i < 10; i++) {
-	ret = [cchan writeSync:buf length:length];		
-	if (ret != kIOReturnSuccess) {
-		NSLogDebug(@"Write Error for command 0x%x:", buf[1], ret);		
-		LogIOReturn (ret);
-	}
+//	int i;
+//	for (i=0; i<10 ; i++) {
+		ret = [_cchan writeSync:buf length:length];		
+		if (ret != kIOReturnSuccess) {
+			NSLogDebug(@"Write Error for command 0x%x:", buf[1], ret);		
+			LogIOReturn (ret);
+//			usleep (10000);
+		}
+		//else
+//			break;
+//	}
 
 	return ret;
 }
-
 
 - (double) batteryLevel
 {
@@ -205,10 +218,10 @@ typedef enum {
 
 - (NSString *) address
 {
-	return [wiiDevice getAddressString];
+	return [_wiiDevice getAddressString];
 }
 
-- (IOReturn) setMotionSensorEnabled:(BOOL) enabled
+- (void) setMotionSensorEnabled:(BOOL) enabled
 {
 	if (enabled) {
 		NSLogDebug (@"Set motion sensor enabled");
@@ -217,42 +230,52 @@ typedef enum {
 	}
 
 	// this variable indicate a desire, and should be updated regardless of the sucess of sending the command
-	isMotionSensorEnabled = enabled;	
-	return [self requestUpdates];
+	_isMotionSensorEnabled = enabled;	
+
+	[self updateReportMode];
 }
 
 
-- (IOReturn) setForceFeedbackEnabled:(BOOL) enabled
+- (void) setForceFeedbackEnabled:(BOOL) enabled
 {
 	// this variable indicate a desire, and should be updated regardless of the sucess of sending the command
-	isVibrationEnabled = enabled;
-	return [self requestUpdates];
+	_isVibrationEnabled = enabled;
+	[self updateReportMode];
 }
 
-- (IOReturn) setLEDEnabled1:(BOOL) enabled1 enabled2:(BOOL) enabled2 enabled3:(BOOL) enabled3 enabled4:(BOOL) enabled4
+- (void) setLEDEnabled1:(BOOL) enabled1 enabled2:(BOOL) enabled2 enabled3:(BOOL) enabled3 enabled4:(BOOL) enabled4
 {
 	unsigned char cmd[] = {0x11, 0x00};
-	if (isVibrationEnabled)	cmd[1] |= 0x01;
+	if (_isVibrationEnabled)	cmd[1] |= 0x01;
 	if (enabled1)	cmd[1] |= 0x10;
 	if (enabled2)	cmd[1] |= 0x20;
 	if (enabled3)	cmd[1] |= 0x40;
 	if (enabled4)	cmd[1] |= 0x80;
 	
-	isLED1Illuminated = enabled1;
-	isLED2Illuminated = enabled2;
-	isLED3Illuminated = enabled3;
-	isLED4Illuminated = enabled4;
+	_isLED1Illuminated = enabled1;
+	_isLED2Illuminated = enabled2;
+	_isLED3Illuminated = enabled3;
+	_isLED4Illuminated = enabled4;
 	
-	return [self sendCommand:cmd length:2];
+	IOReturn ret = [self sendCommand:cmd length:2];
+	LogIOReturn (ret);
 }
 
-- (IOReturn) requestUpdates
+- (void) updateReportMode
 {
-	NSLogDebug (@"Requesting Updates");
+	_shouldUpdateReportMode = YES;
+}
+
+- (IOReturn) doUpdateReportMode
+{
+	if (!_shouldUpdateReportMode)
+		return kIOReturnSuccess;
+
+	_shouldUpdateReportMode = NO;
+
+	NSLogDebug (@"Updating Report Mode");
 	// Set the report type the Wiimote should send.
 	unsigned char cmd[] = {0x12, 0x02, 0x30}; // Just buttons.
-	
-	if (isVibrationEnabled)	cmd[1] |= 0x01;
 	
 	/*
 		There are numerous status report types that can be requested.
@@ -281,35 +304,31 @@ typedef enum {
 		
 	*/
 		
-	if (isIRSensorEnabled) {
-		if (isExpansionPortEnabled) {
-			cmd[2] = 0x36;	// Buttons, 10 IR Bytes, 9 Extension Bytes
-			wiiIRMode = kWiiIRModeBasic;
-		} else {
-			cmd[2] = 0x33; // Buttons, Accelerometer, and 12 IR Bytes.
-			wiiIRMode = kWiiIRModeExtended;
-		}
+	if (_isIRSensorEnabled) {
+		cmd[2] = _isExpansionPortEnabled ? 0x36 : 0x33;	// Buttons, 10 IR Bytes, 9 Extension Bytes
+		wiiIRMode = _isExpansionPortEnabled ? kWiiIRModeBasic : kWiiIRModeExtended;
 		
 		// Set IR Mode
-		NSLogDebug (@"Setting IR Mode to finish initialization.");
+		//		NSLogDebug (@"Setting IR Mode to finish initialization.");
+		// I don't think it should be here ...		
 		[self writeData:(darr){ wiiIRMode } at:0x04B00033 length:1];
-////		usleep(10000);
-	 } else {
-		if (isExpansionPortEnabled) {
-			cmd[2] = 0x34;	// Buttons, 19 Extension Bytes	 
-		} else {
-			cmd[2] = 0x30; // Buttons
-		}
-	 }
-
-	if (isMotionSensorEnabled)	cmd[2] |= 0x01;	// Add Accelerometer
+		usleep(10000);
+	} else {
+		cmd[2] = _isExpansionPortEnabled ? 0x34 : 0x30;	// Buttons, 19 Extension Bytes	 
+	}
 	
-usleep(10000);
+	if (_isVibrationEnabled)
+		cmd[1] |= 0x01;
+
+	if (_isMotionSensorEnabled)
+		cmd[2] |= 0x01;	// Add Accelerometer
+	
+	usleep(10000);
 	return [self sendCommand:cmd length:3];
 
-} // requestUpdates
+} // updateReportMode
 
-- (IOReturn) setExpansionPortEnabled:(BOOL) enabled
+- (void) setExpansionPortEnabled:(BOOL) enabled
 {	
 	IOReturn ret = kIOReturnSuccess;
 	
@@ -317,47 +336,40 @@ usleep(10000);
 		NSLogDebug (@"Enabling expansion port.");
 	else
 		NSLogDebug (@"Disabling expansion port.");	
-	
-	isExpansionPortEnabled = enabled;
 
-	if (!isExpansionPortAttached) {
-		isExpansionPortEnabled = NO;
-	} else {
+	if (_isExpansionPortAttached) {
+		_isExpansionPortEnabled = enabled;		
 		// get expansion device calibration data
-		readingRegister = YES;
+		_shouldReadExpansionCalibration = YES;
 		ret = [self readData:0x04A40020 length: 16];
+		LogIOReturn (ret);
 	}
 
-	if (isExpansionPortEnabled) {
-		NSLogDebug (@"Expansion port enabled.");
-	} else
-		NSLogDebug (@"Expansion port disabled.");
-	
-	ret = [self requestUpdates];
-	return ret;
+	[self updateReportMode];
 }
 
-
 //based on Ian's codes. thanks!
-- (IOReturn) setIRSensorEnabled:(BOOL) enabled
+- (void) setIRSensorEnabled:(BOOL) enabled
 {
-	IOReturn ret = kIOReturnSuccess;
-	isIRSensorEnabled = enabled;
+	_isIRSensorEnabled = enabled;
 		
 	// ir enable 1
+	IOReturn ret = kIOReturnSuccess;
 	unsigned char cmd[] = {0x13, 0x00};
-	if (isVibrationEnabled)	cmd[1] |= 0x01;
-	if (isIRSensorEnabled)	cmd[1] |= 0x04;
-	if (ret = [self sendCommand:cmd length:2]) return ret;
+	if (_isVibrationEnabled) cmd[1] |= 0x01;
+	if (_isIRSensorEnabled)  cmd[1] |= 0x04;
+	ret = [self sendCommand:cmd length:2];
+	LogIOReturn (ret);
 	usleep(10000);
 	
 	// set register 0x1a (ir enable 2)
 	unsigned char cmd2[] = {0x1a, 0x00};
-	if (enabled)	cmd2[1] |= 0x04;
-	if (ret = [self sendCommand:cmd2 length:2]) return ret;
+	if (_isIRSensorEnabled)	cmd2[1] |= 0x04;
+	ret = [self sendCommand:cmd2 length:2];
+	LogIOReturn (ret);
 	usleep(10000);
 
-	if (enabled) {
+	if (_isIRSensorEnabled) {
 		NSLogDebug (@"Enabling IR Sensor");
 		
 		// based on marcan's method, found on wiili wiki:
@@ -366,61 +378,63 @@ usleep(10000);
 		// the sleeps help it it seems
 
 		// start initializing camera
-		if (ret = [self writeData:(darr){0x01} at:0x04B00030 length:1]) return ret;
+		ret = [self writeData:(darr){0x01} at:0x04B00030 length:1];
+		LogIOReturn (ret);
 		usleep(10000);
 		
 		// set sensitivity block 1
-		if (ret = [self writeData:(darr){0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x90, 0x00, 0xC0} at:0x04B00000 length:9]) return ret;
+		ret = [self writeData:(darr){0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x90, 0x00, 0xC0} at:0x04B00000 length:9];
+		LogIOReturn (ret);
 		usleep(10000);
 		
 		// set sensitivity block 2
-		if (ret = [self writeData:(darr){0x40, 0x00} at:0x04B0001A length:2]) return ret;
+		ret = [self writeData:(darr){0x40, 0x00} at:0x04B0001A length:2];
+		LogIOReturn (ret);
 		usleep(10000);
 				
 		// finish initializing camera
-		if (ret = [self writeData:(darr){0x08} at:0x04B00030 length:1]) return ret;
+		ret = [self writeData:(darr){0x08} at:0x04B00030 length:1];
+		LogIOReturn (ret);
 		usleep(10000);
-	
-		[self requestUpdates];
-	}else{
-		// probably should do some writes to power down the camera, save battery
-		// but don't know how yet.
-
-		[self setMotionSensorEnabled:isMotionSensorEnabled];
-		[self setForceFeedbackEnabled:isVibrationEnabled];
-		[self setExpansionPortEnabled:isExpansionPortEnabled];
+		
+		if (ret != kIOReturnSuccess) {
+			NSLogDebug (@"Set IR Enabled failed, closing connection");
+//			[self closeConnection];
+			_isIRSensorEnabled = NO;
+			return;
+		}
 	}
 	
-	return kIOReturnSuccess;
+	[self updateReportMode];
 }
 
 
 - (IOReturn) writeData:(const unsigned char*) data at:(unsigned long) address length:(size_t) length
 {
-	unsigned char cmd[22];
-	//unsigned long addr = CFSwapInt32HostToBig(address);
-	unsigned long addr = address;
+	unsigned char cmd [22];
 
-	int i;
-	for(i=0 ; i < length ; i++) {
-		cmd[i+6] = data[i];
-	}
-	for(; i < 16; i++) {
-		cmd[i+6]= 0;
-	}
-	
+	if (length > 16)
+		NSLog (@"Error! Trying to write more than 16 bytes of data (length=%i)", length);
+
+	memset (cmd, 0, 22);
+	memcpy (cmd + 6, data, length);
+
+	// register write header
 	cmd[0] = 0x16;
-	cmd[1] = (addr >> 24) & 0xFF;
-	cmd[2] = (addr >> 16) & 0xFF;
-	cmd[3] = (addr >>  8) & 0xFF;
-	cmd[4] = (addr >>  0) & 0xFF;
+
+	// write address
+	cmd[1] = (address >> 24) & 0xFF;
+	cmd[2] = (address >> 16) & 0xFF;
+	cmd[3] = (address >>  8) & 0xFF;
+	cmd[4] = (address >>  0) & 0xFF;
+	
+	// data length
 	cmd[5] = length;
 	
 	// and of course the vibration flag, as usual
-	if (isVibrationEnabled)	cmd[1] |= 0x01;
-	
-	data = cmd;
-	
+	if (_isVibrationEnabled)
+		cmd[1] |= 0x01;
+
 	return [self sendCommand:cmd length:22];
 }
 
@@ -428,12 +442,7 @@ usleep(10000);
 - (IOReturn) readData:(unsigned long) address length:(unsigned short) length
 {	
 	unsigned char cmd[7];
-	
-	//i'm still not sure whether i don't have to swap these args
-	
-	//unsigned long addr = CFSwapInt32HostToBig(address);
 	unsigned long addr = address;
-	//unsigned short len = CFSwapInt16HostToBig(length);
 	unsigned short len = length;
 	
 	cmd[0] = 0x17; // read memory
@@ -448,7 +457,8 @@ usleep(10000);
 	cmd[5] = (len >> 8) & 0xFF;
 	cmd[6] = (len >> 0) & 0xFF;
 	
-	if (isVibrationEnabled)	cmd[1] |= 0x01;
+	if (_isVibrationEnabled)
+		cmd[1] |= 0x01;
 
 	return [self sendCommand:cmd length:7];
 }
@@ -461,20 +471,20 @@ usleep(10000);
 	disconnectNotification = nil;
 	
 	// cam: set delegate to nil
-	[cchan setDelegate:nil];
-	ret = [cchan closeChannel];
-	cchan = nil;
+	[_cchan setDelegate:nil];
+	ret = [_cchan closeChannel];
+	_cchan = nil;
 	LogIOReturn (ret);
 	
-	[ichan setDelegate:nil];
-	ret = [ichan closeChannel];
-	ichan = nil;
+	[_ichan setDelegate:nil];
+	ret = [_ichan closeChannel];
+	_ichan = nil;
 	LogIOReturn (ret);
 
-	ret = [wiiDevice closeConnection];
-	wiiDevice = nil;
+	ret = [_wiiDevice closeConnection];
+	_wiiDevice = nil;
 	LogIOReturn (ret);
-	
+
 	// no longer a delegate
 	[statusTimer invalidate];
 	[statusTimer release];
@@ -556,10 +566,8 @@ usleep(10000);
 	}
 		
 	// wiimote calibration data
-	if (!readingRegister && (addr == 0x0020)) {
+	if (!_shouldReadExpansionCalibration && (addr == 0x0020)) {
 		NSLogDebug (@"Read Wii calibration");
-
-#if USE_ACC_NINTH_LSB_BIT			
 		wiiCalibData.accX_zero = dp[7] << 1;
 		wiiCalibData.accY_zero = dp[8] << 1;
 		wiiCalibData.accZ_zero = dp[9] << 1;
@@ -567,20 +575,11 @@ usleep(10000);
 		wiiCalibData.accX_1g = dp[11] << 1;
 		wiiCalibData.accY_1g = dp[12] << 1;
 		wiiCalibData.accZ_1g = dp[13] << 1;
-#else
-		wiiCalibData.accX_zero = dp[7];
-		wiiCalibData.accY_zero = dp[8];
-		wiiCalibData.accZ_zero = dp[9];
-		//dp[10] - unknown/unused
-		wiiCalibData.accX_1g = dp[11];
-		wiiCalibData.accY_1g = dp[12];
-		wiiCalibData.accZ_1g = dp[13];
-#endif
 		return;
 	}
 	
 	// expansion device calibration data.		
-	if (readingRegister && (addr == 0x0020)) {
+	if (_shouldReadExpansionCalibration && (addr == 0x0020)) {
 		if (expType == WiiNunchuk) {
 			NSLogDebug (@"Read nunchuk calibration");
 			//nunchuk calibration data
@@ -600,9 +599,9 @@ usleep(10000);
 			nunchukJoyStickCalibData.y_min =  WII_DECRYPT(dp[19]);
 			nunchukJoyStickCalibData.y_center =  WII_DECRYPT(dp[20]);	
 			
-			readingRegister = NO;
+			_shouldReadExpansionCalibration = NO;
 			return;
-		} else if (expType == WiiClassicController){
+		} else if (expType == WiiClassicController) {
 			//classic controller calibration data (probably)
 		}
 	} // expansion device calibration data
@@ -612,7 +611,7 @@ usleep(10000);
 	[self sendWiiRemoteButtonEvent:buttonData];
 } // handleRAMData
 
--(void) handleStatusReport:(unsigned char *) dp length:(size_t) dataLength
+- (void) handleStatusReport:(unsigned char *) dp length:(size_t) dataLength
 {
 	NSLogDebug (@"Status Report (0x%x)", dp[4]);
 		
@@ -631,7 +630,7 @@ usleep(10000);
 	IOReturn ret = kIOReturnSuccess;
 	if (dp[4] & 0x02) { //some device attached to Wiimote
 		NSLogDebug (@"Device Attached");
-		if (!isExpansionPortAttached) {
+		if (!_isExpansionPortAttached) {
 			ret = [self writeData:(darr){0x00} at:(unsigned long)0x04A40040 length:1]; // Initialize the device
 			usleep (10000);
 
@@ -644,7 +643,7 @@ usleep(10000);
 			IOReturn ret = [self readData:0x04A400F0 length:16]; // read expansion device type
 			LogIOReturn (ret);
 			
-			isExpansionPortAttached = (ret == kIOReturnSuccess);
+			_isExpansionPortAttached = (ret == kIOReturnSuccess);
 			
 			if (ret == kIOReturnSuccess) {
 				NSLogDebug (@"Expansion Device initialized");
@@ -654,19 +653,19 @@ usleep(10000);
 			return;
 		}
 	} else { // unplugged
-		if (isExpansionPortAttached) {
+		if (_isExpansionPortAttached) {
 			NSLogDebug (@"Device Detached");
-			isExpansionPortAttached = NO;
+			_isExpansionPortAttached = NO;
 			expType = WiiExpNotAttached;
 
 			[[NSNotificationCenter defaultCenter] postNotificationName:WiiRemoteExpansionPortChangedNotification object:self];
 		}
 	}
 
-	isLED1Illuminated = (dp[4] & 0x10);
-	isLED2Illuminated = (dp[4] & 0x20);
-	isLED3Illuminated = (dp[4] & 0x40);
-	isLED4Illuminated = (dp[4] & 0x80);
+	_isLED1Illuminated = (dp[4] & 0x10);
+	_isLED2Illuminated = (dp[4] & 0x20);
+	_isLED3Illuminated = (dp[4] & 0x40);
+	_isLED4Illuminated = (dp[4] & 0x80);
 } // handleStatusReport
 
 - (void) handleExtensionData:(unsigned char *) dp length:(size_t) dataLength
@@ -873,43 +872,30 @@ usleep(10000);
 	
 	// report contains motion sensor data
 	if (dp[1] & 0x01) {
-#if USE_ACC_NINTH_LSB_BIT
 		// cam: added 9th bit of resolution to the wii acceleration
 		// see http://www.wiili.org/index.php/Talk:Wiimote#Remaining_button_state_bits
 		//
 		accX = (dp[4] << 1) | (buttonData & 0x0040) >> 6;
 		accY = (dp[5] << 1) | (buttonData & 0x2000) >> 13;
 		accZ = (dp[6] << 1) | (buttonData & 0x4000) >> 14;
-#else
-		accX = dp[4];
-		accY = dp[5];
-		accZ = dp[6];
-#endif
 		
 		[_delegate accelerationChanged:WiiRemoteAccelerationSensor accX:accX accY:accY accZ:accZ];
 		
-		lowZ = lowZ * 0.9 + accZ * 0.1;
-		lowX = lowX * 0.9 + accX * 0.1;
+		_lowZ = _lowZ * 0.9 + accZ * 0.1;
+		_lowX = _lowX * 0.9 + accX * 0.1;
 		
-#if USE_ACC_NINTH_LSB_BIT
-#	define WIR_HALFRANGE 256
-#	define WIR_INTERVAL  10
-#else
-#	define WIR_HALFRANGE 128
-#	define WIR_INTERVAL  5
-#endif
-		float absx = abs(lowX - WIR_HALFRANGE);
-		float absz = abs(lowZ - WIR_HALFRANGE);
+		float absx = fabsf (_lowX - WIR_HALFRANGE);
+		float absz = fabsf (_lowZ - WIR_HALFRANGE);
 		
 		if (orientation == 0 || orientation == 2) absx -= WIR_INTERVAL;
 		if (orientation == 1 || orientation == 3) absz -= WIR_INTERVAL;
 		
 		if (absz >= absx) {
 			if (absz > WIR_INTERVAL)
-				orientation = (lowZ > WIR_HALFRANGE) ? 0 : 2;
+				orientation = (_lowZ > WIR_HALFRANGE) ? 0 : 2;
 		} else {
 			if (absx > WIR_INTERVAL)
-				orientation = (lowX > WIR_HALFRANGE) ? 3 : 1;
+				orientation = (_lowX > WIR_HALFRANGE) ? 3 : 1;
 		}
 	} // report contains motion sensor data
 } // handleButtonReport
@@ -1297,14 +1283,14 @@ usleep(10000);
 	return [self readData:MII_OFFSET(slot) length:WIIMOTE_MII_DATA_BYTES_PER_SLOT];
 }
 
-- (void) getCurrentStatus:(NSTimer*) timer
+- (IOReturn) getCurrentStatus:(NSTimer*) timer
 {
 	unsigned char cmd[] = {0x15, 0x00};
 	IOReturn ret = [self sendCommand:cmd length:2];
-	if (ret != kIOReturnSuccess) {
-		NSLogDebug (@"getCurrentStatus: failed:");
-		LogIOReturn (ret); 
-	}
+	if (ret != kIOReturnSuccess)
+		NSLogDebug (@"getCurrentStatus: failed.");
+	
+	return ret;
 }
 
 - (WiiExpansionPortType) expansionPortType
@@ -1314,15 +1300,13 @@ usleep(10000);
 
 - (BOOL) isExpansionPortAttached
 {
-	return isExpansionPortAttached;
+	return _isExpansionPortAttached;
 }
 
 - (BOOL)isButtonPressed:(WiiButtonType) type
 {
 	return buttonState[type];
 }
-
-static WiiJoyStickCalibData kWiiNullJoystickCalibData = {0, 0, 0, 0, 0, 0};
 
 - (WiiJoyStickCalibData) joyStickCalibData:(WiiJoyStickType) type
 {
@@ -1333,8 +1317,6 @@ static WiiJoyStickCalibData kWiiNullJoystickCalibData = {0, 0, 0, 0, 0, 0};
 			return kWiiNullJoystickCalibData;
 	}
 }
-
-static WiiAccCalibData kWiiNullAccCalibData = {0, 0, 0, 0, 0, 0};
 
 - (WiiAccCalibData) accCalibData:(WiiAccelerationSensorType) type
 {
@@ -1367,24 +1349,26 @@ static WiiAccCalibData kWiiNullAccCalibData = {0, 0, 0, 0, 0, 0};
 
 - (void) l2capChannelOpenComplete:(IOBluetoothL2CAPChannel*) l2capChannel status:(IOReturn) error
 {
-	NSLogDebug (@"l2capChannelOpenComplete");
-} 
+	NSLogDebug (@"l2capChannelOpenComplete (PSM:0x%x)", [l2capChannel getPSM]);
+}
 
 - (void) l2capChannelClosed:(IOBluetoothL2CAPChannel*) l2capChannel
 {
-	if (l2capChannel == cchan)
-		cchan = nil;
+	if (l2capChannel == _cchan)
+		_cchan = nil;
 
-	if (l2capChannel == ichan)
-		ichan = nil;
+	if (l2capChannel == _ichan)
+		_ichan = nil;
+	
+	_opened = NO;
 } 
 
 // thanks to Ian!
 - (void) l2capChannelData:(IOBluetoothL2CAPChannel*) l2capChannel data:(void *) dataPointer length:(size_t) dataLength
 {	
-	if (!wiiDevice)
+	if (!_wiiDevice || !_opened)
 		return;
-	
+
 	unsigned char * dp = (unsigned char *) dataPointer;
 	
 /*	if (_dump) {
@@ -1398,7 +1382,7 @@ static WiiAccCalibData kWiiNullAccCalibData = {0, 0, 0, 0, 0, 0};
 	// controller status (expansion port and battery level data) - received when report 0x15 sent to Wiimote (getCurrentStatus:) or status of expansion port changes.
 	if (dp[1] == 0x20 && dataLength >= 8) {
 		[self handleStatusReport:dp length:dataLength];
-//		[self requestUpdates]; // Make sure we keep getting state change reports.
+//		[self updateReportMode]; // Make sure we keep getting state change reports.
 	} else if (dp[1] == 0x21) { // read data response
 		[self handleRAMData:dp length:dataLength];
 	} else if (dp[1] == 0x22) { // Write data response
@@ -1411,6 +1395,17 @@ static WiiAccCalibData kWiiNullAccCalibData = {0, 0, 0, 0, 0, 0};
 	if ([_delegate respondsToSelector:@selector (wiimoteDidSendData)])
 		[_delegate wiimoteDidSendData];
 
+	IOReturn ret = [self doUpdateReportMode];
+	if (ret != kIOReturnSuccess) {
+		_shouldUpdateReportMode = YES;
+		[self doUpdateReportMode];
+		
+		if (ret != kIOReturnSuccess) {
+			NSLogDebug (@"Can't update report mode after two retries, bailing out.");
+			[self closeConnection];
+			return;
+		}
+	}
 //	NSLogDebug (@"Unhandled data received: 0x%x", dp[1]);
 	//if (nil != _delegate)
 		//[_delegate dataChanged:buttonData accX:accX accY:accY accZ:accZ mouseX:ox mouseY:oy];
@@ -1428,8 +1423,8 @@ static WiiAccCalibData kWiiNullAccCalibData = {0, 0, 0, 0, 0, 0};
 	IOReturn ret = kIOReturnSuccess;
 	
 	NSLogDebug(@"Open channel (PSM:%i) ...", psm);
-	if ((ret = [wiiDevice openL2CAPChannelSync:&channel withPSM:psm delegate:delegate]) != kIOReturnSuccess) {
-//	if ((ret = [wiiDevice openL2CAPChannel:psm findExisting:NO newChannel:&channel]) != kIOReturnSuccess) {
+	if ((ret = [_wiiDevice openL2CAPChannelSync:&channel withPSM:psm delegate:delegate]) != kIOReturnSuccess) {
+//	if ((ret = [_wiiDevice openL2CAPChannel:psm findExisting:NO newChannel:&channel]) != kIOReturnSuccess) {
 		NSLogDebug (@"Could not open L2CAP channel (psm:%i)", psm);
 		LogIOReturn (ret);
 		channel = nil;

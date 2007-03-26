@@ -107,14 +107,25 @@ typedef enum {
 #endif
 	
 	BOOL _opened;
-	
-	IOBluetoothDevice * wiiDevice;
-	IOBluetoothL2CAPChannel * ichan;
-	IOBluetoothL2CAPChannel * cchan;
+	BOOL _shouldUpdateReportMode;
+	BOOL _shouldReadExpansionCalibration;
+	BOOL _isMotionSensorEnabled;
+	BOOL _isIRSensorEnabled;
+	BOOL _isVibrationEnabled;
+	BOOL _isExpansionPortEnabled;
+	BOOL _isExpansionPortAttached;
+	BOOL _isLED1Illuminated;
+	BOOL _isLED2Illuminated;
+	BOOL _isLED3Illuminated;
+	BOOL _isLED4Illuminated;
+
+	IOBluetoothDevice * _wiiDevice;
+	IOBluetoothL2CAPChannel * _ichan;
+	IOBluetoothL2CAPChannel * _cchan;
 
 	id _delegate;
 
-	float lowZ, lowX;
+	float _lowZ, _lowX;
 	int orientation;
 	int leftPoint; // is point 0 or 1 on the left. -1 when not tracking.
 
@@ -126,10 +137,6 @@ typedef enum {
 	double _batteryLevel;
 	double _warningBatteryLevel;
 	
-	BOOL readingRegister;
-	BOOL isMotionSensorEnabled, isIRSensorEnabled, isVibrationEnabled, isExpansionPortEnabled;
-	BOOL isExpansionPortAttached;
-	BOOL isLED1Illuminated, isLED2Illuminated, isLED3Illuminated, isLED4Illuminated;
 	NSTimer * statusTimer;
 	IOBluetoothUserNotification * disconnectNotification;
 	BOOL buttonState[28];
@@ -171,19 +178,20 @@ typedef enum {
 
 - (IOReturn) connectTo:(IOBluetoothDevice*) device;
 - (IOReturn) closeConnection;
-- (IOReturn) requestUpdates;
-- (IOReturn) setIRSensorEnabled:(BOOL) enabled;
-- (IOReturn) setForceFeedbackEnabled:(BOOL) enabled;
-- (IOReturn) setMotionSensorEnabled:(BOOL) enabled;
-- (IOReturn) setExpansionPortEnabled:(BOOL) enabled;
-- (IOReturn) setLEDEnabled1:(BOOL) enabled1 enabled2:(BOOL) enabled2 enabled3:(BOOL) enabled3 enabled4:(BOOL) enabled4;
+- (IOReturn) getCurrentStatus:(NSTimer*) timer;
 - (IOReturn) writeData:(const unsigned char*) data at:(unsigned long) address length:(size_t) length;
 - (IOReturn) readData:(unsigned long) address length:(unsigned short) length;
 - (IOReturn) sendCommand:(const unsigned char*) data length:(size_t) length;
 
+- (void) updateReportMode;
+- (void) setIRSensorEnabled:(BOOL) enabled;
+- (void) setForceFeedbackEnabled:(BOOL) enabled;
+- (void) setMotionSensorEnabled:(BOOL) enabled;
+- (void) setExpansionPortEnabled:(BOOL) enabled;
+- (void) setLEDEnabled1:(BOOL) enabled1 enabled2:(BOOL) enabled2 enabled3:(BOOL) enabled3 enabled4:(BOOL) enabled4;
+
 - (IOReturn) getMii:(unsigned int) slot;
 
-- (void) getCurrentStatus:(NSTimer*) timer;
 - (void) sendWiiRemoteButtonEvent:(UInt16) data;
 - (void) sendWiiNunchukButtonEvent:(UInt16) data;
 - (void) sendWiiClassicControllerButtonEvent:(UInt16) data;
