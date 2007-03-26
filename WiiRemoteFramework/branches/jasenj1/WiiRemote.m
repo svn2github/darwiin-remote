@@ -119,7 +119,7 @@ typedef enum {
 
 - (BOOL) available
 {
-	if ((_wiiDevice != nil) && _opened)
+	if ((_wiiDevice != nil) && (_cchan != nil) && (_ichan != nil))
 		return YES;
 	
 	return NO;
@@ -147,15 +147,21 @@ typedef enum {
 	
 //            statusTimer = [[NSTimer scheduledTimerWithTimeInterval:60 target:self selector:@selector(getCurrentStatus:) userInfo:nil repeats:YES] retain];
 	ret = [self getCurrentStatus:nil];	
-	ret = [self readData:0x0020 length:7]; // Get Accelerometer calibration data
+
+	if (ret == kIOReturnSuccess)
+		ret = [self readData:0x0020 length:7]; // Get Accelerometer calibration data
 
 	if (ret == kIOReturnSuccess) {
-		disconnectNotification = [_wiiDevice registerForDisconnectNotification:self selector:@selector(disconnected:fromDevice:)];
-		[self updateReportMode];
 		[self setMotionSensorEnabled:NO];
 		[self setIRSensorEnabled:NO];
 		[self setForceFeedbackEnabled:NO];
 		[self setLEDEnabled1:NO enabled2:NO enabled3:NO enabled4:NO];
+		[self updateReportMode];
+//		ret = [self doUpdateReportMode];
+	}
+	
+	if ((ret == kIOReturnSuccess) && [self available]) {
+		disconnectNotification = [_wiiDevice registerForDisconnectNotification:self selector:@selector(disconnected:fromDevice:)];
 		_opened = YES;
 	} else {
 		_opened = NO;
@@ -169,10 +175,9 @@ typedef enum {
 {
 	NSLogDebug (@"Disconnected.");
 	if (device == _wiiDevice) {
+//		_cchan = nil;
+//		_ichan = nil;
 		[self closeConnection];
-		[_delegate wiiRemoteDisconnected:device];
-		_delegate = nil;
-		_opened = NO;
 	}
 }
 
@@ -196,17 +201,18 @@ typedef enum {
 	
 	// cam: i think there is no need to do the loop many times in order to see there is an error
 	// if there's an error it must be managed right away
-//	int i;
-//	for (i=0; i<10 ; i++) {
+	int i;
+	for (i=0; i<10 ; i++) {
 		ret = [_cchan writeSync:buf length:length];		
 		if (ret != kIOReturnSuccess) {
 			NSLogDebug(@"Write Error for command 0x%x:", buf[1], ret);		
 			LogIOReturn (ret);
-//			usleep (10000);
+//			[self closeConnection];
+			usleep (10000);
 		}
-		//else
-//			break;
-//	}
+		else
+			break;
+	}
 
 	return ret;
 }
@@ -264,6 +270,9 @@ typedef enum {
 - (void) updateReportMode
 {
 	_shouldUpdateReportMode = YES;
+	
+	if (!_cchan)
+		[self closeConnection];
 }
 
 - (IOReturn) doUpdateReportMode
@@ -466,10 +475,14 @@ typedef enum {
 - (IOReturn) closeConnection
 {
 	IOReturn ret = 0;
-	
+	_opened = NO;
+
 	[disconnectNotification unregister];
 	disconnectNotification = nil;
-	
+
+	[_delegate wiiRemoteDisconnected:_wiiDevice];
+	_delegate = nil;
+
 	// cam: set delegate to nil
 	[_cchan setDelegate:nil];
 	ret = [_cchan closeChannel];
@@ -900,8 +913,7 @@ typedef enum {
 	} // report contains motion sensor data
 } // handleButtonReport
 
-- (void) sendWiiRemoteButtonEvent:(UInt16) data
-{
+- (void) sendWiiRemoteButtonEvent:(UInt16) data {
 	if (data & kWiiRemoteTwoButton){
 		if (!buttonState[WiiRemoteTwoButton]){
 			buttonState[WiiRemoteTwoButton] = YES;
@@ -1077,7 +1089,7 @@ typedef enum {
 			
 		}
 	}
-	
+
 	if (!(data & kWiiClassicControllerYButton)){
 		
 		if (!buttonState[WiiClassicControllerYButton]){
@@ -1354,20 +1366,24 @@ typedef enum {
 
 - (void) l2capChannelClosed:(IOBluetoothL2CAPChannel*) l2capChannel
 {
+	NSLogDebug (@"l2capChannelClosed (PSM:0x%x)", [l2capChannel getPSM]);
+
 	if (l2capChannel == _cchan)
 		_cchan = nil;
 
 	if (l2capChannel == _ichan)
 		_ichan = nil;
 	
-	_opened = NO;
+	[self closeConnection];
 } 
 
 // thanks to Ian!
 - (void) l2capChannelData:(IOBluetoothL2CAPChannel*) l2capChannel data:(void *) dataPointer length:(size_t) dataLength
 {	
-	if (!_wiiDevice || !_opened)
+	if (!([self available] && _opened)) {
+//		[self closeConnection];
 		return;
+	}
 
 	unsigned char * dp = (unsigned char *) dataPointer;
 	

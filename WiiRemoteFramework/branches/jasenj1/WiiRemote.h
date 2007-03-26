@@ -184,6 +184,7 @@ typedef enum {
 - (IOReturn) sendCommand:(const unsigned char*) data length:(size_t) length;
 
 - (void) updateReportMode;
+- (IOReturn) doUpdateReportMode;
 - (void) setIRSensorEnabled:(BOOL) enabled;
 - (void) setForceFeedbackEnabled:(BOOL) enabled;
 - (void) setMotionSensorEnabled:(BOOL) enabled;
