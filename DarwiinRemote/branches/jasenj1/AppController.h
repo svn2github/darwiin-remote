@@ -96,7 +96,7 @@
 	int mouseEventMode;
 	int x1, x2, x3, y1, y2, y3, z1, z2, z3;
 	int x0, y0, z0;
-	unsigned char tmpAccX, tmpAccY, tmpAccZ;
+	unsigned short tmpAccX, tmpAccY, tmpAccZ;
 	
 	WiiJoyStickCalibData nunchukJsCalib;
 	WiiAccCalibData wiiAccCalib, nunchukAccCalib;

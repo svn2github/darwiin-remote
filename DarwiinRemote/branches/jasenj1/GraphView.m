@@ -91,7 +91,7 @@
 		glColor4f(1.0, 0.0, 0.0, 1.0);
 		for (i = 0; i < [datax count]; i++){
 			GraphPoint* p = [datax objectAtIndex:i];
-			float y = [p value] / (float)0xff * 2.0 - 1.0;
+			float y = [p value] / (float)0x1ff * 2.0 - 1.0;
 			float x = (float)[self timeDif:[p timeValue] subtract:from] / (float)[self timeDif:tval subtract:from] * 2.0 - 1.0;
 			glVertex3f(x, y, 0.0f);
 		}
@@ -106,7 +106,7 @@
 		glColor4f(0.0, 1.0, 0.0, 1.0);
 		for (i = 0; i < [datay count]; i++){
 			GraphPoint* p = [datay objectAtIndex:i];
-			float y = [p value] / (float)0xff * 2.0 - 1.0;
+			float y = [p value] / (float)0x1ff * 2.0 - 1.0;
 			float x = [self timeDif:[p timeValue] subtract:from] / [self timeDif:tval subtract:from] * 2.0 - 1.0;
 			glVertex3f(x, y, 0.0f);
 		}
@@ -121,7 +121,7 @@
 		glColor4f(0.0, 0.0, 1.0, 1.0);
 		for (i = 0; i < [dataz count]; i++){
 			GraphPoint* p = [dataz objectAtIndex:i];
-			float y = [p value] / (float)0xff * 2.0 - 1.0;
+			float y = [p value] / (float)0x1ff * 2.0 - 1.0;
 			float x = [self timeDif:[p timeValue] subtract:from] / [self timeDif:tval subtract:from] * 2.0 - 1.0;
 			glVertex3f(x, y, 0.0f);
 		}
@@ -159,7 +159,7 @@
 }
 
 
--(void)setData:(unsigned char)x y:(unsigned char)y z:(unsigned char)z{
+-(void)setData:(unsigned short)x y:(unsigned short)y z:(unsigned short)z{
 	struct timeval tval;
 	struct timezone tzone;
 	gettimeofday(&tval, &tzone);

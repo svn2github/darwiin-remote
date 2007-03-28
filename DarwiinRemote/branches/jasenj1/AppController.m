@@ -829,10 +829,10 @@
 	values.  See http://www.wiili.org/index.php/Nunchuk#Calibration_data for more
 	details.
 */
-- (void) joyStickChanged:(WiiJoyStickType)type tiltX:(unsigned char)tiltX tiltY:(unsigned char)tiltY{
+- (void) joyStickChanged:(WiiJoyStickType)type tiltX:(unsigned short)tiltX tiltY:(unsigned short)tiltY{
 	if (type == WiiNunchukJoyStick){
-		unsigned char max = 0xE0;
-		unsigned char center = 0x80;
+		unsigned short max = 0xE0;
+		unsigned short center = 0x80;
 		
 		float shiftedX = (tiltX * 1.0) - (center * 1.0);
 		float shiftedY = (tiltY * 1.0) - (center * 1.0);
@@ -852,7 +852,7 @@
 
 
 
-- (void) accelerationChanged:(WiiAccelerationSensorType)type accX:(unsigned char)accX accY:(unsigned char)accY accZ:(unsigned char)accZ{
+- (void) accelerationChanged:(WiiAccelerationSensorType)type accX:(unsigned short)accX accY:(unsigned short)accY accZ:(unsigned short)accZ{
 	
 	if (type == WiiNunchukAccelerationSensor){
 		[graphView2 setData:accX y:accY z:accZ];
