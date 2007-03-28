@@ -115,6 +115,14 @@
 	return self;
 }
 
+- (void) dealloc
+{
+	[wii release];
+	[discovery release];
+	[configSortDescriptors release];
+	[super dealloc];
+}
+
 -(void)awakeFromNib{
 
 	[[NSNotificationCenter defaultCenter] addObserver:self
@@ -994,8 +1002,10 @@
 	
 }
 
-- (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication *)sender{
-	
+- (NSApplicationTerminateReply) applicationShouldTerminate:(NSApplication *) sender
+{
+	[[NSNotificationCenter defaultCenter] removeObserver:self];
+
 	NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
 	
 	[defaults setObject:[[NSNumber alloc] initWithDouble:x1] forKey:@"x1"];
@@ -1341,9 +1351,10 @@
 
 - (void) WiiRemoteDiscovered:(WiiRemote*)wiimote {
 	
-	[discovery stop];
+	//[discovery stop];
 	
-	wii = wiimote;
+	// the wiimote must be retained because the discovery provides us with an autoreleased object
+	wii = [wiimote retain];
 	[wiimote setDelegate:self];
 	
 	[textView setString:[NSString stringWithFormat:@"%@\n===== Connected to WiiRemote =====", [textView string]]];
