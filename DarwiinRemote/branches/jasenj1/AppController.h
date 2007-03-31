@@ -24,7 +24,8 @@
 	NSArray* modes;
 	NSArray* configSortDescriptors;
 	
-    IBOutlet NSDrawer *drawer;
+    IBOutlet NSDrawer *logDrawer;
+	IBOutlet NSDrawer *epDrawer;
     IBOutlet GraphView *graphView;
 	IBOutlet GraphView *graphView2;
     IBOutlet NSTextView *textView;
