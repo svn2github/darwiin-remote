@@ -30,8 +30,8 @@
                 batteryLevel = NSLevelIndicator; 
                 batteryLevelView = NSView; 
                 downButton = NSButton; 
-                drawer = NSDrawer; 
                 enterNameWindow = NSWindow; 
+                epDrawer = NSDrawer; 
                 graphView = GraphView; 
                 graphView2 = GraphView; 
                 homeButton = NSButton; 
@@ -57,6 +57,7 @@
                 led3 = NSButton; 
                 led4 = NSButton; 
                 leftButton = NSButton; 
+                logDrawer = NSDrawer; 
                 mainWindow = NSWindow; 
                 mappingController = NSArrayController; 
                 minusButton = NSButton; 

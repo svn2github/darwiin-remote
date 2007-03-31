@@ -143,7 +143,7 @@
 	discovery = [[WiiRemoteDiscovery alloc] init];
 	[discovery setDelegate:self];
 	[discovery start];
-	[drawer open];
+	[logDrawer open];
 	[textView setString:@"Please press 1 button and 2 button simultaneously"];
 	point.x = 0;
 	point.y = 0;
@@ -210,9 +210,11 @@
 	
 	if ([tmpWii isExpansionPortAttached]){
 		[wii setExpansionPortEnabled:YES];
+		[epDrawer open];
 		NSLog(@"** Expansion Port Enabled");
 	}else{
 		[wii setExpansionPortEnabled:NO];
+		[epDrawer close];
 		NSLog(@"** Expansion Port Disabled");
 	}	
 }
