@@ -3,6 +3,16 @@
 
 @implementation AppController
 
+- (IBAction)doDiscovery:(id)sender
+{
+//	CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.5, NO);
+
+	[discovery start];
+	[textView setString:@"Please press 1 button and 2 button simultaneously"];
+	[discoverySpinner startAnimation:self];
+}
+
+
 - (IBAction)showHideIRWindow:(id)sender
 {
 	if ([irWindow isVisible]) {
@@ -143,6 +153,7 @@
 	discovery = [[WiiRemoteDiscovery alloc] init];
 	[discovery setDelegate:self];
 	[discovery start];
+	[discoverySpinner startAnimation:self];
 	[logDrawer open];
 	[textView setString:@"Please press 1 button and 2 button simultaneously"];
 	point.x = 0;
@@ -222,15 +233,10 @@
 
 
 - (void) wiiRemoteDisconnected:(IOBluetoothDevice*)device {
-	[textView setString:[NSString stringWithFormat:@"%@\n===== lost connection with WiiRemote =====", [textView string]]];
 	[wii release];
-
-	CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.5, NO);
-
 	wii = nil;
-	// [discovery stop];
-	[discovery start];
-	[textView setString:[NSString stringWithFormat:@"%@\nPlease press the synchronize button", [textView string]]];
+
+	[textView setString:[NSString stringWithFormat:@"%@\n===== lost connection with WiiRemote =====", [textView string]]];
 }
 
 - (void) irPointMovedX:(float)px Y:(float)py{
@@ -1317,6 +1323,7 @@
 	}
 }
 
+/*
 - (IBAction)getMii: (id)sender
 {
        NSLog(@"Requesting Mii...");
@@ -1339,11 +1346,13 @@
                [miiData writeToURL:selectedFileURL atomically:NO];
        }
 }
+*/
 
 #pragma mark -
 #pragma mark WiiRemoteDiscovery delegates
 
 - (void) WiiRemoteDiscoveryError:(int)code {
+	[discoverySpinner stopAnimation:self];
 	[textView setString:[NSString stringWithFormat:@"%@\n===== WiiRemoteDiscovery error (%d) =====", [textView string], code]];
 }
 
@@ -1360,6 +1369,7 @@
 	[wiimote setDelegate:self];
 	
 	[textView setString:[NSString stringWithFormat:@"%@\n===== Connected to WiiRemote =====", [textView string]]];
+	[discoverySpinner stopAnimation:self];
 	
 	[wiimote setLEDEnabled1:YES enabled2:NO enabled3:NO enabled4:NO];
 	[wiimoteQCView setValue:[NSNumber numberWithBool:[led1 state] ] forInputKey:[NSString stringWithString:@"LED_1"]];

@@ -3,7 +3,7 @@
 #import <Cocoa/Cocoa.h>
 #import <ApplicationServices/ApplicationServices.h>
 #import <QuartzComposer/QCView.h>
-#import <WiiRemote/Mii.h>
+// #import <WiiRemote/Mii.h>
 #import <WiiRemote/WiiRemote.h>
 #import <WiiRemote/WiiRemoteDiscovery.h>
 #import "GraphView.h"
@@ -24,6 +24,7 @@
 	NSArray* modes;
 	NSArray* configSortDescriptors;
 	
+	IBOutlet NSProgressIndicator *discoverySpinner;
     IBOutlet NSDrawer *logDrawer;
 	IBOutlet NSDrawer *epDrawer;
     IBOutlet GraphView *graphView;
@@ -114,18 +115,22 @@
 - (IBAction)setLEDEnabled:(id)sender;
 - (IBAction)setMotionSensorsEnabled:(id)sender;
 - (IBAction)setMouseModeEnabled:(id)sender;
-- (IBAction)doCalibration:(id)sender;
 - (IBAction)openKeyConfiguration:(id)sender;
 - (IBAction)addConfiguration:(id)sender;
 - (IBAction)deleteConfiguration:(id)sender;
-- (void)sendKeyboardEvent:(CGKeyCode)keyCode keyDown:(BOOL)keyDown;
 - (IBAction)enterSaveName:(id)sender;
 - (IBAction)cancelEnterSaveName:(id)sender;
+- (IBAction)doDiscovery:(id)sender;
 
-- (void)gotMiiData: (Mii*)m at:(int)slot;
+- (void)sendKeyboardEvent:(CGKeyCode)keyCode keyDown:(BOOL)keyDown;
+
+// - (void)gotMiiData: (Mii*)m at:(int)slot;
 - (IBAction)showHideIRWindow:(id)sender;
 
 - (void) sendModifierKeys:(id)map isPressed:(BOOL)isPressed;
+
+- (NSManagedObject*)createNewConfigration:(NSString*)name;
+
 
 #pragma mark -
 #pragma mark WiiRemoteDiscovery delegates
