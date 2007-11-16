@@ -17,7 +17,7 @@
 }
 - (void)setIRPointX:(float)x Y:(float)y;
 - (id) initWithFrame:(NSRect)frame;
--(void)setData:(unsigned char)x y:(unsigned char)y z:(unsigned char)z;
+- (void)setData:(unsigned short)x y:(unsigned short)y z:(unsigned short)z;
 - (float)timeDif:(struct timeval)timeVal1 subtract:(struct timeval)timeVal2;
 - (BOOL)shouldDraw:(struct timeval)tval now:(struct timeval)now;
 - (void) drawAnimation: (NSTimer*)timer;

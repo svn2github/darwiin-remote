@@ -57,7 +57,7 @@
 		5317449A0B240DD500579963 /* AppController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AppController.m; sourceTree = "<group>"; };
 		5335B3450B3C73F800B21C9A /* PreferenceWindow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PreferenceWindow.h; sourceTree = "<group>"; };
 		5335B3460B3C73F800B21C9A /* PreferenceWindow.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PreferenceWindow.m; sourceTree = "<group>"; };
-		5335E4970B9EF4C8005F5FF0 /* WiiRemote.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WiiRemote.framework; path = ../../WiiRemoteFramework/branches/hiroaki/build/Release/WiiRemote.framework; sourceTree = SOURCE_ROOT; };
+		5335E4970B9EF4C8005F5FF0 /* WiiRemote.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WiiRemote.framework; path = ../../WiiRemoteFramework/trunk/build/Release/WiiRemote.framework; sourceTree = SOURCE_ROOT; };
 		535197AB0B39657F007184B2 /* WidgetsEnableTransformer2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WidgetsEnableTransformer2.h; sourceTree = "<group>"; };
 		535197AC0B39657F007184B2 /* WidgetsEnableTransformer2.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WidgetsEnableTransformer2.m; sourceTree = "<group>"; };
 		536852960B33172200A38BE5 /* KeyConfiguration_AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KeyConfiguration_AppDelegate.h; sourceTree = "<group>"; };
@@ -237,9 +237,11 @@
 		29B97313FDCFA39411CA2CEA /* Project object */ = {
 			isa = PBXProject;
 			buildConfigurationList = C01FCF4E08A954540054247B /* Build configuration list for PBXProject "DarwiinRemote" */;
+			compatibilityVersion = "Xcode 2.4";
 			hasScannedForEncodings = 1;
 			mainGroup = 29B97314FDCFA39411CA2CEA /* WiiRemote */;
 			projectDirPath = "";
+			projectRoot = "";
 			targets = (
 				8D1107260486CEB800E47090 /* DarwiinRemote */,
 			);
