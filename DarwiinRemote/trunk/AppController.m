@@ -1,5 +1,5 @@
 #import "AppController.h"
-
+#import <sys/time.h>
 
 @implementation AppController
 
@@ -104,6 +104,34 @@
 
 }
 
+- (IBAction)saveFile:(id)sender
+{
+	if ([[sender title] isEqualToString:@"Start"]){
+		[sender setTitle:@"Stop"];
+//		state = YES;
+		if ([recordData length] > 0){
+			savePanel = [NSSavePanel savePanel];
+			[savePanel setDirectory:NSHomeDirectory()];
+			int ret = [savePanel runModal];
+
+			NSString * columnHeaders =@"time,AccX,AccY,AccZ\n";
+			[recordData insertString:columnHeaders atIndex:0];
+				
+			if (ret){
+				[recordData writeToFile:[savePanel filename] atomically:YES];				
+			}
+		}
+	
+		[recordData release];
+		recordData = [[NSMutableString string] retain];
+
+	}else{
+		[sender setTitle:@"Start"];
+//		state = NO;
+
+	}
+}
+
 
 
 - (id)init{
@@ -156,6 +184,10 @@
 	[discoverySpinner startAnimation:self];
 	[logDrawer open];
 	[textView setString:@"Please press 1 button and 2 button simultaneously"];
+	
+	state = NO;
+	recordData = [[NSMutableString string] retain];
+	
 	point.x = 0;
 	point.y = 0;
 	
@@ -879,11 +911,6 @@
 		return;
 	}
 	
-	[graphView setData:accX y:accY z:accZ];
-	[WiimoteX setStringValue: [NSString stringWithFormat:@"%00X", accX]];		
-	[WiimoteY setStringValue: [NSString stringWithFormat:@"%00X", accY]];		
-	[WiimoteZ setStringValue: [NSString stringWithFormat:@"%00X", accZ]];		
-
 	[batteryLevel setDoubleValue:(double)[wii batteryLevel]];
 	
 	
@@ -891,15 +918,14 @@
 	tmpAccY = accY;
 	tmpAccZ = accZ;
 	
-	if (mouseEventMode != 1)
-		return;
-	
 	id config = [mappingController selection];
 	if ([[config valueForKey:@"manualCalibration"] boolValue]){
 		x0 = [[config valueForKeyPath:@"wiimote.accX_zero"] intValue] ;
 		x3 = [[config valueForKeyPath:@"wiimote.accX_1g"] intValue];
 		y0 = [[config valueForKeyPath:@"wiimote.accY_zero"] intValue];
 		y2 = [[config valueForKeyPath:@"wiimote.accY_1g"] intValue];
+		z0 = [[config valueForKeyPath:@"wiimote.accZ_zero"] intValue];
+		z1 = [[config valueForKeyPath:@"wiimote.accZ_1g"] intValue];
 		
 	}else{ 
 		WiiAccCalibData data = [wii accCalibData:WiiRemoteAccelerationSensor];
@@ -907,12 +933,40 @@
 		x3 = data.accX_1g;
 		y0 = data.accY_zero;
 		y2 = data.accY_1g;
+		z0 = data.accZ_zero;
+		z1 = data.accZ_1g;
 	}
-	
-	
 
 	double ax = (double)(accX - x0) / (x3 - x0);
 	double ay = (double)(accY - y0) / (y2 - y0);
+	double az = (double)(accZ - z0) / (z1 - z0);
+	
+//This part is for writing data to a file.  Data is scaled to local gravitational acceleration and contains absolute local times.
+	
+	struct tm *t;
+	struct timeval tval;
+	struct timezone tzone;
+	
+	
+	gettimeofday(&tval, &tzone);
+	t = localtime(&(tval.tv_sec));
+	
+	[recordData appendFormat:@"%d:%d:%d.%06d,%f,%f,%f\n", t->tm_hour, t->tm_min, t->tm_sec, tval.tv_usec, ax, ay, az];
+
+//End of part for writing data to file.
+//Send same data to graphing window for live viewing and to text box to see values.
+	
+	[graphView setData:ax y:ay z:az];
+	[WiimoteX setStringValue: [NSString stringWithFormat:@"%f", ax]];		
+	[WiimoteY setStringValue: [NSString stringWithFormat:@"%f", ay]];		
+	[WiimoteZ setStringValue: [NSString stringWithFormat:@"%f", az]];		
+	
+//End sending to live view.
+
+	
+	if (mouseEventMode != 1)	//Must be after graph and file data or they don't happen if Wii doesn't control mouse.
+	return;
+	
 	
 	double roll = atan(ax) * 180.0 / 3.14 * 2;
 	double pitch = atan(ay) * 180.0 / 3.14 * 2;
@@ -1353,7 +1407,7 @@
 
 - (void) WiiRemoteDiscoveryError:(int)code {
 	[discoverySpinner stopAnimation:self];
-	[textView setString:[NSString stringWithFormat:@"%@\n===== WiiRemoteDiscovery error (%d) =====", [textView string], code]];
+	[textView setString:[NSString stringWithFormat:@"%@\n===== WiiRemoteDiscovery error.  If clicking Search for Wiimote gives this error, try System Preferences > Bluetooth > Devices, delete Nintendo. (%d) =====", [textView string], code]];
 }
 
 - (void) willStartWiimoteConnections {
