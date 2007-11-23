@@ -1,211 +1,103 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-	<key>IBClasses</key>
-	<array>
-		<dict>
-			<key>CLASS</key>
-			<string>NSLevelIndicator</string>
-			<key>LANGUAGE</key>
-			<string>ObjC</string>
-			<key>SUPERCLASS</key>
-			<string>NSControl</string>
-		</dict>
-		<dict>
-			<key>ACTIONS</key>
-			<dict>
-				<key>saveAction</key>
-				<string>id</string>
-			</dict>
-			<key>CLASS</key>
-			<string>KeyConfiguration_AppDelegate</string>
-			<key>LANGUAGE</key>
-			<string>ObjC</string>
-			<key>SUPERCLASS</key>
-			<string>NSObject</string>
-		</dict>
-		<dict>
-			<key>CLASS</key>
-			<string>FirstResponder</string>
-			<key>LANGUAGE</key>
-			<string>ObjC</string>
-			<key>SUPERCLASS</key>
-			<string>NSObject</string>
-		</dict>
-		<dict>
-			<key>CLASS</key>
-			<string>GraphView</string>
-			<key>LANGUAGE</key>
-			<string>ObjC</string>
-			<key>SUPERCLASS</key>
-			<string>NSOpenGLView</string>
-		</dict>
-		<dict>
-			<key>ACTIONS</key>
-			<dict>
-				<key>cancel</key>
-				<string>id</string>
-				<key>ok</key>
-				<string>id</string>
-			</dict>
-			<key>CLASS</key>
-			<string>PreferenceWindow</string>
-			<key>LANGUAGE</key>
-			<string>ObjC</string>
-			<key>SUPERCLASS</key>
-			<string>NSWindow</string>
-		</dict>
-		<dict>
-			<key>ACTIONS</key>
-			<dict>
-				<key>addConfiguration</key>
-				<string>id</string>
-				<key>cancelEnterSaveName</key>
-				<string>id</string>
-				<key>deleteConfiguration</key>
-				<string>id</string>
-				<key>doCalibration</key>
-				<string>id</string>
-				<key>doDiscovery</key>
-				<string>id</string>
-				<key>enterSaveName</key>
-				<string>id</string>
-				<key>openKeyConfiguration</key>
-				<string>id</string>
-				<key>setForceFeedbackEnabled</key>
-				<string>id</string>
-				<key>setIRSensorEnabled</key>
-				<string>id</string>
-				<key>setLEDEnabled</key>
-				<string>id</string>
-				<key>setMotionSensorsEnabled</key>
-				<string>id</string>
-				<key>setMouseModeEnabled</key>
-				<string>id</string>
-				<key>showHideIRWindow</key>
-				<string>id</string>
-			</dict>
-			<key>CLASS</key>
-			<string>AppController</string>
-			<key>LANGUAGE</key>
-			<string>ObjC</string>
-			<key>OUTLETS</key>
-			<dict>
-				<key>NunchukX</key>
-				<string>NSTextField</string>
-				<key>NunchukY</key>
-				<string>NSTextField</string>
-				<key>NunchukZ</key>
-				<string>NSTextField</string>
-				<key>WiimoteX</key>
-				<string>NSTextField</string>
-				<key>WiimoteY</key>
-				<string>NSTextField</string>
-				<key>WiimoteZ</key>
-				<string>NSTextField</string>
-				<key>aButton</key>
-				<string>NSButton</string>
-				<key>appDelegate</key>
-				<string>KeyConfiguration_AppDelegate</string>
-				<key>bButton</key>
-				<string>NSButton</string>
-				<key>batteryLevel</key>
-				<string>NSLevelIndicator</string>
-				<key>batteryLevelView</key>
-				<string>NSView</string>
-				<key>discoverySpinner</key>
-				<string>NSProgressIndicator</string>
-				<key>downButton</key>
-				<string>NSButton</string>
-				<key>enterNameWindow</key>
-				<string>NSWindow</string>
-				<key>epDrawer</key>
-				<string>NSDrawer</string>
-				<key>graphView</key>
-				<string>GraphView</string>
-				<key>graphView2</key>
-				<string>GraphView</string>
-				<key>homeButton</key>
-				<string>NSButton</string>
-				<key>irPoint1Size</key>
-				<string>NSTextField</string>
-				<key>irPoint1X</key>
-				<string>NSTextField</string>
-				<key>irPoint1Y</key>
-				<string>NSTextField</string>
-				<key>irPoint2Size</key>
-				<string>NSTextField</string>
-				<key>irPoint2X</key>
-				<string>NSTextField</string>
-				<key>irPoint2Y</key>
-				<string>NSTextField</string>
-				<key>irPoint3Size</key>
-				<string>NSTextField</string>
-				<key>irPoint3X</key>
-				<string>NSTextField</string>
-				<key>irPoint3Y</key>
-				<string>NSTextField</string>
-				<key>irPoint4Size</key>
-				<string>NSTextField</string>
-				<key>irPoint4X</key>
-				<string>NSTextField</string>
-				<key>irPoint4Y</key>
-				<string>NSTextField</string>
-				<key>irQCView</key>
-				<string>QCView</string>
-				<key>irWindow</key>
-				<string>NSWindow</string>
-				<key>joystickQCView</key>
-				<string>QCView</string>
-				<key>joystickX</key>
-				<string>NSTextField</string>
-				<key>joystickY</key>
-				<string>NSTextField</string>
-				<key>led1</key>
-				<string>NSButton</string>
-				<key>led2</key>
-				<string>NSButton</string>
-				<key>led3</key>
-				<string>NSButton</string>
-				<key>led4</key>
-				<string>NSButton</string>
-				<key>leftButton</key>
-				<string>NSButton</string>
-				<key>logDrawer</key>
-				<string>NSDrawer</string>
-				<key>mainWindow</key>
-				<string>NSWindow</string>
-				<key>mappingController</key>
-				<string>NSArrayController</string>
-				<key>minusButton</key>
-				<string>NSButton</string>
-				<key>mouseMode</key>
-				<string>NSPopUpButton</string>
-				<key>newNameField</key>
-				<string>NSTextField</string>
-				<key>oneButton</key>
-				<string>NSButton</string>
-				<key>plusButton</key>
-				<string>NSButton</string>
-				<key>preferenceWindow</key>
-				<string>PreferenceWindow</string>
-				<key>rightButton</key>
-				<string>NSButton</string>
-				<key>textView</key>
-				<string>NSTextView</string>
-				<key>twoButton</key>
-				<string>NSButton</string>
-				<key>upButton</key>
-				<string>NSButton</string>
-				<key>wiimoteQCView</key>
-				<string>QCView</string>
-			</dict>
-			<key>SUPERCLASS</key>
-			<string>NSObject</string>
-		</dict>
-	</array>
-	<key>IBVersion</key>
-	<string>1</string>
-</dict>
-</plist>
+{
+    IBClasses = (
+        {
+            ACTIONS = {
+                addConfiguration = id; 
+                cancelEnterSaveName = id; 
+                deleteConfiguration = id; 
+                doCalibration = id; 
+                doDiscovery = id; 
+                enterSaveName = id; 
+                openKeyConfiguration = id; 
+                saveFile = id; 
+                setForceFeedbackEnabled = id; 
+                setIRSensorEnabled = id; 
+                setLEDEnabled = id; 
+                setMotionSensorsEnabled = id; 
+                setMouseModeEnabled = id; 
+                showHideIRWindow = id; 
+            }; 
+            CLASS = AppController; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {
+                NunchukX = NSTextField; 
+                NunchukY = NSTextField; 
+                NunchukZ = NSTextField; 
+                Recording = NSButton; 
+                WiimoteX = NSTextField; 
+                WiimoteY = NSTextField; 
+                WiimoteZ = NSTextField; 
+                aButton = NSButton; 
+                appDelegate = "KeyConfiguration_AppDelegate"; 
+                bButton = NSButton; 
+                batteryLevel = NSLevelIndicator; 
+                batteryLevelView = NSView; 
+                discoverySpinner = NSProgressIndicator; 
+                downButton = NSButton; 
+                enterNameWindow = NSWindow; 
+                epDrawer = NSDrawer; 
+                graphView = GraphView; 
+                graphView2 = GraphView; 
+                homeButton = NSButton; 
+                irPoint1Size = NSTextField; 
+                irPoint1X = NSTextField; 
+                irPoint1Y = NSTextField; 
+                irPoint2Size = NSTextField; 
+                irPoint2X = NSTextField; 
+                irPoint2Y = NSTextField; 
+                irPoint3Size = NSTextField; 
+                irPoint3X = NSTextField; 
+                irPoint3Y = NSTextField; 
+                irPoint4Size = NSTextField; 
+                irPoint4X = NSTextField; 
+                irPoint4Y = NSTextField; 
+                irQCView = QCView; 
+                irWindow = NSWindow; 
+                joystickQCView = QCView; 
+                joystickX = NSTextField; 
+                joystickY = NSTextField; 
+                led1 = NSButton; 
+                led2 = NSButton; 
+                led3 = NSButton; 
+                led4 = NSButton; 
+                leftButton = NSButton; 
+                logDrawer = NSDrawer; 
+                mainWindow = NSWindow; 
+                mappingController = NSArrayController; 
+                minusButton = NSButton; 
+                mouseMode = NSPopUpButton; 
+                newNameField = NSTextField; 
+                oneButton = NSButton; 
+                plusButton = NSButton; 
+                preferenceWindow = PreferenceWindow; 
+                rightButton = NSButton; 
+                textView = NSTextView; 
+                twoButton = NSButton; 
+                upButton = NSButton; 
+                wiimoteQCView = QCView; 
+            }; 
+            SUPERCLASS = NSObject; 
+        }, 
+        {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
+        {
+            CLASS = GraphView; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {scaleField = NSTextField; }; 
+            SUPERCLASS = NSOpenGLView; 
+        }, 
+        {
+            ACTIONS = {saveAction = id; }; 
+            CLASS = "KeyConfiguration_AppDelegate"; 
+            LANGUAGE = ObjC; 
+            SUPERCLASS = NSObject; 
+        }, 
+        {CLASS = NSLevelIndicator; LANGUAGE = ObjC; SUPERCLASS = NSControl; }, 
+        {
+            ACTIONS = {cancel = id; ok = id; }; 
+            CLASS = PreferenceWindow; 
+            LANGUAGE = ObjC; 
+            SUPERCLASS = NSWindow; 
+        }
+    ); 
+    IBVersion = 1; 
+}
