@@ -14,10 +14,12 @@
 	NSLock* lock;
 	float _x;
 	float _y;
+	
+	IBOutlet NSTextField* scaleField;  //enables scaling of live window		
 }
 - (void)setIRPointX:(float)x Y:(float)y;
 - (id) initWithFrame:(NSRect)frame;
-- (void)setData:(unsigned short)x y:(unsigned short)y z:(unsigned short)z;
+- (void)setData:(float)x y:(float)y z:(float)z;
 - (float)timeDif:(struct timeval)timeVal1 subtract:(struct timeval)timeVal2;
 - (BOOL)shouldDraw:(struct timeval)tval now:(struct timeval)now;
 - (void) drawAnimation: (NSTimer*)timer;
