@@ -87,6 +87,12 @@
 	IBOutlet NSTextField* irPoint4X;
 	IBOutlet NSTextField* irPoint4Y;
 	IBOutlet NSTextField* irPoint4Size;
+
+//enable recording of data	
+	IBOutlet NSButton* recordButton;  
+	NSMutableString* recordData;
+	NSSavePanel* savePanel;
+	BOOL state;
 	
 	WiiRemoteDiscovery *discovery;
 	WiiRemote* wii;
@@ -120,6 +126,7 @@
 - (IBAction)deleteConfiguration:(id)sender;
 - (IBAction)enterSaveName:(id)sender;
 - (IBAction)cancelEnterSaveName:(id)sender;
+- (IBAction)saveFile:(id)sender;
 - (IBAction)doDiscovery:(id)sender;
 
 - (void)sendKeyboardEvent:(CGKeyCode)keyCode keyDown:(BOOL)keyDown;
