@@ -9,7 +9,7 @@
 @implementation GraphView
 
 - (void)awakeFromNib{
-	lock = [[NSLock alloc] init];
+	lock  = [[NSLock alloc] init];
 	datax = [[NSMutableArray array] retain];
 	datay = [[NSMutableArray array] retain];
 	dataz = [[NSMutableArray array] retain];
