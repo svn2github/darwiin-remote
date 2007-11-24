@@ -86,179 +86,103 @@
 	
 	struct timeval from = [[datax objectAtIndex:0] timeValue];
 	
-//Draw horizontal gridlines in grey.  They need to use strip or they walk off the edge of the screen.  
-//They should be done first so the traces draw over them.
+// Draw a grid in gray and black before drawing data so the grid will be under the data.
+// This creates the horizontal lines for the grid.
 	glBegin (GL_LINE_STRIP);
 	{
 		int i;
 		glColor4f(0.7, 0.7, 0.7, 1.0);
-		for (i = 0; i <[ datax count]; i++){
-			GraphPoint* p = [datax objectAtIndex: i];
-			float x = (float)[self timeDif:[p timeValue] subtract:from] / (float)[self timeDif:tval subtract:from] * 2.0 - 1.0;
-			glVertex3f(x, -0.8, 0.0F);
-		}
-	}
-	glEnd();
-	
-		glBegin (GL_LINE_STRIP);
-	{
-		int i;
-		glColor4f(0.7, 0.7, 0.7, 1.0);
-		for (i = 0; i <[ datax count]; i++){
-			GraphPoint* p = [datax objectAtIndex: i];
-			float x = (float)[self timeDif:[p timeValue] subtract:from] / (float)[self timeDif:tval subtract:from] * 2.0 - 1.0;
-			glVertex3f(x, -0.6, 0.0F);
+		for (i = 0; i < 10; i++){
+			float test = sin(i * 3.14159265358979);
+			float x = 1.1 * test / fabs(test);
+			float y = i * 0.2 - 1.0;
+			glVertex2f(x, y);
+			glVertex2f(-x, y);
 		}
 	}
 	glEnd();
 
-		glBegin (GL_LINE_STRIP);
+// This creates stable vertical lines for the grid.
+	glBegin (GL_LINE_STRIP);
 	{
 		int i;
 		glColor4f(0.7, 0.7, 0.7, 1.0);
-		for (i = 0; i <[ datax count]; i++){
-			GraphPoint* p = [datax objectAtIndex: i];
-			float x = (float)[self timeDif:[p timeValue] subtract:from] / (float)[self timeDif:tval subtract:from] * 2.0 - 1.0;
-			glVertex3f(x, -0.4, 0.0F);
+		for (i = 0; i < 10; i++){
+			float test = sin(i * 3.14159265358979);
+			float y = 1.1 * test / fabs(test);
+			float x = i * 0.2 - 1.0;
+			glVertex2f(x, y);
+			glVertex2f(x, -y);
 		}
 	}
 	glEnd();
 	
-		glBegin (GL_LINE_STRIP);
+// This makes the two axes black instead of gray.
+	glBegin (GL_LINE_STRIP);		//Draw a double line so the axis is a little thicker than other lines.
 	{
-		int i;
-		glColor4f(0.7, 0.7, 0.7, 1.0);
-		for (i = 0; i <[ datax count]; i++){
-			GraphPoint* p = [datax objectAtIndex: i];
-			float x = (float)[self timeDif:[p timeValue] subtract:from] / (float)[self timeDif:tval subtract:from] * 2.0 - 1.0;
-			glVertex3f(x, -0.2, 0.0F);
-		}
-	}
-	glEnd();
-
-//This is the horizontal axis, so draw it in black.
-		glBegin (GL_LINE_STRIP);
-	{
-		int i;
 		glColor4f(0.0, 0.0, 0.0, 1.0);
-		for (i = 0; i <[ datax count]; i++){
-			GraphPoint* p = [datax objectAtIndex: i];
-			float x = (float)[self timeDif:[p timeValue] subtract:from] / (float)[self timeDif:tval subtract:from] * 2.0 - 1.0;
-			glVertex3f(x, 0.0, 0.0F);
-		}
+		float x1 = 0.001;
+		float y = 1.1;
+		glVertex2f(x1, y);
+		glVertex2f(x1, -y);
+		float x2 = -0.001;
+		glVertex2f(x2, -y);
+		glVertex2f(x2, y);
 	}
 	glEnd();
-
-	glBegin (GL_LINE_STRIP);
-	{
-		int i;
-		glColor4f(0.7, 0.7, 0.7, 1.0);
-		for (i = 0; i <[ datax count]; i++){
-			GraphPoint* p = [datax objectAtIndex: i];
-			float x = (float)[self timeDif:[p timeValue] subtract:from] / (float)[self timeDif:tval subtract:from] * 2.0 - 1.0;
-			glVertex3f(x, 0.2, 0.0F);
-		}
-	}
-	glEnd();
-
-		glBegin (GL_LINE_STRIP);
-	{
-		int i;
-		glColor4f(0.7, 0.7, 0.7, 1.0);
-		for (i = 0; i <[ datax count]; i++){
-			GraphPoint* p = [datax objectAtIndex: i];
-			float x = (float)[self timeDif:[p timeValue] subtract:from] / (float)[self timeDif:tval subtract:from] * 2.0 - 1.0;
-			glVertex3f(x, 0.4, 0.0F);
-		}
-	}
-	glEnd();
-
-	glBegin (GL_LINE_STRIP);
-	{
-		int i;
-		glColor4f(0.7, 0.7, 0.7, 1.0);
-		for (i = 0; i <[ datax count]; i++){
-			GraphPoint* p = [datax objectAtIndex: i];
-			float x = (float)[self timeDif:[p timeValue] subtract:from] / (float)[self timeDif:tval subtract:from] * 2.0 - 1.0;
-			glVertex3f(x, 0.6, 0.0f);
-		}
-	}
-	glEnd();
-
-	glBegin (GL_LINE_STRIP);
-	{
-		int i;
-		glColor4f(0.7, 0.7, 0.7, 1.0);
-		for (i = 0; i <[ datax count]; i++){
-			GraphPoint* p = [datax objectAtIndex: i];
-			float x = (float)[self timeDif:[p timeValue] subtract:from] / (float)[self timeDif:tval subtract:from] * 2.0 - 1.0;
-			glVertex3f(x, 0.8, 0.0f);
-		}
-	}
-	glEnd();
-
-//Draw the vertical lines of the grid.  Using the time-function in the grid keeps the grid in a fixed location.  
-//The grid just comes from the trace hopping from top to bottom of the screen every time the sign of the sine changes.  
-//The wobbles have to do with skipped times as a result of data smoothing.
-//Vertical spacing is 1s as nearly as I can tell by eye with a metronome.
-	glBegin (GL_LINE_STRIP);
-	{
-		int i;
-		glColor4f(0.7, 0.7, 0.7, 1.0);
-		for (i = 0; i <[ datax count]; i++){
-			GraphPoint* p = [datax objectAtIndex:i];
-			float xCalculation = (float)[self timeDif:[p timeValue] subtract:from] / (float)[self timeDif:tval subtract:from];
-			float test = sin(xCalculation * 10.0 * 3.14157);
-			float y = test / fabs(test) * 10.0;  //Makes things taller so verticals aren't so messed up.
-			float x = xCalculation * 2.0 - 1.0;
-			glVertex3f(x, y, 0.0f);
-		}
-	}
-	glEnd();
-//Now we're plotting data.
 	
+	glBegin (GL_LINE_STRIP);		//Draw a double line so the axis is a little thicker than other lines.
+	{
+		glColor4f(0.0, 0.0, 0.0, 1.0);
+		float y1 = 0.01;
+		float x = 1.1;
+		glVertex2f(x, y1);
+		glVertex2f(-x, y1);
+		float y2 = -0.01;
+		glVertex2f(-x, y2);
+		glVertex2f(x, y2);
+	}
+	glEnd();
+
+
+//Now we're plotting data.
+			
 	glBegin (GL_LINE_STRIP);
 	{
 		int i;
-		glColor4f(1.0, 0.0, 0.0, 1.0);
+		glColor4f(1.0, 0.0, 0.0, 1.0);			//red
 		for (i = 0; i < [datax count]; i++){
 			GraphPoint* p = [datax objectAtIndex:i];
 			float y = [p value] / scale;
 			float x = (float)[self timeDif:[p timeValue] subtract:from] / (float)[self timeDif:tval subtract:from] * 2.0 - 1.0;
-			glVertex3f(x, y, 0.0f);
-		}
-		
-		
+			glVertex2f(x, y);
+		}	
 	}
 	glEnd();
 	
 	glBegin (GL_LINE_STRIP);
 	{
 		int i;
-		glColor4f(0.0, 1.0, 0.0, 1.0);
+		glColor4f(0.0, 1.0, 0.0, 1.0);			//green
 		for (i = 0; i < [datay count]; i++){
 			GraphPoint* p = [datay objectAtIndex:i];
 			float y = [p value] / scale;
 			float x = [self timeDif:[p timeValue] subtract:from] / [self timeDif:tval subtract:from] * 2.0 - 1.0;
-			glVertex3f(x, y, 0.0f);
-		}
-		
-		
+			glVertex2f(x, y);
+		}		
 	}
 	glEnd();
 	
 	glBegin (GL_LINE_STRIP);
 	{
 		int i;
-		glColor4f(0.0, 0.0, 1.0, 1.0);
+		glColor4f(0.0, 0.0, 1.0, 1.0);			//blue
 		for (i = 0; i < [dataz count]; i++){
 			GraphPoint* p = [dataz objectAtIndex:i];
 			float y = [p value] / scale;
 			float x = [self timeDif:[p timeValue] subtract:from] / [self timeDif:tval subtract:from] * 2.0 - 1.0;
-			glVertex3f(x, y, 0.0f);
+			glVertex2f(x, y);
 		}
-		
-		
 	}
 	glEnd();
 	
