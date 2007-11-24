@@ -939,7 +939,7 @@
 
 	double ax = (double)(accX - x0) / (x3 - x0);
 	double ay = (double)(accY - y0) / (y2 - y0);
-	double az = (double)(accZ - z0) / (z1 - z0);
+	double az = (double)(accZ - z0) / (z1 - z0) * (-1.0);
 	
 //This part is for writing data to a file.  Data is scaled to local gravitational acceleration and contains absolute local times.
 	
@@ -1416,7 +1416,7 @@
 
 - (void) WiiRemoteDiscovered:(WiiRemote*)wiimote {
 	
-	//[discovery stop];
+	//	[discovery stop];
 	
 	// the wiimote must be retained because the discovery provides us with an autoreleased object
 	wii = [wiimote retain];
