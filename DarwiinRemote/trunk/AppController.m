@@ -898,15 +898,27 @@
 	}
 }
 
-
-
 - (void) accelerationChanged:(WiiAccelerationSensorType)type accX:(unsigned short)accX accY:(unsigned short)accY accZ:(unsigned short)accZ{
 	
 	if (type == WiiNunchukAccelerationSensor){
-		[graphView2 setData:accX y:accY z:accZ];
-		[NunchukX setStringValue: [NSString stringWithFormat:@"%00X", accX]];		
-		[NunchukY setStringValue: [NSString stringWithFormat:@"%00X", accY]];		
-		[NunchukZ setStringValue: [NSString stringWithFormat:@"%00X", accZ]];		
+		// Get calibration data
+		WiiAccCalibData data = [wii accCalibData:WiiNunchukAccelerationSensor];
+
+		x0 = data.accX_zero;
+		x3 = data.accX_1g;
+		y0 = data.accY_zero;
+		y2 = data.accY_1g;
+		z0 = data.accZ_zero;
+		z1 = data.accZ_1g;
+
+		double ax = (double)(accX - x0) / (x3 - x0);
+		double ay = (double)(accY - y0) / (y2 - y0);
+		double az = (double)(accZ - z0) / (z1 - z0) * (-1.0);
+
+		[graphView2 setData:ax y:ay z:az];
+		[NunchukX setStringValue: [NSString stringWithFormat:@"%f", ax]];	
+		[NunchukY setStringValue: [NSString stringWithFormat:@"%f", ay]];	
+		[NunchukZ setStringValue: [NSString stringWithFormat:@"%f", az]];	
 		
 		return;
 	}
