@@ -1407,7 +1407,7 @@
 
 - (void) WiiRemoteDiscoveryError:(int)code {
 	[discoverySpinner stopAnimation:self];
-	[textView setString:[NSString stringWithFormat:@"%@\n===== WiiRemoteDiscovery error.  If clicking Search for Wiimote gives this error, try System Preferences > Bluetooth > Devices, delete Nintendo. (%d) =====", [textView string], code]];
+	[textView setString:[NSString stringWithFormat:@"%@\n===== WiiRemoteDiscovery error.  If clicking Find Wiimote gives this error, try System Preferences > Bluetooth > Devices, delete Nintendo. (%d) =====", [textView string], code]];
 }
 
 - (void) willStartWiimoteConnections {
