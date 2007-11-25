@@ -180,10 +180,11 @@
 	mouseEventMode = 0;
 	discovery = [[WiiRemoteDiscovery alloc] init];
 	[discovery setDelegate:self];
-	[discovery start];
-	[discoverySpinner startAnimation:self];
+//	[discovery start];
+//	[discoverySpinner startAnimation:self];
 	[logDrawer open];
-	[textView setString:@"Please press 1 button and 2 button simultaneously"];
+//	[textView setString:@"Please press 1 button and 2 button simultaneously"];
+    [textView setString:@"Waiting about 15s on non-Intel systems may prevent having to refind the wiimote"];
 	
 	state = NO;
 	recordData = [[NSMutableString string] retain];
