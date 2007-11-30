@@ -154,7 +154,7 @@
 		for (i = 0; i < [datax count]; i++){
 			GraphPoint* p = [datax objectAtIndex:i];
 			float y = [p value] / scale;
-			float x = (float)[self timeDif:[p timeValue] subtract:from] / (float)[self timeDif:tval subtract:from] * 2.0 - 1.0;
+			float x = [self timeDif:[p timeValue] subtract:tval]/5 + 1.0;
 			glVertex2f(x, y);
 		}	
 	}
@@ -167,7 +167,7 @@
 		for (i = 0; i < [datay count]; i++){
 			GraphPoint* p = [datay objectAtIndex:i];
 			float y = [p value] / scale;
-			float x = [self timeDif:[p timeValue] subtract:from] / [self timeDif:tval subtract:from] * 2.0 - 1.0;
+			float x = [self timeDif:[p timeValue] subtract:tval]/5 + 1.0;
 			glVertex2f(x, y);
 		}		
 	}
@@ -180,7 +180,7 @@
 		for (i = 0; i < [dataz count]; i++){
 			GraphPoint* p = [dataz objectAtIndex:i];
 			float y = [p value] / scale;
-			float x = [self timeDif:[p timeValue] subtract:from] / [self timeDif:tval subtract:from] * 2.0 - 1.0;
+			float x = [self timeDif:[p timeValue] subtract:tval]/5 + 1.0;
 			glVertex2f(x, y);
 		}
 	}
