@@ -19,9 +19,9 @@
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
-	<string>0.5</string>
+	<string>0.6</string>
 	<key>CFBundleGetInfoString</key>
-	<string>${PRODUCT_NAME} 0.5, Copyright 2006 Hiroaki</string>
+	<string>${PRODUCT_NAME} 0.6, Copyright 2007 DarwiinRemote Team</string>
 	<key>NSMainNibFile</key>
 	<string>MainMenu</string>
 	<key>NSPrincipalClass</key>

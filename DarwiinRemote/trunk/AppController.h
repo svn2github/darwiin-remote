@@ -50,14 +50,19 @@
 	IBOutlet NSButton* homeButton;
 	IBOutlet NSButton* oneButton;
 	IBOutlet NSButton* twoButton;
+	
 	IBOutlet NSPopUpButton* mouseMode;
 	
+	IBOutlet NSView* nunchukView;
+	IBOutlet NSView* ccView;
+
 	IBOutlet NSView* batteryLevelView;
 	IBOutlet NSLevelIndicator* batteryLevel;
 	
 	IBOutlet QCView* wiimoteQCView;
 	IBOutlet QCView* joystickQCView;
 	IBOutlet QCView* irQCView;
+	IBOutlet QCView* ccQCView;
 
 	IBOutlet NSTextField* newNameField;
 	

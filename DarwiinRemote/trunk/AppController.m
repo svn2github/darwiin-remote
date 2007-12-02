@@ -248,15 +248,34 @@
 	
 	WiiRemote* tmpWii = (WiiRemote*)[nc object];
 	
+	// Check that the Wiimote reporting is the one we're connected to.
 	if (![[tmpWii address] isEqualToString:[wii address]]){
 		return;
 	}
 	
-	if ([tmpWii isExpansionPortAttached]){
+	// Set the view for the expansion port drawer.
+	WiiExpansionPortType epType = [wii expansionPortType];
+	switch (epType) {
+		
+		case WiiNunchuk:
+			[epDrawer setContentView: nunchukView];
+		break;
+		
+		case WiiClassicController:
+			[epDrawer setContentView: ccView];
+		break;
+		
+		case WiiExpNotAttached:
+		default:
+			[epDrawer setContentView: nil];
+		
+	}
+	
+	if ([wii isExpansionPortAttached]){
 		[wii setExpansionPortEnabled:YES];
 		[epDrawer open];
 		NSLog(@"** Expansion Port Enabled");
-	}else{
+	} else {
 		[wii setExpansionPortEnabled:NO];
 		[epDrawer close];
 		NSLog(@"** Expansion Port Disabled");
@@ -508,6 +527,81 @@
 	}else if (type == WiiNunchukZButton){
 		map = [mappings valueForKeyPath:@"nunchuk.z"];
 		[joystickQCView setValue:[NSNumber numberWithBool: isPressed] forInputKey:[NSString stringWithString:@"ZEnable"]];
+	} 
+	
+	switch (type) {
+		case WiiClassicControllerXButton:
+			map = [mappings valueForKeyPath:@"classiccontroller.x"];
+			[ccQCView setValue:[NSNumber numberWithBool: isPressed] forInputKey:[NSString stringWithString:@"X"]];			
+		break;
+	
+		case WiiClassicControllerYButton:
+			map = [mappings valueForKeyPath:@"classiccontroller.y"];
+			[ccQCView setValue:[NSNumber numberWithBool: isPressed] forInputKey:[NSString stringWithString:@"Y"]];
+		break;
+		
+		case WiiClassicControllerAButton:
+			map = [mappings valueForKeyPath:@"classiccontroller.a"];
+			[ccQCView setValue:[NSNumber numberWithBool: isPressed] forInputKey:[NSString stringWithString:@"A"]];
+		break;
+		
+		case WiiClassicControllerBButton:
+			map = [mappings valueForKeyPath:@"classiccontroller.b"];
+			[ccQCView setValue:[NSNumber numberWithBool: isPressed] forInputKey:[NSString stringWithString:@"B"]];
+		break;
+		
+		case WiiClassicControllerLButton:
+			map = [mappings valueForKeyPath:@"classiccontroller.l"];
+		break;
+		
+		case WiiClassicControllerRButton:
+			map = [mappings valueForKeyPath:@"classiccontroller.r"];
+		break;
+		
+		case WiiClassicControllerZLButton:
+			map = [mappings valueForKeyPath:@"classiccontroller.zl"];
+			[ccQCView setValue:[NSNumber numberWithBool: isPressed] forInputKey:[NSString stringWithString:@"ZL"]];
+		break;
+
+		case WiiClassicControllerZRButton:
+			map = [mappings valueForKeyPath:@"classiccontroller.zr"];
+			[ccQCView setValue:[NSNumber numberWithBool: isPressed] forInputKey:[NSString stringWithString:@"ZR"]];
+		break;
+
+		case WiiClassicControllerUpButton:
+			map = [mappings valueForKeyPath:@"classiccontroller.up"];
+			[ccQCView setValue:[NSNumber numberWithBool: isPressed] forInputKey:[NSString stringWithString:@"Up"]];
+		break;
+
+		case WiiClassicControllerDownButton:
+			map = [mappings valueForKeyPath:@"classiccontroller.down"];
+			[ccQCView setValue:[NSNumber numberWithBool: isPressed] forInputKey:[NSString stringWithString:@"Down"]];
+		break;
+
+		case WiiClassicControllerLeftButton:
+			map = [mappings valueForKeyPath:@"classiccontroller.left"];
+			[ccQCView setValue:[NSNumber numberWithBool: isPressed] forInputKey:[NSString stringWithString:@"Left"]];
+		break;
+
+		case WiiClassicControllerRightButton:
+			map = [mappings valueForKeyPath:@"classiccontroller.right"];
+			[ccQCView setValue:[NSNumber numberWithBool: isPressed] forInputKey:[NSString stringWithString:@"Right"]];
+		break;
+
+		case WiiClassicControllerMinusButton:
+			map = [mappings valueForKeyPath:@"classiccontroller.minus"];
+			[ccQCView setValue:[NSNumber numberWithBool: isPressed] forInputKey:[NSString stringWithString:@"Minus"]];
+		break;
+
+		case WiiClassicControllerHomeButton:
+			map = [mappings valueForKeyPath:@"classiccontroller.home"];
+			[ccQCView setValue:[NSNumber numberWithBool: isPressed] forInputKey:[NSString stringWithString:@"Home"]];
+		break;
+
+		case WiiClassicControllerPlusButton:
+			map = [mappings valueForKeyPath:@"classiccontroller.plus"];
+			[ccQCView setValue:[NSNumber numberWithBool: isPressed] forInputKey:[NSString stringWithString:@"Plus"]];
+		break;
 	}
 	
 	
