@@ -664,10 +664,8 @@
 		
 		[self sendKeyboardEvent:121 keyDown:isPressed];
 		
-	}else if ([modeName isEqualToString:@"Left Click"]){
+	} else if ([modeName isEqualToString:@"Left Click"]) {
 		[self sendModifierKeys:map isPressed:isPressed];
-		
-		
 		
 		if (!isLeftButtonDown && isPressed){	//start dragging...
 			isLeftButtonDown = YES;
@@ -687,7 +685,7 @@
 			
 			CGEventPost(kCGHIDEventTap, event);
 			CFRelease(event);	
-		}else if (isLeftButtonDown && !isPressed){	//end dragging...
+		} else if (isLeftButtonDown && !isPressed) {	//end dragging...
 
 			isLeftButtonDown = NO;
 
@@ -709,7 +707,7 @@
 			
 		}
 				
-	}else if ([modeName isEqualToString:@"Left Click2"]){
+	} else if ([modeName isEqualToString:@"Left Click2"]) {
 		
 		if (!isPressed)
 			return;
@@ -749,7 +747,7 @@
 		[self sendModifierKeys:map isPressed:NO];
 
 				
-	}else if ([modeName isEqualToString:@"Right Click"]){
+	} else if ([modeName isEqualToString:@"Right Click"]) {
 		[self sendModifierKeys:map isPressed:isPressed]; 
 		
 		
@@ -775,7 +773,7 @@
 			
 			CGEventPost(kCGHIDEventTap, event);
 			CFRelease(event);	
-		}else if (isRightButtonDown && !isPressed){	//end dragging...
+		} else if (isRightButtonDown && !isPressed) {	//end dragging...
 			
 			isRightButtonDown = NO;
 			
@@ -797,7 +795,7 @@
 			
 		}
 		
-	}else if ([modeName isEqualToString:@"Right Click2"]){
+	} else if ([modeName isEqualToString:@"Right Click2"]) {
 		if (!isPressed)
 			return;
 		
@@ -836,7 +834,7 @@
 		[self sendModifierKeys:map isPressed:NO];
 		
 		
-	}else if ([modeName isEqualToString:@"Toggle Mouse (Motion)"]){
+	} else if ([modeName isEqualToString:@"Toggle Mouse (Motion)"]) {
 		
 		if (isPressed)
 			return;
@@ -845,7 +843,7 @@
 			mouseEventMode = 1;
 			[textView setString:[NSString stringWithFormat:@"%@\n===== Mouse Mode On (Motion Sensors) =====", [textView string]]];
 
-		}else{						//Mouse mode off
+		} else {						//Mouse mode off
 			mouseEventMode = 0;
 			CFRelease(CGEventCreate(NULL));		
 			// this is Tiger's bug.
@@ -889,7 +887,7 @@
 		}
 		[mouseMode selectItemAtIndex:mouseEventMode];
 		
-	}else if ([modeName isEqualToString:@"Toggle Mouse (IR)"]){
+	} else if ([modeName isEqualToString:@"Toggle Mouse (IR)"]){
 		
 		
 		if (isPressed)
@@ -964,6 +962,18 @@
 	}
 }
 
+- (void) analogButtonChanged:(WiiButtonType) type amount:(unsigned short) press {
+
+	switch (type) {
+		case WiiClassicControllerLButton:
+			[ccAnalogL setStringValue:[NSString stringWithFormat:@"%00X", press]];
+		break;
+
+		case WiiClassicControllerRButton:
+			[ccAnalogR setStringValue:[NSString stringWithFormat:@"%00X", press]];
+		break;
+	}
+}
 
 /* 
 	My nunchuk reports joystick values from ~0x20 to ~0xE0 +/- ~5 in each axis.
@@ -972,24 +982,30 @@
 	values.  See http://www.wiili.org/index.php/Nunchuk#Calibration_data for more
 	details.
 */
-- (void) joyStickChanged:(WiiJoyStickType)type tiltX:(unsigned short)tiltX tiltY:(unsigned short)tiltY{
-	if (type == WiiNunchukJoyStick){
-		unsigned short max = 0xE0;
-		unsigned short center = 0x80;
+- (void) joyStickChanged:(WiiJoyStickType)type tiltX:(unsigned short)tiltX tiltY:(unsigned short)tiltY {
+
+	if (type == WiiNunchukJoyStick) {
+			unsigned short max = 0xE0;
+			unsigned short center = 0x80;
 		
-		float shiftedX = (tiltX * 1.0) - (center * 1.0);
-		float shiftedY = (tiltY * 1.0) - (center * 1.0);
+			float shiftedX = (tiltX * 1.0) - (center * 1.0);
+			float shiftedY = (tiltY * 1.0) - (center * 1.0);
 		
-		float scaledX = (shiftedX * 1.0) / ((max - center) * 1.0);
-		float scaledY = (shiftedY * 1.0) / ((max - center) * 1.0);
+			float scaledX = (shiftedX * 1.0) / ((max - center) * 1.0);
+			float scaledY = (shiftedY * 1.0) / ((max - center) * 1.0);
 		
-		// NSLog(@"Joystick X = %f  Y= %f", scaledX, scaledY);
-		[joystickQCView setValue:[NSNumber numberWithFloat: scaledX] forInputKey:[NSString stringWithString:@"X_Position"]];
-		[joystickQCView setValue:[NSNumber numberWithFloat: scaledY] forInputKey:[NSString stringWithString:@"Y_Position"]];
+			// NSLog(@"Joystick X = %f  Y= %f", scaledX, scaledY);
+			[joystickQCView setValue:[NSNumber numberWithFloat: scaledX] forInputKey:[NSString stringWithString:@"X_Position"]];
+			[joystickQCView setValue:[NSNumber numberWithFloat: scaledY] forInputKey:[NSString stringWithString:@"Y_Position"]];
 		
-		[joystickX setStringValue: [NSString stringWithFormat:@"%00X", tiltX]];		
-		[joystickY setStringValue: [NSString stringWithFormat:@"%00X", tiltY]];		
-				
+			[joystickX setStringValue: [NSString stringWithFormat:@"%00X", tiltX]];		
+			[joystickY setStringValue: [NSString stringWithFormat:@"%00X", tiltY]];		
+	} else if (type == WiiClassicControllerLeftJoyStick) {
+			[ccLeftX setStringValue: [NSString stringWithFormat:@"%00X", tiltX]];
+			[ccLeftY setStringValue: [NSString stringWithFormat:@"%00X", tiltY]];
+	} else if (type == WiiClassicControllerRightJoyStick) {
+			[ccRightX setStringValue: [NSString stringWithFormat:@"%00X", tiltX]];
+			[ccRightY setStringValue: [NSString stringWithFormat:@"%00X", tiltY]];	
 	}
 }
 

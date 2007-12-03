@@ -77,6 +77,13 @@
 	IBOutlet NSTextField* joystickX;
 	IBOutlet NSTextField* joystickY;
 	
+	IBOutlet NSTextField* ccLeftX;
+	IBOutlet NSTextField* ccLeftY;
+	IBOutlet NSTextField* ccRightX;
+	IBOutlet NSTextField* ccRightY;
+	IBOutlet NSTextField* ccAnalogL;
+	IBOutlet NSTextField* ccAnalogR;
+	
 	IBOutlet NSTextField* irPoint1X;
 	IBOutlet NSTextField* irPoint1Y;
 	IBOutlet NSTextField* irPoint1Size;

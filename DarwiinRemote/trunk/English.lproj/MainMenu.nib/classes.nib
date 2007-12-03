@@ -128,8 +128,20 @@
 				<string>NSLevelIndicator</string>
 				<key>batteryLevelView</key>
 				<string>NSView</string>
+				<key>ccAnalogL</key>
+				<string>NSTextField</string>
+				<key>ccAnalogR</key>
+				<string>NSTextField</string>
+				<key>ccLeftX</key>
+				<string>NSTextField</string>
+				<key>ccLeftY</key>
+				<string>NSTextField</string>
 				<key>ccQCView</key>
 				<string>QCView</string>
+				<key>ccRightX</key>
+				<string>NSTextField</string>
+				<key>ccRightY</key>
+				<string>NSTextField</string>
 				<key>ccView</key>
 				<string>NSView</string>
 				<key>discoverySpinner</key>
