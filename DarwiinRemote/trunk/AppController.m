@@ -1334,7 +1334,111 @@
 	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"wiimote.two.shift"];
 	[config setValue:[[NSNumber alloc] initWithInt:17] forKeyPath:@"wiimote.two.mode"];
 	
+	// Nunchuk
+	
+	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"nunchuk.c.command"];
+	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"nunchuk.c.control"];
+	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"nunchuk.c.option"];
+	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"nunchuk.c.shift"];
+	[config setValue:[[NSNumber alloc] initWithInt:1] forKeyPath:@"nunchuk.c.mode"];
+	
+	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"nunchuk.z.command"];
+	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"nunchuk.z.control"];
+	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"nunchuk.z.option"];
+	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"nunchuk.z.shift"];
+	[config setValue:[[NSNumber alloc] initWithInt:1] forKeyPath:@"nunchuk.z.mode"];
+	
+	// Classic Controller
+	
+	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"classiccontroller.up.command"];
+	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"classiccontroller.up.control"];
+	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"classiccontroller.up.option"];
+	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"classiccontroller.up.shift"];
+	[config setValue:[[NSNumber alloc] initWithInt:1] forKeyPath:@"classiccontroller.up.mode"];
 
+	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"classiccontroller.left.command"];
+	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"classiccontroller.left.control"];
+	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"classiccontroller.left.option"];
+	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"classiccontroller.left.shift"];
+	[config setValue:[[NSNumber alloc] initWithInt:1] forKeyPath:@"classiccontroller.left.mode"];
+
+	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"classiccontroller.right.command"];
+	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"classiccontroller.right.control"];
+	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"classiccontroller.right.option"];
+	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"classiccontroller.right.shift"];
+	[config setValue:[[NSNumber alloc] initWithInt:1] forKeyPath:@"classiccontroller.right.mode"];
+
+	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"classiccontroller.down.command"];
+	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"classiccontroller.down.control"];
+	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"classiccontroller.down.option"];
+	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"classiccontroller.down.shift"];
+	[config setValue:[[NSNumber alloc] initWithInt:1] forKeyPath:@"classiccontroller.down.mode"];
+
+	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"classiccontroller.a.command"];
+	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"classiccontroller.a.control"];
+	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"classiccontroller.a.option"];
+	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"classiccontroller.a.shift"];
+	[config setValue:[[NSNumber alloc] initWithInt:1] forKeyPath:@"classiccontroller.a.mode"];
+
+	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"classiccontroller.b.command"];
+	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"classiccontroller.b.control"];
+	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"classiccontroller.b.option"];
+	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"classiccontroller.b.shift"];
+	[config setValue:[[NSNumber alloc] initWithInt:1] forKeyPath:@"classiccontroller.b.mode"];
+
+	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"classiccontroller.x.command"];
+	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"classiccontroller.x.control"];
+	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"classiccontroller.x.option"];
+	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"classiccontroller.x.shift"];
+	[config setValue:[[NSNumber alloc] initWithInt:1] forKeyPath:@"classiccontroller.x.mode"];
+
+	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"classiccontroller.y.command"];
+	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"classiccontroller.y.control"];
+	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"classiccontroller.y.option"];
+	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"classiccontroller.y.shift"];
+	[config setValue:[[NSNumber alloc] initWithInt:1] forKeyPath:@"classiccontroller.y.mode"];
+
+	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"classiccontroller.l.command"];
+	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"classiccontroller.l.control"];
+	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"classiccontroller.l.option"];
+	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"classiccontroller.l.shift"];
+	[config setValue:[[NSNumber alloc] initWithInt:1] forKeyPath:@"classiccontroller.l.mode"];
+
+	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"classiccontroller.r.command"];
+	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"classiccontroller.r.control"];
+	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"classiccontroller.r.option"];
+	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"classiccontroller.r.shift"];
+	[config setValue:[[NSNumber alloc] initWithInt:1] forKeyPath:@"classiccontroller.r.mode"];
+
+	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"classiccontroller.zl.command"];
+	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"classiccontroller.zl.control"];
+	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"classiccontroller.zl.option"];
+	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"classiccontroller.zl.shift"];
+	[config setValue:[[NSNumber alloc] initWithInt:1] forKeyPath:@"classiccontroller.zl.mode"];
+
+	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"classiccontroller.zr.command"];
+	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"classiccontroller.zr.control"];
+	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"classiccontroller.zr.option"];
+	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"classiccontroller.zr.shift"];
+	[config setValue:[[NSNumber alloc] initWithInt:1] forKeyPath:@"classiccontroller.zr.mode"];
+
+	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"classiccontroller.minus.command"];
+	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"classiccontroller.minus.control"];
+	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"classiccontroller.minus.option"];
+	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"classiccontroller.minus.shift"];
+	[config setValue:[[NSNumber alloc] initWithInt:1] forKeyPath:@"classiccontroller.minus.mode"];
+
+	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"classiccontroller.home.command"];
+	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"classiccontroller.home.control"];
+	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"classiccontroller.home.option"];
+	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"classiccontroller.home.shift"];
+	[config setValue:[[NSNumber alloc] initWithInt:1] forKeyPath:@"classiccontroller.home.mode"];
+
+	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"classiccontroller.plus.command"];
+	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"classiccontroller.plus.control"];
+	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"classiccontroller.plus.option"];
+	[config setValue:[[NSNumber alloc] initWithBool:NO] forKeyPath:@"classiccontroller.plus.shift"];
+	[config setValue:[[NSNumber alloc] initWithInt:1] forKeyPath:@"classiccontroller.plus.mode"];
 
 	[appDelegate saveAction:nil];
 	
@@ -1378,8 +1482,9 @@
 	NSManagedObject* config = [NSEntityDescription insertNewObjectForEntityForName:@"KeyConfiguration" inManagedObjectContext: context];
 	NSManagedObject* wiimote = [NSEntityDescription insertNewObjectForEntityForName:@"Wiimote" inManagedObjectContext: context];
 	NSManagedObject* nunchuk = [NSEntityDescription insertNewObjectForEntityForName:@"Nunchuk" inManagedObjectContext: context];
+	NSManagedObject* classicController = [NSEntityDescription insertNewObjectForEntityForName:@"ClassicController" inManagedObjectContext: context];
 
-	
+	// Wiimote 
 	NSManagedObject* one = [NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context];
 	NSManagedObject* two = [NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context];
 	NSManagedObject* a = [NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context];
@@ -1404,18 +1509,42 @@
 	[wiimote setValue:left forKey:@"left"];
 	[wiimote setValue:right forKey:@"right"];
 	
-	
+	// Nunchuk
 	NSManagedObject* c = [NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context];
 	NSManagedObject* z = [NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context];
 
 	[nunchuk setValue:c forKey:@"c"];
 	[nunchuk setValue:z forKey:@"z"];
 	
+	// Classic Controller
+	NSManagedObject* x = [NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context];
+	NSManagedObject* y = [NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context];
+	NSManagedObject* l = [NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context];
+	NSManagedObject* r = [NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context];
+	NSManagedObject* zl = [NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context];
+	NSManagedObject* zr = [NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context];
 	
+	[classicController setValue:a forKey:@"a"];
+	[classicController setValue:b forKey:@"b"];
+	[classicController setValue:x forKey:@"x"];
+	[classicController setValue:y forKey:@"y"];
+	[classicController setValue:minus forKey:@"minus"];
+	[classicController setValue:home forKey:@"home"];
+	[classicController setValue:plus forKey:@"plus"];
+	[classicController setValue:up forKey:@"up"];
+	[classicController setValue:down forKey:@"down"];
+	[classicController setValue:left forKey:@"left"];
+	[classicController setValue:right forKey:@"right"];
+	[classicController setValue:l forKey:@"l"];
+	[classicController setValue:r forKey:@"r"];
+	[classicController setValue:zl forKey:@"zl"];
+	[classicController setValue:zr forKey:@"zr"];
+	
+	// Devices
 	[config setValue:wiimote forKey:@"wiimote"];
 	[config setValue:nunchuk forKey:@"nunchuk"];
+	[config setValue:classicController forKey:@"classiccontroller"];
 	[config setValue:name forKey:@"name"];
-	
 	
 	return config;
 }
