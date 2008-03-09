@@ -552,10 +552,12 @@
 		
 		case WiiClassicControllerLButton:
 			map = [mappings valueForKeyPath:@"classiccontroller.l"];
+			[ccQCView setValue:[NSNumber numberWithBool: isPressed] forInputKey:[NSString stringWithString:@"L"]];
 		break;
 		
 		case WiiClassicControllerRButton:
 			map = [mappings valueForKeyPath:@"classiccontroller.r"];
+			[ccQCView setValue:[NSNumber numberWithBool: isPressed] forInputKey:[NSString stringWithString:@"R"]];
 		break;
 		
 		case WiiClassicControllerZLButton:
@@ -1001,9 +1003,13 @@
 			[joystickX setStringValue: [NSString stringWithFormat:@"%00X", tiltX]];		
 			[joystickY setStringValue: [NSString stringWithFormat:@"%00X", tiltY]];		
 	} else if (type == WiiClassicControllerLeftJoyStick) {
+	
+	
 			[ccLeftX setStringValue: [NSString stringWithFormat:@"%00X", tiltX]];
 			[ccLeftY setStringValue: [NSString stringWithFormat:@"%00X", tiltY]];
 	} else if (type == WiiClassicControllerRightJoyStick) {
+	
+	
 			[ccRightX setStringValue: [NSString stringWithFormat:@"%00X", tiltX]];
 			[ccRightY setStringValue: [NSString stringWithFormat:@"%00X", tiltY]];	
 	}
@@ -1510,35 +1516,45 @@
 	[wiimote setValue:right forKey:@"right"];
 	
 	// Nunchuk
-	NSManagedObject* c = [NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context];
-	NSManagedObject* z = [NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context];
+	NSManagedObject* n_c = [NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context];
+	NSManagedObject* n_z = [NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context];
 
-	[nunchuk setValue:c forKey:@"c"];
-	[nunchuk setValue:z forKey:@"z"];
+	[nunchuk setValue:n_c forKey:@"c"];
+	[nunchuk setValue:n_z forKey:@"z"];
 	
 	// Classic Controller
-	NSManagedObject* x = [NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context];
-	NSManagedObject* y = [NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context];
-	NSManagedObject* l = [NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context];
-	NSManagedObject* r = [NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context];
-	NSManagedObject* zl = [NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context];
-	NSManagedObject* zr = [NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context];
+	NSManagedObject* cc_a = [NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context];
+	NSManagedObject* cc_b = [NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context];
+	NSManagedObject* cc_minus = [NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context];
+	NSManagedObject* cc_plus = [NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context];
+	NSManagedObject* cc_home = [NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context];
+	NSManagedObject* cc_up = [NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context];
+	NSManagedObject* cc_down = [NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context];
+	NSManagedObject* cc_left = [NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context];
+	NSManagedObject* cc_right = [NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context];
 	
-	[classicController setValue:a forKey:@"a"];
-	[classicController setValue:b forKey:@"b"];
-	[classicController setValue:x forKey:@"x"];
-	[classicController setValue:y forKey:@"y"];
-	[classicController setValue:minus forKey:@"minus"];
-	[classicController setValue:home forKey:@"home"];
-	[classicController setValue:plus forKey:@"plus"];
-	[classicController setValue:up forKey:@"up"];
-	[classicController setValue:down forKey:@"down"];
-	[classicController setValue:left forKey:@"left"];
-	[classicController setValue:right forKey:@"right"];
-	[classicController setValue:l forKey:@"l"];
-	[classicController setValue:r forKey:@"r"];
-	[classicController setValue:zl forKey:@"zl"];
-	[classicController setValue:zr forKey:@"zr"];
+	NSManagedObject* cc_x = [NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context];
+	NSManagedObject* cc_y = [NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context];
+	NSManagedObject* cc_l = [NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context];
+	NSManagedObject* cc_r = [NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context];
+	NSManagedObject* cc_zl = [NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context];
+	NSManagedObject* cc_zr = [NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context];
+	
+	[classicController setValue:cc_a forKey:@"a"];
+	[classicController setValue:cc_b forKey:@"b"];
+	[classicController setValue:cc_x forKey:@"x"];
+	[classicController setValue:cc_y forKey:@"y"];
+	[classicController setValue:cc_minus forKey:@"minus"];
+	[classicController setValue:cc_home forKey:@"home"];
+	[classicController setValue:cc_plus forKey:@"plus"];
+	[classicController setValue:cc_up forKey:@"up"];
+	[classicController setValue:cc_down forKey:@"down"];
+	[classicController setValue:cc_left forKey:@"left"];
+	[classicController setValue:cc_right forKey:@"right"];
+	[classicController setValue:cc_l forKey:@"l"];
+	[classicController setValue:cc_r forKey:@"r"];
+	[classicController setValue:cc_zl forKey:@"zl"];
+	[classicController setValue:cc_zr forKey:@"zr"];
 	
 	// Devices
 	[config setValue:wiimote forKey:@"wiimote"];
