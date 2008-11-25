@@ -27,6 +27,7 @@
 	IBOutlet NSProgressIndicator *discoverySpinner;
     IBOutlet NSDrawer *logDrawer;
 	IBOutlet NSDrawer *epDrawer;
+	IBOutlet NSDrawer *bbDrawer;
     IBOutlet GraphView *graphView;
 	IBOutlet GraphView *graphView2;
     IBOutlet NSTextView *textView;
@@ -63,6 +64,7 @@
 	IBOutlet QCView* joystickQCView;
 	IBOutlet QCView* irQCView;
 	IBOutlet QCView* ccQCView;
+	IBOutlet QCView* bbQCView;
 
 	IBOutlet NSTextField* newNameField;
 	
@@ -99,6 +101,11 @@
 	IBOutlet NSTextField* irPoint4X;
 	IBOutlet NSTextField* irPoint4Y;
 	IBOutlet NSTextField* irPoint4Size;
+	
+	IBOutlet NSTextField* bPressureTR;	
+	IBOutlet NSTextField* bPressureBR;	
+	IBOutlet NSTextField* bPressureTL;	
+	IBOutlet NSTextField* bPressureBL;
 
 //enable recording of data	
 	IBOutlet NSButton* recordButton;  

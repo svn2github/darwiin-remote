@@ -183,8 +183,12 @@
 //	[discovery start];
 //	[discoverySpinner startAnimation:self];
 	[logDrawer open];
-//	[textView setString:@"Please press 1 button and 2 button simultaneously"];
-    [textView setString:@"Please press Find Wiimote.  Waiting about 15s on non-Intel systems _may_ prevent having to refind the wiimote"];
+	//[textView setString:@"Please press 1 button and 2 button simultaneously"];
+   [textView setString:@"Please press Find Wiimote\n\
+1) If the application is unable to find your devices please make _sure_ to\n\
+   delete assosiated Wii devices from your Bluetooth Preferences screen\n\
+2) Still unable? Press Find, _wait_ a few (like 5+) seconds and then try to sync\n\
+3) Waiting about 15s on non-Intel systems _may_ prevent having to refind the wiimote"];
 	
 	state = NO;
 	recordData = [[NSMutableString string] retain];
@@ -259,25 +263,31 @@
 		
 		case WiiNunchuk:
 			[epDrawer setContentView: nunchukView];
+			[epDrawer open];
 		break;
 		
 		case WiiClassicController:
 			[epDrawer setContentView: ccView];
+			[epDrawer open];
 		break;
 		
+		case WiiBalanceBoard:
+			[bbDrawer open];
+		break;
+			
 		case WiiExpNotAttached:
 		default:
 			[epDrawer setContentView: nil];
+			[epDrawer close];
+
 		
 	}
 	
 	if ([wii isExpansionPortAttached]){
 		[wii setExpansionPortEnabled:YES];
-		[epDrawer open];
 		NSLog(@"** Expansion Port Enabled");
 	} else {
 		[wii setExpansionPortEnabled:NO];
-		[epDrawer close];
 		NSLog(@"** Expansion Port Disabled");
 	}	
 }
@@ -606,6 +616,14 @@
 		break;
 	}
 	
+	/* Fetch current location to allow clicking at the current mouse pointer position, instead of 0,0 */
+	int dispHeight = CGDisplayPixelsHigh(kCGDirectMainDisplay);
+	
+	NSPoint p = [mainWindow mouseLocationOutsideOfEventStream];
+	NSRect p2 = [mainWindow frame];
+	
+	point.x = p.x + p2.origin.x;
+	point.y = dispHeight - p.y - p2.origin.y;
 	
 	NSString* modeName = [modes objectAtIndex:[[map valueForKey:@"mode"] intValue] ];
 	//NSLog(@"modeName: %@", modeName);
@@ -1015,6 +1033,95 @@
 	}
 }
 
+- (void) pressureChanged:(WiiAccelerationSensorType)type pressureTR:(unsigned short) pressureTR pressureBR:(unsigned short) pressureBR 
+                                                         pressureTL:(unsigned short) pressureTL pressureBL:(unsigned short) pressureBL {
+	if (type == WiiBalanceBoardPressureSensor){
+		[bPressureTR setStringValue: [NSString stringWithFormat:@"%ikg", pressureTR]];
+		[bPressureBR setStringValue: [NSString stringWithFormat:@"%ikg", pressureBR]];
+		[bPressureTL setStringValue: [NSString stringWithFormat:@"%ikg", pressureTL]];
+		[bPressureBL setStringValue: [NSString stringWithFormat:@"%ikg", pressureBL]];
+		[bbQCView setValue:[NSNumber numberWithFloat: 0.1 + (pressureTR/5)] forInputKey:[NSString stringWithString:@"sizeTR"]];
+		[bbQCView setValue:[NSNumber numberWithFloat: 0.1 + (pressureBR/5)] forInputKey:[NSString stringWithString:@"sizeBR"]];
+		[bbQCView setValue:[NSNumber numberWithFloat: 0.1 + (pressureTL/5)] forInputKey:[NSString stringWithString:@"sizeTL"]];
+		[bbQCView setValue:[NSNumber numberWithFloat: 0.1 + (pressureBL/5)] forInputKey:[NSString stringWithString:@"sizeBL"]];
+		
+		
+		/* Little hack (Proof Of Concept) of mapping */
+		
+		const int deadLevel = 20;
+		static BOOL leftActive = FALSE;
+		static BOOL rightActive = FALSE;
+		static BOOL forwardActive = FALSE;
+		static BOOL backwardActive = FALSE;
+		
+		/* Google Earth mapping */
+		
+		const char moveLeft = 'a';
+		const char moveRight = 'd';
+		const char moveUp = 'w';
+		const char moveDown = 's';
+		
+		/* Wonderland mapping */
+		/*
+		const char moveLeft = 'z';
+		const char moveRight = 'x';
+		const char moveUp = 'w';
+		const char moveDown = 's';
+		*/
+		
+		if ((pressureTL > deadLevel) && (pressureBL > deadLevel)) {
+			if (!leftActive) {
+			[self sendKeyboardEvent:AsciiToKeyCode(&table, moveLeft) keyDown:YES];
+			leftActive = TRUE;
+			}
+		} else {
+			
+			if (leftActive) {
+				[self sendKeyboardEvent:AsciiToKeyCode(&table, moveLeft) keyDown:NO];
+				leftActive = FALSE;
+			}
+		}
+		
+		if ((pressureTR > deadLevel) && (pressureBR > deadLevel)) {
+			if (!rightActive) {
+			[self sendKeyboardEvent:AsciiToKeyCode(&table, moveRight) keyDown:YES];
+			rightActive = TRUE;
+			}
+		} else {
+			if (rightActive) {
+			rightActive = FALSE;
+			[self sendKeyboardEvent:AsciiToKeyCode(&table, moveRight) keyDown:NO];
+			}
+		}
+		
+		if ((pressureTR > deadLevel) && (pressureTL > deadLevel)) {
+			if (!forwardActive) {
+				[self sendKeyboardEvent:AsciiToKeyCode(&table, moveUp) keyDown:YES];
+				forwardActive = TRUE;
+			}
+		} else {
+			if (forwardActive) {
+				forwardActive = FALSE;
+				[self sendKeyboardEvent:AsciiToKeyCode(&table, moveUp) keyDown:NO];
+			}
+		}
+
+		if ((pressureBL > deadLevel) && (pressureBR > deadLevel)) {
+			if (!backwardActive) {
+				[self sendKeyboardEvent:AsciiToKeyCode(&table, moveDown) keyDown:YES];
+				backwardActive = TRUE;
+			}
+		} else {
+			if (backwardActive) {
+				backwardActive = FALSE;
+				[self sendKeyboardEvent:AsciiToKeyCode(&table, moveDown) keyDown:NO];
+			}
+		}
+	}
+	
+}
+															 
+
 - (void) accelerationChanged:(WiiAccelerationSensorType)type accX:(unsigned short)accX accY:(unsigned short)accY accZ:(unsigned short)accZ{
 	
 	if (type == WiiNunchukAccelerationSensor){
@@ -1092,6 +1199,68 @@
 	
 //End sending to live view.
 
+
+	/* Little hack (Proof Of Concept) of mapping */
+	const double deadLevel = 0.5;
+	const double secondLevel = 0.1;
+	static BOOL upActive = FALSE;
+	static BOOL downActive = FALSE;
+	static BOOL turnLeftActive = FALSE;
+	static BOOL turnRightActive = FALSE;
+	
+	static NSDate* reftimeAY = nil;
+	double secondsElapsedAY = [[NSDate date] timeIntervalSinceDate:reftimeAY];	
+	
+	static NSDate* reftimeAX = nil;
+	double secondsElapsedAX = [[NSDate date] timeIntervalSinceDate:reftimeAX];	
+	
+	/* upActive < -0.5 < neutral < 0.5 < downActive */
+	if (ay < (deadLevel * -1)) {
+		if (!upActive && (secondsElapsedAY > secondLevel)) {
+			[self sendKeyboardEvent:AsciiToKeyCode(&table, 'r') keyDown:YES];
+			upActive = TRUE;
+		}
+	} else if (ay > deadLevel) {
+		if (!downActive && (secondsElapsedAY > secondLevel)) {
+			[self sendKeyboardEvent:AsciiToKeyCode(&table, 'f') keyDown:YES];
+			downActive = TRUE;
+		}
+	} else {
+		[reftimeAY release];
+		reftimeAY = [[NSDate date] retain];
+		if (upActive) {
+			[self sendKeyboardEvent:AsciiToKeyCode(&table, 'r') keyDown:NO];
+			upActive = FALSE;
+		}
+		if (downActive) {
+			[self sendKeyboardEvent:AsciiToKeyCode(&table, 'f') keyDown:NO];
+			downActive = FALSE;
+		}		
+	}
+
+	/* turnLeftActive < -0.5 < neutral < 0.5 < turnRightActive */
+	if (ax < (deadLevel * -1)) {
+		if (!turnLeftActive && (secondsElapsedAX > secondLevel)) {
+			[self sendKeyboardEvent:AsciiToKeyCode(&table, 'a') keyDown:YES];
+			turnLeftActive = TRUE;
+		}
+	} else if (ax > deadLevel) {
+		if (!turnRightActive && (secondsElapsedAX > secondLevel)) {
+			[self sendKeyboardEvent:AsciiToKeyCode(&table, 'd') keyDown:YES];
+			turnRightActive = TRUE;
+		}
+	} else {
+		[reftimeAX release];
+		reftimeAX = [[NSDate date] retain];
+		if (turnLeftActive) {
+			[self sendKeyboardEvent:AsciiToKeyCode(&table, 'a') keyDown:NO];
+			turnLeftActive = FALSE;
+		}
+		if (turnRightActive) {
+			[self sendKeyboardEvent:AsciiToKeyCode(&table, 'd') keyDown:NO];
+			turnRightActive = FALSE;
+		}		
+	}
 	
 	if (mouseEventMode != 1)	//Must be after graph and file data or they don't happen if Wii doesn't control mouse.
 	return;
@@ -1601,7 +1770,7 @@
 			CFRelease(CGEventCreate(NULL));		
 			// this is Tiger's bug.
 			// see also: http://www.cocoabuilder.com/archive/message/cocoa/2006/10/4/172206
-			
+		
 			
 			CGEventRef event = CGEventCreateMouseEvent(NULL, kCGEventRightMouseUp, point, kCGMouseButtonRight);
 			
@@ -1617,7 +1786,7 @@
 			CFRelease(CGEventCreate(NULL));		
 			// this is Tiger's bug.
 			// see also: http://www.cocoabuilder.com/archive/message/cocoa/2006/10/4/172206
-			
+		
 			
 			event = CGEventCreateMouseEvent(NULL, kCGEventLeftMouseUp, point, kCGMouseButtonLeft);
 			

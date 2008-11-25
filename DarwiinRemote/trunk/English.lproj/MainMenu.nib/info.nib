@@ -3,15 +3,19 @@
 <plist version="1.0">
 <dict>
 	<key>IBFramework Version</key>
-	<string>644</string>
+	<string>672</string>
 	<key>IBLastKnownRelativeProjectPath</key>
 	<string>../DarwiinRemote.xcodeproj</string>
 	<key>IBOldestOS</key>
 	<integer>5</integer>
 	<key>IBOpenObjects</key>
-	<array/>
+	<array>
+		<integer>21</integer>
+		<integer>29</integer>
+		<integer>230</integer>
+	</array>
 	<key>IBSystem Version</key>
-	<string>9C31</string>
+	<string>9F33</string>
 	<key>targetFramework</key>
 	<string>IBCocoaFramework</string>
 </dict>

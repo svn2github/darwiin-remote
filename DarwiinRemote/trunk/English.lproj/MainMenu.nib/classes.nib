@@ -52,6 +52,14 @@
 			<string>NSOpenGLView</string>
 		</dict>
 		<dict>
+			<key>CLASS</key>
+			<string>QCView</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSView</string>
+		</dict>
+		<dict>
 			<key>ACTIONS</key>
 			<dict>
 				<key>cancel</key>
@@ -95,6 +103,8 @@
 				<string>id</string>
 				<key>setMouseModeEnabled</key>
 				<string>id</string>
+				<key>showHideBalanceBoardWindow</key>
+				<string>id</string>
 				<key>showHideIRWindow</key>
 				<string>id</string>
 			</dict>
@@ -124,10 +134,30 @@
 				<string>KeyConfiguration_AppDelegate</string>
 				<key>bButton</key>
 				<string>NSButton</string>
+				<key>bPressureBL</key>
+				<string>NSTextField</string>
+				<key>bPressureBR</key>
+				<string>NSTextField</string>
+				<key>bPressureLB</key>
+				<string>NSTextField</string>
+				<key>bPressureLT</key>
+				<string>NSTextField</string>
+				<key>bPressureRB</key>
+				<string>NSTextField</string>
+				<key>bPressureRT</key>
+				<string>NSTextField</string>
+				<key>bPressureTL</key>
+				<string>NSTextField</string>
+				<key>bPressureTR</key>
+				<string>NSTextField</string>
 				<key>batteryLevel</key>
 				<string>NSLevelIndicator</string>
 				<key>batteryLevelView</key>
 				<string>NSView</string>
+				<key>bbDrawer</key>
+				<string>NSDrawer</string>
+				<key>bbQCView</key>
+				<string>QCView</string>
 				<key>ccAnalogL</key>
 				<string>NSTextField</string>
 				<key>ccAnalogR</key>
