@@ -325,6 +325,7 @@
 	
 	float newx = (px*1*sens2)*dispWidth + dispWidth/2;
 	float newy = -(py*1*sens2)*dispWidth + dispHeight/2;
+	//float scaledX = ((irData[0].x / 1024.0) * 2.0) - 1.0;
 	
 	if (newx < 0) newx = 0;
 	if (newy < 0) newy = 0;
