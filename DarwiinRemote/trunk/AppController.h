@@ -111,7 +111,8 @@
 	IBOutlet NSButton* recordButton;  
 	NSMutableString* recordData;
 	NSSavePanel* savePanel;
-	BOOL state;
+	BOOL recordToFile;
+	NSFileHandle* recordHandle;
 	
 	WiiRemoteDiscovery *discovery;
 	WiiRemote* wii;

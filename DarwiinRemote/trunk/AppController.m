@@ -106,29 +106,36 @@
 
 - (IBAction)saveFile:(id)sender
 {
-	if ([[sender title] isEqualToString:@"Start"]){
-		[sender setTitle:@"Stop"];
-//		state = YES;
-		if ([recordData length] > 0){
-			savePanel = [NSSavePanel savePanel];
-			[savePanel setDirectory:NSHomeDirectory()];
-			int ret = [savePanel runModal];
+	// Currently not yet recording
+	if (recordToFile == NO) {				
+		// Select file
+		// XXX: Might want to include a file suggestion http://www.cocoabuilder.com/archive/message/cocoa/2002/8/1/56817
+		savePanel = [NSSavePanel savePanel];
+		[savePanel setDirectory:NSHomeDirectory()];
+		int ret = [savePanel runModal];
+		
+		// Create file
+		if (ret) {
+			// Try to write csv headers
+			ret = [[NSFileManager defaultManager] createFileAtPath:[savePanel filename] 
+														  contents:@"time,AccX,AccY,AccZ\n" attributes:nil];
+			[textView setString:[NSString stringWithFormat:@"%@\n===%i===", [textView string], ret]];
 
-			NSString * columnHeaders =@"time,AccX,AccY,AccZ\n";
-			[recordData insertString:columnHeaders atIndex:0];
-				
-			if (ret){
-				[recordData writeToFile:[savePanel filename] atomically:YES];				
-			}
 		}
-	
-		[recordData release];
-		recordData = [[NSMutableString string] retain];
 
-	}else{
+		// Let's save the data succesfully selected and created file
+		if (ret) {
+			// Update display and status
+			recordHandle = [[NSFileHandle fileHandleForWritingAtPath:[savePanel filename]] retain];
+			recordToFile = YES;
+			[sender setTitle:@"Stop"];
+		}
+	} else {
+		// Done recording, update state
 		[sender setTitle:@"Start"];
-//		state = NO;
-
+		[recordHandle closeFile];
+		[recordHandle release];
+		recordToFile = NO;
 	}
 }
 
@@ -190,8 +197,8 @@
 2) Still unable? Press Find, _wait_ a few (like 5+) seconds and then try to sync\n\
 3) Waiting about 15s on non-Intel systems _may_ prevent having to refind the wiimote"];
 	
-	state = NO;
-	recordData = [[NSMutableString string] retain];
+	// By default no recording on startup
+	recordToFile = NO;
 	
 	point.x = 0;
 	point.y = 0;
@@ -1188,8 +1195,12 @@
 	gettimeofday(&tval, &tzone);
 	t = localtime(&(tval.tv_sec));
 	
-	[recordData appendFormat:@"%d:%d:%d.%06d,%f,%f,%f\n", t->tm_hour, t->tm_min, t->tm_sec, tval.tv_usec, ax, ay, az];
-
+	// Write output if record mode
+	if (recordToFile) {
+		[recordHandle writeData:[[NSString stringWithFormat:@"%d:%d:%d.%06d,%f,%f,%f\n",  
+								  t->tm_hour, t->tm_min, t->tm_sec, tval.tv_usec, ax, ay, az] dataUsingEncoding:NSASCIIStringEncoding]];
+	}
+	
 //End of part for writing data to file.
 //Send same data to graphing window for live viewing and to text box to see values.
 	
