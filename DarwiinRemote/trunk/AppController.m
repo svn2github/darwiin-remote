@@ -118,15 +118,17 @@
 		if (ret) {
 			// Try to write csv headers
 			ret = [[NSFileManager defaultManager] createFileAtPath:[savePanel filename] 
-														  contents:@"time,AccX,AccY,AccZ\n" attributes:nil];
-			[textView setString:[NSString stringWithFormat:@"%@\n===%i===", [textView string], ret]];
-
+														  contents:@"time,AccX,AccY,AccZ,pressureTR, pressureBR, pressureTL, pressureBL\n" attributes:nil];
 		}
 
 		// Let's save the data succesfully selected and created file
 		if (ret) {
 			// Update display and status
 			recordHandle = [[NSFileHandle fileHandleForWritingAtPath:[savePanel filename]] retain];
+			// set to end will avoid overwriting header values ;-)
+			[recordHandle seekToEndOfFile];
+			
+			// update display and internal state
 			recordToFile = YES;
 			[sender setTitle:@"Stop"];
 		}
@@ -1053,6 +1055,23 @@
 		[bbQCView setValue:[NSNumber numberWithFloat: 0.1 + (pressureTL/5)] forInputKey:[NSString stringWithString:@"sizeTL"]];
 		[bbQCView setValue:[NSNumber numberWithFloat: 0.1 + (pressureBL/5)] forInputKey:[NSString stringWithString:@"sizeBL"]];
 		
+		//This part is for writing data to a file.  Data is scaled to local gravitational acceleration and contains absolute local times.
+		
+		struct tm *t;
+		struct timeval tval;
+		struct timezone tzone;
+		
+		
+		gettimeofday(&tval, &tzone);
+		t = localtime(&(tval.tv_sec));
+		
+		// Write output if record mode
+		if (recordToFile) {
+			[recordHandle writeData:[[NSString stringWithFormat:@"%d:%d:%d.%06d,,,,%hu,%hu,%hu,%hu\n",  
+									  t->tm_hour, t->tm_min, t->tm_sec, tval.tv_usec, pressureTR, pressureBR, pressureTL, pressureBL] dataUsingEncoding:NSASCIIStringEncoding]];
+		}
+		
+		//End of part for writing data to file.
 		
 		/* Little hack (Proof Of Concept) of mapping */
 		
@@ -1197,7 +1216,7 @@
 	
 	// Write output if record mode
 	if (recordToFile) {
-		[recordHandle writeData:[[NSString stringWithFormat:@"%d:%d:%d.%06d,%f,%f,%f\n",  
+		[recordHandle writeData:[[NSString stringWithFormat:@"%d:%d:%d.%06d,%f,%f,%f,,,,\n",  
 								  t->tm_hour, t->tm_min, t->tm_sec, tval.tv_usec, ax, ay, az] dataUsingEncoding:NSASCIIStringEncoding]];
 	}
 	
