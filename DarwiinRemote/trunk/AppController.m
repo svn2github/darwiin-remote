@@ -1074,54 +1074,63 @@
 		//End of part for writing data to file.
 		
 		/* Little hack (Proof Of Concept) of mapping */
-		
-		const int deadLevel = 20;
+				
+		/* As determined at the user evaluations, a fix value of deadLevel 
+		 * is not the way to go, percentage based is a much smarter approch 
+		 */
+		const unsigned short currentWeight = pressureTR + pressureBR + pressureTL + pressureBL;
+		float deadLevelLR = ((float)currentWeight / 100) * [[[mappingController selection] valueForKey:@"balanceboard.deadzone_left_right"] floatValue];
+		float deadLevelTB = ((float)currentWeight / 100) * [[[mappingController selection] valueForKey:@"balanceboard.deadzone_top_bottom"] floatValue];
+		/* Set minimum tresshold allowing persons to set on WiiBalanceBoard */
+		deadLevelLR = (deadLevelLR < 15)?15:deadLevelLR;
+		deadLevelTB = (deadLevelTB < 15)?15:deadLevelTB;
+
+		NSLog(@"%f", deadLevelLR);
+		NSLog(@"%f", deadLevelTB);
+
 		static BOOL leftActive = FALSE;
 		static BOOL rightActive = FALSE;
 		static BOOL forwardActive = FALSE;
 		static BOOL backwardActive = FALSE;
 		
 		/* Google Earth mapping */
-		
-		const char moveLeft = 'a';
-		const char moveRight = 'd';
-		const char moveUp = 'w';
-		const char moveDown = 's';
-		
+		/* XXX: Make me dynamic */
+		 const char moveLeft = 'a';
+		 const char moveRight = 'd';
+		 const char moveUp = 'w';
+		 const char moveDown = 's';
+		 */
 		/* Wonderland mapping */
-		/*
 		const char moveLeft = 'z';
 		const char moveRight = 'x';
 		const char moveUp = 'w';
 		const char moveDown = 's';
-		*/
 		
-		if ((pressureTL > deadLevel) && (pressureBL > deadLevel)) {
+		if ((pressureTL + pressureBL) > deadLevelLR) {
 			if (!leftActive) {
-			[self sendKeyboardEvent:AsciiToKeyCode(&table, moveLeft) keyDown:YES];
-			leftActive = TRUE;
+				[self sendKeyboardEvent:AsciiToKeyCode(&table, moveLeft) keyDown:YES];
+				leftActive = TRUE;
 			}
 		} else {
-			
 			if (leftActive) {
 				[self sendKeyboardEvent:AsciiToKeyCode(&table, moveLeft) keyDown:NO];
 				leftActive = FALSE;
 			}
 		}
 		
-		if ((pressureTR > deadLevel) && (pressureBR > deadLevel)) {
+		if ((pressureTR + pressureBR) > deadLevelLR) {
 			if (!rightActive) {
-			[self sendKeyboardEvent:AsciiToKeyCode(&table, moveRight) keyDown:YES];
-			rightActive = TRUE;
+				[self sendKeyboardEvent:AsciiToKeyCode(&table, moveRight) keyDown:YES];
+				rightActive = TRUE;
 			}
 		} else {
 			if (rightActive) {
-			rightActive = FALSE;
-			[self sendKeyboardEvent:AsciiToKeyCode(&table, moveRight) keyDown:NO];
+				rightActive = FALSE;
+				[self sendKeyboardEvent:AsciiToKeyCode(&table, moveRight) keyDown:NO];
 			}
 		}
 		
-		if ((pressureTR > deadLevel) && (pressureTL > deadLevel)) {
+		if ((pressureTR +pressureTL) > deadLevelTB) {
 			if (!forwardActive) {
 				[self sendKeyboardEvent:AsciiToKeyCode(&table, moveUp) keyDown:YES];
 				forwardActive = TRUE;
@@ -1132,8 +1141,8 @@
 				[self sendKeyboardEvent:AsciiToKeyCode(&table, moveUp) keyDown:NO];
 			}
 		}
-
-		if ((pressureBL > deadLevel) && (pressureBR > deadLevel)) {
+		
+		if ((pressureBL + pressureBR) > deadLevelTB) {
 			if (!backwardActive) {
 				[self sendKeyboardEvent:AsciiToKeyCode(&table, moveDown) keyDown:YES];
 				backwardActive = TRUE;
@@ -1145,9 +1154,7 @@
 			}
 		}
 	}
-	
-}
-															 
+}	
 
 - (void) accelerationChanged:(WiiAccelerationSensorType)type accX:(unsigned short)accX accY:(unsigned short)accY accZ:(unsigned short)accZ{
 	
@@ -1689,6 +1696,7 @@
 	NSManagedObject* wiimote = [NSEntityDescription insertNewObjectForEntityForName:@"Wiimote" inManagedObjectContext: context];
 	NSManagedObject* nunchuk = [NSEntityDescription insertNewObjectForEntityForName:@"Nunchuk" inManagedObjectContext: context];
 	NSManagedObject* classicController = [NSEntityDescription insertNewObjectForEntityForName:@"ClassicController" inManagedObjectContext: context];
+	NSManagedObject* balancBoard = [NSEntityDescription insertNewObjectForEntityForName:@"BalanceBoard" inManagedObjectContext: context];
 
 	// Wiimote 
 	NSManagedObject* one = [NSEntityDescription insertNewObjectForEntityForName:@"KeyMapping" inManagedObjectContext: context];
@@ -1760,6 +1768,7 @@
 	[config setValue:wiimote forKey:@"wiimote"];
 	[config setValue:nunchuk forKey:@"nunchuk"];
 	[config setValue:classicController forKey:@"classiccontroller"];
+	[config setValue:balancBoard forKey:@"balanceboard"];
 	[config setValue:name forKey:@"name"];
 	
 	return config;
