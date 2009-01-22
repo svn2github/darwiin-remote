@@ -118,7 +118,7 @@
 		if (ret) {
 			// Try to write csv headers
 			ret = [[NSFileManager defaultManager] createFileAtPath:[savePanel filename] 
-														  contents:@"time,AccX,AccY,AccZ,pressureTR, pressureBR, pressureTL, pressureBL\n" attributes:nil];
+														  contents:@"time,AccX,AccY,AccZ,pressureTR, pressureBR, pressureTL, pressureBL,rawPressureTR,rawPressureBR,rawPressureTL,rawPressureBL\n" attributes:nil];
 		}
 
 		// Let's save the data succesfully selected and created file
@@ -1043,6 +1043,26 @@
 	}
 }
 
+- (void) rawPressureChanged:(WiiBalanceBoardGrid) bbData {
+	//This part is for writing data to a file.  Data is scaled to local gravitational acceleration and contains absolute local times.
+	
+	struct tm *t;
+	struct timeval tval;
+	struct timezone tzone;
+	
+	
+	gettimeofday(&tval, &tzone);
+	t = localtime(&(tval.tv_sec));
+	
+	// Write output if record mode
+	if (recordToFile) {
+		[recordHandle writeData:[[NSString stringWithFormat:@"%d:%d:%d.%06d,,,,,,,,%hu,%hu,%hu,%hu\n",  
+								  t->tm_hour, t->tm_min, t->tm_sec, tval.tv_usec, bbData.tr, bbData.br, bbData.tl, bbData.bl] dataUsingEncoding:NSASCIIStringEncoding]];
+	}
+	
+	//End of part for writing data to file.	
+}
+
 - (void) pressureChanged:(WiiAccelerationSensorType)type pressureTR:(unsigned short) pressureTR pressureBR:(unsigned short) pressureBR 
                                                          pressureTL:(unsigned short) pressureTL pressureBL:(unsigned short) pressureBL {
 	if (type == WiiBalanceBoardPressureSensor){
@@ -1067,7 +1087,7 @@
 		
 		// Write output if record mode
 		if (recordToFile) {
-			[recordHandle writeData:[[NSString stringWithFormat:@"%d:%d:%d.%06d,,,,%hu,%hu,%hu,%hu\n",  
+			[recordHandle writeData:[[NSString stringWithFormat:@"%d:%d:%d.%06d,,,,%hu,%hu,%hu,%hu,,,,\n",  
 									  t->tm_hour, t->tm_min, t->tm_sec, tval.tv_usec, pressureTR, pressureBR, pressureTL, pressureBL] dataUsingEncoding:NSASCIIStringEncoding]];
 		}
 		
@@ -1095,6 +1115,7 @@
 		
 		/* Google Earth mapping */
 		/* XXX: Make me dynamic */
+		/* 
 		 const char moveLeft = 'a';
 		 const char moveRight = 'd';
 		 const char moveUp = 'w';
@@ -1178,6 +1199,69 @@
 		[NunchukY setStringValue: [NSString stringWithFormat:@"%f", ay]];	
 		[NunchukZ setStringValue: [NSString stringWithFormat:@"%f", az]];	
 		
+		/* Little hack (Proof Of Concept) of mapping */
+		const double deadLevel = 0.5;
+		const double secondLevel = 0.1;
+		static BOOL upActive = FALSE;
+		static BOOL downActive = FALSE;
+		static BOOL turnLeftActive = FALSE;
+		static BOOL turnRightActive = FALSE;
+		
+		static NSDate* reftimeAY = nil;
+		double secondsElapsedAY = [[NSDate date] timeIntervalSinceDate:reftimeAY];	
+		
+		static NSDate* reftimeAX = nil;
+		double secondsElapsedAX = [[NSDate date] timeIntervalSinceDate:reftimeAX];	
+		
+		/* upActive < -0.5 < neutral < 0.5 < downActive */
+		if (ay < (deadLevel * -1)) {
+			if (!upActive && (secondsElapsedAY > secondLevel)) {
+				[self sendKeyboardEvent:AsciiToKeyCode(&table, 'r') keyDown:YES];
+				upActive = TRUE;
+			}
+		} else if (ay > deadLevel) {
+			if (!downActive && (secondsElapsedAY > secondLevel)) {
+				[self sendKeyboardEvent:AsciiToKeyCode(&table, 'f') keyDown:YES];
+				downActive = TRUE;
+			}
+		} else {
+			[reftimeAY release];
+			reftimeAY = [[NSDate date] retain];
+			if (upActive) {
+				[self sendKeyboardEvent:AsciiToKeyCode(&table, 'r') keyDown:NO];
+				upActive = FALSE;
+			}
+			if (downActive) {
+				[self sendKeyboardEvent:AsciiToKeyCode(&table, 'f') keyDown:NO];
+				downActive = FALSE;
+			}		
+		}
+		
+		/* turnLeftActive < -0.5 < neutral < 0.5 < turnRightActive */
+		if (ax < (deadLevel * -1)) {
+			if (!turnLeftActive && (secondsElapsedAX > secondLevel)) {
+				[self sendKeyboardEvent:AsciiToKeyCode(&table, 'a') keyDown:YES];
+				turnLeftActive = TRUE;
+			}
+		} else if (ax > deadLevel) {
+			if (!turnRightActive && (secondsElapsedAX > secondLevel)) {
+				[self sendKeyboardEvent:AsciiToKeyCode(&table, 'd') keyDown:YES];
+				turnRightActive = TRUE;
+			}
+		} else {
+			[reftimeAX release];
+			reftimeAX = [[NSDate date] retain];
+			if (turnLeftActive) {
+				[self sendKeyboardEvent:AsciiToKeyCode(&table, 'a') keyDown:NO];
+				turnLeftActive = FALSE;
+			}
+			if (turnRightActive) {
+				[self sendKeyboardEvent:AsciiToKeyCode(&table, 'd') keyDown:NO];
+				turnRightActive = FALSE;
+			}		
+		}
+		
+		
 		return;
 	}
 	
@@ -1223,7 +1307,7 @@
 	
 	// Write output if record mode
 	if (recordToFile) {
-		[recordHandle writeData:[[NSString stringWithFormat:@"%d:%d:%d.%06d,%f,%f,%f,,,,\n",  
+		[recordHandle writeData:[[NSString stringWithFormat:@"%d:%d:%d.%06d,%f,%f,%f,,,,,,,,\n",  
 								  t->tm_hour, t->tm_min, t->tm_sec, tval.tv_usec, ax, ay, az] dataUsingEncoding:NSASCIIStringEncoding]];
 	}
 	
@@ -1239,66 +1323,66 @@
 
 
 	/* Little hack (Proof Of Concept) of mapping */
-	const double deadLevel = 0.5;
-	const double secondLevel = 0.1;
-	static BOOL upActive = FALSE;
-	static BOOL downActive = FALSE;
-	static BOOL turnLeftActive = FALSE;
-	static BOOL turnRightActive = FALSE;
-	
-	static NSDate* reftimeAY = nil;
-	double secondsElapsedAY = [[NSDate date] timeIntervalSinceDate:reftimeAY];	
-	
-	static NSDate* reftimeAX = nil;
-	double secondsElapsedAX = [[NSDate date] timeIntervalSinceDate:reftimeAX];	
-	
-	/* upActive < -0.5 < neutral < 0.5 < downActive */
-	if (ay < (deadLevel * -1)) {
-		if (!upActive && (secondsElapsedAY > secondLevel)) {
-			[self sendKeyboardEvent:AsciiToKeyCode(&table, 'r') keyDown:YES];
-			upActive = TRUE;
-		}
-	} else if (ay > deadLevel) {
-		if (!downActive && (secondsElapsedAY > secondLevel)) {
-			[self sendKeyboardEvent:AsciiToKeyCode(&table, 'f') keyDown:YES];
-			downActive = TRUE;
-		}
-	} else {
-		[reftimeAY release];
-		reftimeAY = [[NSDate date] retain];
-		if (upActive) {
-			[self sendKeyboardEvent:AsciiToKeyCode(&table, 'r') keyDown:NO];
-			upActive = FALSE;
-		}
-		if (downActive) {
-			[self sendKeyboardEvent:AsciiToKeyCode(&table, 'f') keyDown:NO];
-			downActive = FALSE;
-		}		
-	}
-
-	/* turnLeftActive < -0.5 < neutral < 0.5 < turnRightActive */
-	if (ax < (deadLevel * -1)) {
-		if (!turnLeftActive && (secondsElapsedAX > secondLevel)) {
-			[self sendKeyboardEvent:AsciiToKeyCode(&table, 'a') keyDown:YES];
-			turnLeftActive = TRUE;
-		}
-	} else if (ax > deadLevel) {
-		if (!turnRightActive && (secondsElapsedAX > secondLevel)) {
-			[self sendKeyboardEvent:AsciiToKeyCode(&table, 'd') keyDown:YES];
-			turnRightActive = TRUE;
-		}
-	} else {
-		[reftimeAX release];
-		reftimeAX = [[NSDate date] retain];
-		if (turnLeftActive) {
-			[self sendKeyboardEvent:AsciiToKeyCode(&table, 'a') keyDown:NO];
-			turnLeftActive = FALSE;
-		}
-		if (turnRightActive) {
-			[self sendKeyboardEvent:AsciiToKeyCode(&table, 'd') keyDown:NO];
-			turnRightActive = FALSE;
-		}		
-	}
+//	const double deadLevel = 0.5;
+//	const double secondLevel = 0.1;
+//	static BOOL upActive = FALSE;
+//	static BOOL downActive = FALSE;
+//	static BOOL turnLeftActive = FALSE;
+//	static BOOL turnRightActive = FALSE;
+//	
+//	static NSDate* reftimeAY = nil;
+//	double secondsElapsedAY = [[NSDate date] timeIntervalSinceDate:reftimeAY];	
+//	
+//	static NSDate* reftimeAX = nil;
+//	double secondsElapsedAX = [[NSDate date] timeIntervalSinceDate:reftimeAX];	
+//	
+//	/* upActive < -0.5 < neutral < 0.5 < downActive */
+//	if (ay < (deadLevel * -1)) {
+//		if (!upActive && (secondsElapsedAY > secondLevel)) {
+//			[self sendKeyboardEvent:AsciiToKeyCode(&table, 'r') keyDown:YES];
+//			upActive = TRUE;
+//		}
+//	} else if (ay > deadLevel) {
+//		if (!downActive && (secondsElapsedAY > secondLevel)) {
+//			[self sendKeyboardEvent:AsciiToKeyCode(&table, 'f') keyDown:YES];
+//			downActive = TRUE;
+//		}
+//	} else {
+//		[reftimeAY release];
+//		reftimeAY = [[NSDate date] retain];
+//		if (upActive) {
+//			[self sendKeyboardEvent:AsciiToKeyCode(&table, 'r') keyDown:NO];
+//			upActive = FALSE;
+//		}
+//		if (downActive) {
+//			[self sendKeyboardEvent:AsciiToKeyCode(&table, 'f') keyDown:NO];
+//			downActive = FALSE;
+//		}		
+//	}
+//
+//	/* turnLeftActive < -0.5 < neutral < 0.5 < turnRightActive */
+//	if (ax < (deadLevel * -1)) {
+//		if (!turnLeftActive && (secondsElapsedAX > secondLevel)) {
+//			[self sendKeyboardEvent:AsciiToKeyCode(&table, 'a') keyDown:YES];
+//			turnLeftActive = TRUE;
+//		}
+//	} else if (ax > deadLevel) {
+//		if (!turnRightActive && (secondsElapsedAX > secondLevel)) {
+//			[self sendKeyboardEvent:AsciiToKeyCode(&table, 'd') keyDown:YES];
+//			turnRightActive = TRUE;
+//		}
+//	} else {
+//		[reftimeAX release];
+//		reftimeAX = [[NSDate date] retain];
+//		if (turnLeftActive) {
+//			[self sendKeyboardEvent:AsciiToKeyCode(&table, 'a') keyDown:NO];
+//			turnLeftActive = FALSE;
+//		}
+//		if (turnRightActive) {
+//			[self sendKeyboardEvent:AsciiToKeyCode(&table, 'd') keyDown:NO];
+//			turnRightActive = FALSE;
+//		}		
+//	}
 	
 	if (mouseEventMode != 1)	//Must be after graph and file data or they don't happen if Wii doesn't control mouse.
 	return;
