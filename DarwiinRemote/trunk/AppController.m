@@ -1043,7 +1043,7 @@
 	}
 }
 
-- (void) rawPressureChanged:(WiiBalanceBoardGrid) bbData {
+- (void) allPressureChanged:(WiiAccelerationSensorType)type bbData:(WiiBalanceBoardGrid) bbData bbDataInKg:(WiiBalanceBoardGrid) bbDataInKg {
 	//This part is for writing data to a file.  Data is scaled to local gravitational acceleration and contains absolute local times.
 	
 	struct tm *t;
@@ -1056,12 +1056,16 @@
 	
 	// Write output if record mode
 	if (recordToFile) {
-		[recordHandle writeData:[[NSString stringWithFormat:@"%d:%d:%d.%06d,,,,,,,,%hu,%hu,%hu,%hu\n",  
-								  t->tm_hour, t->tm_min, t->tm_sec, tval.tv_usec, bbData.tr, bbData.br, bbData.tl, bbData.bl] dataUsingEncoding:NSASCIIStringEncoding]];
+		[recordHandle writeData:[[NSString stringWithFormat:@"%d:%d:%d.%06d,,,,%hu,%hu,%hu,%hu,%hu,%hu,%hu,%hu\n",  
+								  t->tm_hour, t->tm_min, t->tm_sec, tval.tv_usec,
+								  bbDataInKg.tr, bbDataInKg.br, bbDataInKg.tl,bbDataInKg.bl,
+								  bbData.tr, bbData.br, bbData.tl, bbData.bl] dataUsingEncoding:NSASCIIStringEncoding]];
 	}
 	
 	//End of part for writing data to file.	
 }
+
+
 
 - (void) pressureChanged:(WiiAccelerationSensorType)type pressureTR:(unsigned short) pressureTR pressureBR:(unsigned short) pressureBR 
                                                          pressureTL:(unsigned short) pressureTL pressureBL:(unsigned short) pressureBL {
@@ -1084,14 +1088,6 @@
 		
 		gettimeofday(&tval, &tzone);
 		t = localtime(&(tval.tv_sec));
-		
-		// Write output if record mode
-		if (recordToFile) {
-			[recordHandle writeData:[[NSString stringWithFormat:@"%d:%d:%d.%06d,,,,%hu,%hu,%hu,%hu,,,,\n",  
-									  t->tm_hour, t->tm_min, t->tm_sec, tval.tv_usec, pressureTR, pressureBR, pressureTL, pressureBL] dataUsingEncoding:NSASCIIStringEncoding]];
-		}
-		
-		//End of part for writing data to file.
 		
 		/* Little hack (Proof Of Concept) of mapping */
 				
