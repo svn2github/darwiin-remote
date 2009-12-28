@@ -13,8 +13,6 @@
 
 #import "KeyConfiguration_AppDelegate.h"
 
-#import "iGetKeys.h"
-
 @class PreferenceWindow;
 
 @interface AppController : NSObject
@@ -129,8 +127,6 @@
 	WiiJoyStickCalibData nunchukJsCalib;
 	WiiAccCalibData wiiAccCalib, nunchukAccCalib;
 	
-	Ascii2KeyCodeTable table;
-
 }
 
 - (void)setupInitialKeyMappings;

@@ -83,9 +83,7 @@
 	
 	glClearColor(1.0, 1.0, 1.0, 1.0);
 	glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-	
-	struct timeval from = [[datax objectAtIndex:0] timeValue];
-	
+		
 // Draw a grid in gray and black before drawing data so the grid will be under the data.
 // This creates the horizontal lines for the grid.
 	glBegin (GL_LINE_STRIP);

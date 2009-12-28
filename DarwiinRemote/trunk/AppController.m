@@ -166,7 +166,7 @@ static CGKeyCode GTMKeyCodeForCharCode(CGCharCode charCode) {
 		if (ret) {
 			// Try to write csv headers
 			ret = [[NSFileManager defaultManager] createFileAtPath:[savePanel filename] 
-														  contents:@"time,AccX,AccY,AccZ,pressureTR, pressureBR, pressureTL, pressureBL,rawPressureTR,rawPressureBR,rawPressureTL,rawPressureBL\n" attributes:nil];
+															  contents:[@"time,AccX,AccY,AccZ,pressureTR, pressureBR, pressureTL, pressureBL,rawPressureTR,rawPressureBR,rawPressureTL,rawPressureBL\n" dataUsingEncoding: NSASCIIStringEncoding] attributes:nil];
 		}
 
 		// Let's save the data succesfully selected and created file
@@ -1089,7 +1089,7 @@ static CGKeyCode GTMKeyCodeForCharCode(CGCharCode charCode) {
 	}
 }
 
-- (void) allPressureChanged:(WiiAccelerationSensorType)type bbData:(WiiBalanceBoardGrid) bbData bbDataInKg:(WiiBalanceBoardGrid) bbDataInKg {
+- (void) allPressureChanged:(WiiPressureSensorType)type bbData:(WiiBalanceBoardGrid) bbData bbDataInKg:(WiiBalanceBoardGrid) bbDataInKg {
 	//This part is for writing data to a file.  Data is scaled to local gravitational acceleration and contains absolute local times.
 	
 	struct tm *t;
@@ -1113,7 +1113,7 @@ static CGKeyCode GTMKeyCodeForCharCode(CGCharCode charCode) {
 
 
 
-- (void) pressureChanged:(WiiAccelerationSensorType)type pressureTR:(unsigned short) pressureTR pressureBR:(unsigned short) pressureBR 
+- (void) pressureChanged:(WiiPressureSensorType)type pressureTR:(unsigned short) pressureTR pressureBR:(unsigned short) pressureBR 
                                                          pressureTL:(unsigned short) pressureTL pressureBL:(unsigned short) pressureBL {
 	if (type == WiiBalanceBoardPressureSensor){
 		[bPressureTR setStringValue: [NSString stringWithFormat:@"%ikg", pressureTR]];

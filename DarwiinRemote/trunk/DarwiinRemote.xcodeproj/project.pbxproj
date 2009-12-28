@@ -6,6 +6,20 @@
 	objectVersion = 42;
 	objects = {
 
+/* Begin PBXAggregateTarget section */
+		9EC9174A10E94AB200CC575F /* DarwiinRemote.dmg */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = 9EC9174F10E94ABF00CC575F /* Build configuration list for PBXAggregateTarget "DarwiinRemote.dmg" */;
+			buildPhases = (
+				9EC9174910E94AB200CC575F /* ShellScript */,
+			);
+			dependencies = (
+			);
+			name = DarwiinRemote.dmg;
+			productName = DarwiinRemote.dmg;
+		};
+/* End PBXAggregateTarget section */
+
 /* Begin PBXBuildFile section */
 		471444FC0B8BD980009B5DD7 /* IR Data.qtz in Resources */ = {isa = PBXBuildFile; fileRef = 471444FB0B8BD97F009B5DD7 /* IR Data.qtz */; };
 		47653BE00B6EF34400F7DFEA /* Joystick.qtz in Resources */ = {isa = PBXBuildFile; fileRef = 47653BDF0B6EF34400F7DFEA /* Joystick.qtz */; };
@@ -29,6 +43,7 @@
 		8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C165CFE840E0CC02AAC07 /* InfoPlist.strings */; };
 		8D11072D0486CEB800E47090 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; settings = {ATTRIBUTES = (); }; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
+		9EC9170410E9438A00CC575F /* Quartz.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9EC9170310E9438A00CC575F /* Quartz.framework */; };
 		FC2F9C490F0E048000E822CC /* WiiRemote.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FC2F9C480F0E048000E822CC /* WiiRemote.framework */; };
 		FC2F9C500F0E048700E822CC /* WiiRemote.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = FC2F9C480F0E048000E822CC /* WiiRemote.framework */; };
 /* End PBXBuildFile section */
@@ -81,7 +96,8 @@
 		53F79ADB0B261EBE00C74335 /* icon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = icon.icns; sourceTree = "<group>"; };
 		53FA54D40B3AD41A003B73F3 /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = /System/Library/Frameworks/Carbon.framework; sourceTree = "<absolute>"; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
-		8D1107320486CEB800E47090 /* WiiRemote.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WiiRemote.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		8D1107320486CEB800E47090 /* DarwiinRemote.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DarwiinRemote.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		9EC9170310E9438A00CC575F /* Quartz.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Quartz.framework; path = /System/Library/Frameworks/Quartz.framework; sourceTree = "<absolute>"; };
 		FC2F9C480F0E048000E822CC /* WiiRemote.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WiiRemote.framework; path = "../WiiRemoteFramework-trunk/build/Debug/WiiRemote.framework"; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
@@ -95,6 +111,7 @@
 				531447F60B3010A900757188 /* ApplicationServices.framework in Frameworks */,
 				53FA54E90B3AD41A003B73F3 /* Carbon.framework in Frameworks */,
 				FC2F9C490F0E048000E822CC /* WiiRemote.framework in Frameworks */,
+				9EC9170410E9438A00CC575F /* Quartz.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -125,6 +142,7 @@
 				531447E10B3010A900757188 /* ApplicationServices.framework */,
 				53C576B50B2497D500D36527 /* OpenGL.framework */,
 				1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */,
+				9EC9170310E9438A00CC575F /* Quartz.framework */,
 			);
 			name = "Linked Frameworks";
 			sourceTree = "<group>";
@@ -141,7 +159,7 @@
 		19C28FACFE9D520D11CA2CBB /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				8D1107320486CEB800E47090 /* WiiRemote.app */,
+				8D1107320486CEB800E47090 /* DarwiinRemote.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -235,7 +253,7 @@
 			name = DarwiinRemote;
 			productInstallPath = "$(HOME)/Applications";
 			productName = WiiRemote;
-			productReference = 8D1107320486CEB800E47090 /* WiiRemote.app */;
+			productReference = 8D1107320486CEB800E47090 /* DarwiinRemote.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -251,6 +269,7 @@
 			projectRoot = "";
 			targets = (
 				8D1107260486CEB800E47090 /* DarwiinRemote */,
+				9EC9174A10E94AB200CC575F /* DarwiinRemote.dmg */,
 			);
 		};
 /* End PBXProject section */
@@ -273,6 +292,24 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		9EC9174910E94AB200CC575F /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"$(BUILT_PRODUCTS_DIR)/DarwiinRemote.app",
+			);
+			outputPaths = (
+				"$(HOME)/Desktop/DarwiinRemote.dmg",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -ex\n\n[ \"$ACTION\" = build ] || exit 0\n[ \"$BUILD_VARIANTS\" = \"normal\" ] || exit 0\n\ndir=\"`mktemp -d  -t DarwiinRemote`\"\ndmg=\"$HOME/Desktop/$PROJECT_NAME-`date '+%Y-%m-%M-%H-%M'`.dmg\"\n\nrm -rf \"$dir\"\nmkdir \"$dir\"\ncp -R \"$BUILT_PRODUCTS_DIR/$PROJECT_NAME.app\" \"$dir\"\nhdiutil create -srcfolder \"$dir\" -volname \"$PROJECT_NAME\" \"$dmg\"\nhdiutil internet-enable -yes \"$dmg\"\nrm -rf \"$dir\"";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		8D11072C0486CEB800E47090 /* Sources */ = {
@@ -313,6 +350,27 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
+		9EC9174B10E94AB200CC575F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				PRODUCT_NAME = DarwiinRemote.dmg;
+			};
+			name = Debug;
+		};
+		9EC9174C10E94AB200CC575F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				PRODUCT_NAME = DarwiinRemote.dmg;
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
 		C01FCF4B08A954540054247B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -347,7 +405,7 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
-				PRODUCT_NAME = WiiRemote;
+				PRODUCT_NAME = DarwiinRemote;
 				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
 				WRAPPER_EXTENSION = app;
 				ZERO_LINK = YES;
@@ -396,28 +454,41 @@
 		C01FCF4F08A954540054247B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT_PRE_XCODE_3_1)";
+				ARCHS_STANDARD_32_64_BIT_PRE_XCODE_3_1 = "x86_64 i386 ppc";
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				PREBINDING = NO;
-				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
+				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
 			};
 			name = Debug;
 		};
 		C01FCF5008A954540054247B /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT_PRE_XCODE_3_1)";
+				ARCHS_STANDARD_32_64_BIT_PRE_XCODE_3_1 = "x86_64 i386 ppc";
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				PREBINDING = NO;
-				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
+				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
 			};
 			name = Release;
 		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		9EC9174F10E94ABF00CC575F /* Build configuration list for PBXAggregateTarget "DarwiinRemote.dmg" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9EC9174B10E94AB200CC575F /* Debug */,
+				9EC9174C10E94AB200CC575F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		C01FCF4A08A954540054247B /* Build configuration list for PBXNativeTarget "DarwiinRemote" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
