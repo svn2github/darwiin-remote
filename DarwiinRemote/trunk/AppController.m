@@ -1,7 +1,55 @@
 #import "AppController.h"
 #import <sys/time.h>
 
+
+
 @implementation AppController
+
+// http://google-toolbox-for-mac.googlecode.com/svn/trunk/UnitTesting/GTMUnitTestingUtilities.m (Apache	2.0 licence)
+// Returns a virtual key code for a given charCode. Handles all of the
+// NS*FunctionKeys as well.
+static CGKeyCode GTMKeyCodeForCharCode(CGCharCode charCode) {
+	// character map taken from http://classicteck.com/rbarticles/mackeyboard.php
+	int characters[] = { 
+		'a', 's', 'd', 'f', 'h', 'g', 'z', 'x', 'c', 'v', 256, 'b', 'q', 'w', 
+		'e', 'r', 'y', 't', '1', '2', '3', '4', '6', '5', '=', '9', '7', '-', 
+		'8', '0', ']', 'o', 'u', '[', 'i', 'p', '\n', 'l', 'j', '\'', 'k', ';', 
+		'\\', ',', '/', 'n', 'm', '.', '\t', ' ', '`', '\b', 256, '\e' 
+	};
+	
+	// function key map taken from 
+	// file:///Developer/ADC%20Reference%20Library/documentation/Cocoa/Reference/ApplicationKit/ObjC_classic/Classes/NSEvent.html
+	int functionKeys[] = { 
+		// NSUpArrowFunctionKey - NSF12FunctionKey
+		126, 125, 123, 124, 122, 120, 99, 118, 96, 97, 98, 100, 101, 109, 103, 111,   
+		// NSF13FunctionKey - NSF28FunctionKey
+		105, 107, 113, 256, 256, 256, 256, 256, 256, 256, 256, 256, 256, 256, 256, 256, 
+		// NSF29FunctionKey - NSScrollLockFunctionKey 
+		256, 256, 256, 256, 256, 256, 256, 256, 117, 115, 256, 119, 116, 121, 256, 256, 
+		// NSPauseFunctionKey - NSPrevFunctionKey
+		256, 256, 256, 256, 256, 256, 256, 256, 256, 256, 256, 256, 256, 256, 256, 256,
+		// NSNextFunctionKey - NSModeSwitchFunctionKey
+		256, 256, 256, 256, 256, 256, 114, 1 
+	};  
+	
+	CGKeyCode outCode = 0;
+	
+	// Look in the function keys
+	if (charCode >= NSUpArrowFunctionKey && charCode <= NSModeSwitchFunctionKey) {
+		outCode = functionKeys[charCode - NSUpArrowFunctionKey];
+	} else {
+		// Look in our character map
+		size_t i;
+		for (i = 0; i < (sizeof(characters) / sizeof (int)); i++) {
+			if (characters[i] == charCode) {
+				outCode = i;
+				break;
+			}
+		}
+	}
+	return outCode;
+}
+		
 
 - (IBAction)doDiscovery:(id)sender
 {
@@ -176,8 +224,6 @@
 											selector:@selector(expansionPortChanged:)
 											name:@"WiiRemoteExpansionPortChangedNotification"
 											object:nil];
-
-	InitAscii2KeyCodeTable(&table);
 	
 	/**	
 		Interface Builder doesn't allow vertical level meters.
@@ -642,7 +688,7 @@
 		[self sendModifierKeys:map isPressed:isPressed]; 
 		
 		char c = (char)[[map valueForKey:@"character"] characterAtIndex:0];
-		short keycode = AsciiToKeyCode(&table, c);
+		short keycode = GTMKeyCodeForCharCode(c);
 		[self sendKeyboardEvent:keycode keyDown:isPressed];
 	}else if ([modeName isEqualToString:@"\tReturn"]){
 		[self sendModifierKeys:map isPressed:isPressed]; 
@@ -1125,49 +1171,49 @@
 		
 		if ((pressureTL + pressureBL) > deadLevelLR) {
 			if (!leftActive) {
-				[self sendKeyboardEvent:AsciiToKeyCode(&table, moveLeft) keyDown:YES];
+				[self sendKeyboardEvent:GTMKeyCodeForCharCode(moveLeft) keyDown:YES];
 				leftActive = TRUE;
 			}
 		} else {
 			if (leftActive) {
-				[self sendKeyboardEvent:AsciiToKeyCode(&table, moveLeft) keyDown:NO];
+				[self sendKeyboardEvent:GTMKeyCodeForCharCode(moveLeft) keyDown:NO];
 				leftActive = FALSE;
 			}
 		}
 		
 		if ((pressureTR + pressureBR) > deadLevelLR) {
 			if (!rightActive) {
-				[self sendKeyboardEvent:AsciiToKeyCode(&table, moveRight) keyDown:YES];
+				[self sendKeyboardEvent:GTMKeyCodeForCharCode(moveRight) keyDown:YES];
 				rightActive = TRUE;
 			}
 		} else {
 			if (rightActive) {
 				rightActive = FALSE;
-				[self sendKeyboardEvent:AsciiToKeyCode(&table, moveRight) keyDown:NO];
+				[self sendKeyboardEvent:GTMKeyCodeForCharCode(moveRight) keyDown:NO];
 			}
 		}
 		
 		if ((pressureTR +pressureTL) > deadLevelTB) {
 			if (!forwardActive) {
-				[self sendKeyboardEvent:AsciiToKeyCode(&table, moveUp) keyDown:YES];
+				[self sendKeyboardEvent:GTMKeyCodeForCharCode(moveUp) keyDown:YES];
 				forwardActive = TRUE;
 			}
 		} else {
 			if (forwardActive) {
 				forwardActive = FALSE;
-				[self sendKeyboardEvent:AsciiToKeyCode(&table, moveUp) keyDown:NO];
+				[self sendKeyboardEvent:GTMKeyCodeForCharCode(moveUp) keyDown:NO];
 			}
 		}
 		
 		if ((pressureBL + pressureBR) > deadLevelTB) {
 			if (!backwardActive) {
-				[self sendKeyboardEvent:AsciiToKeyCode(&table, moveDown) keyDown:YES];
+				[self sendKeyboardEvent:GTMKeyCodeForCharCode(moveDown) keyDown:YES];
 				backwardActive = TRUE;
 			}
 		} else {
 			if (backwardActive) {
 				backwardActive = FALSE;
-				[self sendKeyboardEvent:AsciiToKeyCode(&table, moveDown) keyDown:NO];
+				[self sendKeyboardEvent:GTMKeyCodeForCharCode(moveDown) keyDown:NO];
 			}
 		}
 	}
@@ -1212,23 +1258,23 @@
 		/* upActive < -0.5 < neutral < 0.5 < downActive */
 		if (ay < (deadLevel * -1)) {
 			if (!upActive && (secondsElapsedAY > secondLevel)) {
-				[self sendKeyboardEvent:AsciiToKeyCode(&table, 'r') keyDown:YES];
+				[self sendKeyboardEvent:GTMKeyCodeForCharCode('r') keyDown:YES];
 				upActive = TRUE;
 			}
 		} else if (ay > deadLevel) {
 			if (!downActive && (secondsElapsedAY > secondLevel)) {
-				[self sendKeyboardEvent:AsciiToKeyCode(&table, 'f') keyDown:YES];
+				[self sendKeyboardEvent:GTMKeyCodeForCharCode('f') keyDown:YES];
 				downActive = TRUE;
 			}
 		} else {
 			[reftimeAY release];
 			reftimeAY = [[NSDate date] retain];
 			if (upActive) {
-				[self sendKeyboardEvent:AsciiToKeyCode(&table, 'r') keyDown:NO];
+				[self sendKeyboardEvent:GTMKeyCodeForCharCode('r') keyDown:NO];
 				upActive = FALSE;
 			}
 			if (downActive) {
-				[self sendKeyboardEvent:AsciiToKeyCode(&table, 'f') keyDown:NO];
+				[self sendKeyboardEvent:GTMKeyCodeForCharCode('f') keyDown:NO];
 				downActive = FALSE;
 			}		
 		}
@@ -1236,23 +1282,23 @@
 		/* turnLeftActive < -0.5 < neutral < 0.5 < turnRightActive */
 		if (ax < (deadLevel * -1)) {
 			if (!turnLeftActive && (secondsElapsedAX > secondLevel)) {
-				[self sendKeyboardEvent:AsciiToKeyCode(&table, 'a') keyDown:YES];
+				[self sendKeyboardEvent:GTMKeyCodeForCharCode('a') keyDown:YES];
 				turnLeftActive = TRUE;
 			}
 		} else if (ax > deadLevel) {
 			if (!turnRightActive && (secondsElapsedAX > secondLevel)) {
-				[self sendKeyboardEvent:AsciiToKeyCode(&table, 'd') keyDown:YES];
+				[self sendKeyboardEvent:GTMKeyCodeForCharCode('d') keyDown:YES];
 				turnRightActive = TRUE;
 			}
 		} else {
 			[reftimeAX release];
 			reftimeAX = [[NSDate date] retain];
 			if (turnLeftActive) {
-				[self sendKeyboardEvent:AsciiToKeyCode(&table, 'a') keyDown:NO];
+				[self sendKeyboardEvent:GTMKeyCodeForCharCode('a') keyDown:NO];
 				turnLeftActive = FALSE;
 			}
 			if (turnRightActive) {
-				[self sendKeyboardEvent:AsciiToKeyCode(&table, 'd') keyDown:NO];
+				[self sendKeyboardEvent:GTMKeyCodeForCharCode('d') keyDown:NO];
 				turnRightActive = FALSE;
 			}		
 		}
@@ -1335,23 +1381,23 @@
 //	/* upActive < -0.5 < neutral < 0.5 < downActive */
 //	if (ay < (deadLevel * -1)) {
 //		if (!upActive && (secondsElapsedAY > secondLevel)) {
-//			[self sendKeyboardEvent:AsciiToKeyCode(&table, 'r') keyDown:YES];
+//			[self sendKeyboardEvent:GTMKeyCodeForCharCode('r') keyDown:YES];
 //			upActive = TRUE;
 //		}
 //	} else if (ay > deadLevel) {
 //		if (!downActive && (secondsElapsedAY > secondLevel)) {
-//			[self sendKeyboardEvent:AsciiToKeyCode(&table, 'f') keyDown:YES];
+//			[self sendKeyboardEvent:GTMKeyCodeForCharCode('f') keyDown:YES];
 //			downActive = TRUE;
 //		}
 //	} else {
 //		[reftimeAY release];
 //		reftimeAY = [[NSDate date] retain];
 //		if (upActive) {
-//			[self sendKeyboardEvent:AsciiToKeyCode(&table, 'r') keyDown:NO];
+//			[self sendKeyboardEvent:GTMKeyCodeForCharCode('r') keyDown:NO];
 //			upActive = FALSE;
 //		}
 //		if (downActive) {
-//			[self sendKeyboardEvent:AsciiToKeyCode(&table, 'f') keyDown:NO];
+//			[self sendKeyboardEvent:GTMKeyCodeForCharCode('f') keyDown:NO];
 //			downActive = FALSE;
 //		}		
 //	}
@@ -1359,23 +1405,23 @@
 //	/* turnLeftActive < -0.5 < neutral < 0.5 < turnRightActive */
 //	if (ax < (deadLevel * -1)) {
 //		if (!turnLeftActive && (secondsElapsedAX > secondLevel)) {
-//			[self sendKeyboardEvent:AsciiToKeyCode(&table, 'a') keyDown:YES];
+//			[self sendKeyboardEvent:GTMKeyCodeForCharCode('a') keyDown:YES];
 //			turnLeftActive = TRUE;
 //		}
 //	} else if (ax > deadLevel) {
 //		if (!turnRightActive && (secondsElapsedAX > secondLevel)) {
-//			[self sendKeyboardEvent:AsciiToKeyCode(&table, 'd') keyDown:YES];
+//			[self sendKeyboardEvent:GTMKeyCodeForCharCode('d') keyDown:YES];
 //			turnRightActive = TRUE;
 //		}
 //	} else {
 //		[reftimeAX release];
 //		reftimeAX = [[NSDate date] retain];
 //		if (turnLeftActive) {
-//			[self sendKeyboardEvent:AsciiToKeyCode(&table, 'a') keyDown:NO];
+//			[self sendKeyboardEvent:GTMKeyCodeForCharCode('a') keyDown:NO];
 //			turnLeftActive = FALSE;
 //		}
 //		if (turnRightActive) {
-//			[self sendKeyboardEvent:AsciiToKeyCode(&table, 'd') keyDown:NO];
+//			[self sendKeyboardEvent:GTMKeyCodeForCharCode('d') keyDown:NO];
 //			turnRightActive = FALSE;
 //		}		
 //	}
