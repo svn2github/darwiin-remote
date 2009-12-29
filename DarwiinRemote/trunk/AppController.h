@@ -38,6 +38,12 @@
 	IBOutlet NSWindow* enterNameWindow;
 	IBOutlet NSWindow* irWindow;
 	
+	IBOutlet GraphView* cogGraphView;
+	IBOutlet NSWindow* cogWindow;
+	IBOutlet NSButton* cogPlaybackButton;
+	IBOutlet NSButton* cogRecordButton;
+	IBOutlet NSButton* cogResetButton;
+	
 	IBOutlet NSButton* upButton;
 	IBOutlet NSButton* downButton;
 	IBOutlet NSButton* leftButton;
@@ -144,6 +150,11 @@
 - (IBAction)cancelEnterSaveName:(id)sender;
 - (IBAction)saveFile:(id)sender;
 - (IBAction)doDiscovery:(id)sender;
+
+- (IBAction)cogPlayback:(id)sender;
+- (IBAction)cogRecord:(id)sender;
+- (IBAction)cogReset:(id)sender;
+
 
 - (void)sendKeyboardEvent:(CGKeyCode)keyCode keyDown:(BOOL)keyDown;
 
