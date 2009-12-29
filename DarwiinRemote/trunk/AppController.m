@@ -1,6 +1,10 @@
 #import "AppController.h"
 #import <sys/time.h>
 
+/* XXX: Convert proof of concept implementations to actual GUI friendy options*/
+//#define BALANCEBOARD_TO_KEYS 1
+//#define NUNCHUK_TO_KEYS 1
+//#define WIIREMOTE_MOTION_TO_KEYS 1
 
 
 @implementation AppController
@@ -1134,7 +1138,8 @@ static CGKeyCode GTMKeyCodeForCharCode(CGCharCode charCode) {
 		
 		gettimeofday(&tval, &tzone);
 		t = localtime(&(tval.tv_sec));
-		
+
+#ifdef BALANCEBOARD_TO_KEYS
 		/* Little hack (Proof Of Concept) of mapping */
 				
 		/* As determined at the user evaluations, a fix value of deadLevel 
@@ -1216,6 +1221,7 @@ static CGKeyCode GTMKeyCodeForCharCode(CGCharCode charCode) {
 				[self sendKeyboardEvent:GTMKeyCodeForCharCode(moveDown) keyDown:NO];
 			}
 		}
+#endif
 	}
 }	
 
@@ -1241,6 +1247,7 @@ static CGKeyCode GTMKeyCodeForCharCode(CGCharCode charCode) {
 		[NunchukY setStringValue: [NSString stringWithFormat:@"%f", ay]];	
 		[NunchukZ setStringValue: [NSString stringWithFormat:@"%f", az]];	
 		
+#ifdef NUNCHUK_TO_KEYS
 		/* Little hack (Proof Of Concept) of mapping */
 		const double deadLevel = 0.5;
 		const double secondLevel = 0.1;
@@ -1302,7 +1309,7 @@ static CGKeyCode GTMKeyCodeForCharCode(CGCharCode charCode) {
 				turnRightActive = FALSE;
 			}		
 		}
-		
+#endif	
 		
 		return;
 	}
@@ -1363,68 +1370,69 @@ static CGKeyCode GTMKeyCodeForCharCode(CGCharCode charCode) {
 	
 //End sending to live view.
 
-
+#ifdef WIIREMOTE_MOTION_TO_KEYS
 	/* Little hack (Proof Of Concept) of mapping */
-//	const double deadLevel = 0.5;
-//	const double secondLevel = 0.1;
-//	static BOOL upActive = FALSE;
-//	static BOOL downActive = FALSE;
-//	static BOOL turnLeftActive = FALSE;
-//	static BOOL turnRightActive = FALSE;
-//	
-//	static NSDate* reftimeAY = nil;
-//	double secondsElapsedAY = [[NSDate date] timeIntervalSinceDate:reftimeAY];	
-//	
-//	static NSDate* reftimeAX = nil;
-//	double secondsElapsedAX = [[NSDate date] timeIntervalSinceDate:reftimeAX];	
-//	
-//	/* upActive < -0.5 < neutral < 0.5 < downActive */
-//	if (ay < (deadLevel * -1)) {
-//		if (!upActive && (secondsElapsedAY > secondLevel)) {
-//			[self sendKeyboardEvent:GTMKeyCodeForCharCode('r') keyDown:YES];
-//			upActive = TRUE;
-//		}
-//	} else if (ay > deadLevel) {
-//		if (!downActive && (secondsElapsedAY > secondLevel)) {
-//			[self sendKeyboardEvent:GTMKeyCodeForCharCode('f') keyDown:YES];
-//			downActive = TRUE;
-//		}
-//	} else {
-//		[reftimeAY release];
-//		reftimeAY = [[NSDate date] retain];
-//		if (upActive) {
-//			[self sendKeyboardEvent:GTMKeyCodeForCharCode('r') keyDown:NO];
-//			upActive = FALSE;
-//		}
-//		if (downActive) {
-//			[self sendKeyboardEvent:GTMKeyCodeForCharCode('f') keyDown:NO];
-//			downActive = FALSE;
-//		}		
-//	}
-//
-//	/* turnLeftActive < -0.5 < neutral < 0.5 < turnRightActive */
-//	if (ax < (deadLevel * -1)) {
-//		if (!turnLeftActive && (secondsElapsedAX > secondLevel)) {
-//			[self sendKeyboardEvent:GTMKeyCodeForCharCode('a') keyDown:YES];
-//			turnLeftActive = TRUE;
-//		}
-//	} else if (ax > deadLevel) {
-//		if (!turnRightActive && (secondsElapsedAX > secondLevel)) {
-//			[self sendKeyboardEvent:GTMKeyCodeForCharCode('d') keyDown:YES];
-//			turnRightActive = TRUE;
-//		}
-//	} else {
-//		[reftimeAX release];
-//		reftimeAX = [[NSDate date] retain];
-//		if (turnLeftActive) {
-//			[self sendKeyboardEvent:GTMKeyCodeForCharCode('a') keyDown:NO];
-//			turnLeftActive = FALSE;
-//		}
-//		if (turnRightActive) {
-//			[self sendKeyboardEvent:GTMKeyCodeForCharCode('d') keyDown:NO];
-//			turnRightActive = FALSE;
-//		}		
-//	}
+	const double deadLevel = 0.5;
+	const double secondLevel = 0.1;
+	static BOOL upActive = FALSE;
+	static BOOL downActive = FALSE;
+	static BOOL turnLeftActive = FALSE;
+	static BOOL turnRightActive = FALSE;
+	
+	static NSDate* reftimeAY = nil;
+	double secondsElapsedAY = [[NSDate date] timeIntervalSinceDate:reftimeAY];	
+	
+	static NSDate* reftimeAX = nil;
+	double secondsElapsedAX = [[NSDate date] timeIntervalSinceDate:reftimeAX];	
+	
+	/* upActive < -0.5 < neutral < 0.5 < downActive */
+	if (ay < (deadLevel * -1)) {
+		if (!upActive && (secondsElapsedAY > secondLevel)) {
+			[self sendKeyboardEvent:GTMKeyCodeForCharCode('r') keyDown:YES];
+			upActive = TRUE;
+		}
+	} else if (ay > deadLevel) {
+		if (!downActive && (secondsElapsedAY > secondLevel)) {
+			[self sendKeyboardEvent:GTMKeyCodeForCharCode('f') keyDown:YES];
+			downActive = TRUE;
+		}
+	} else {
+		[reftimeAY release];
+		reftimeAY = [[NSDate date] retain];
+		if (upActive) {
+			[self sendKeyboardEvent:GTMKeyCodeForCharCode('r') keyDown:NO];
+			upActive = FALSE;
+		}
+		if (downActive) {
+			[self sendKeyboardEvent:GTMKeyCodeForCharCode('f') keyDown:NO];
+			downActive = FALSE;
+		}		
+	}
+
+	/* turnLeftActive < -0.5 < neutral < 0.5 < turnRightActive */
+	if (ax < (deadLevel * -1)) {
+		if (!turnLeftActive && (secondsElapsedAX > secondLevel)) {
+			[self sendKeyboardEvent:GTMKeyCodeForCharCode('a') keyDown:YES];
+			turnLeftActive = TRUE;
+		}
+	} else if (ax > deadLevel) {
+		if (!turnRightActive && (secondsElapsedAX > secondLevel)) {
+			[self sendKeyboardEvent:GTMKeyCodeForCharCode('d') keyDown:YES];
+			turnRightActive = TRUE;
+		}
+	} else {
+		[reftimeAX release];
+		reftimeAX = [[NSDate date] retain];
+		if (turnLeftActive) {
+			[self sendKeyboardEvent:GTMKeyCodeForCharCode('a') keyDown:NO];
+			turnLeftActive = FALSE;
+		}
+		if (turnRightActive) {
+			[self sendKeyboardEvent:GTMKeyCodeForCharCode('d') keyDown:NO];
+			turnRightActive = FALSE;
+		}		
+	}
+#endif //WIIREMOTE_MOTION_TO_KEYS
 	
 	if (mouseEventMode != 1)	//Must be after graph and file data or they don't happen if Wii doesn't control mouse.
 	return;
@@ -1587,6 +1595,18 @@ static CGKeyCode GTMKeyCodeForCharCode(CGCharCode charCode) {
 		  contextInfo:nil];
 	
 }
+
+- (IBAction)cogRecord:(id)sender {
+	static bool recording = FALSE;
+	if (recording) {
+		recording = FALSE;
+		[cogRecordButton setStringValue:@"Stop Recording"];
+	} else {
+		recording = TRUE;
+		[cogRecordButton setStringValue:@"Start Recording"];
+	}
+}
+
 
 
 - (void)setupInitialKeyMappings{
