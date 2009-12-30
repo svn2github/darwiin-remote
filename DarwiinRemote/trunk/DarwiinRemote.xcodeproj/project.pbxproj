@@ -43,6 +43,7 @@
 		8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C165CFE840E0CC02AAC07 /* InfoPlist.strings */; };
 		8D11072D0486CEB800E47090 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; settings = {ATTRIBUTES = (); }; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
+		9E65733310EB2550001AE02D /* GridView.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E65733210EB2550001AE02D /* GridView.m */; };
 		9EC9170410E9438A00CC575F /* Quartz.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9EC9170310E9438A00CC575F /* Quartz.framework */; };
 		FC2F9C490F0E048000E822CC /* WiiRemote.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FC2F9C480F0E048000E822CC /* WiiRemote.framework */; };
 		FC2F9C500F0E048700E822CC /* WiiRemote.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = FC2F9C480F0E048000E822CC /* WiiRemote.framework */; };
@@ -97,6 +98,8 @@
 		53FA54D40B3AD41A003B73F3 /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = /System/Library/Frameworks/Carbon.framework; sourceTree = "<absolute>"; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		8D1107320486CEB800E47090 /* DarwiinRemote.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DarwiinRemote.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		9E65733110EB2550001AE02D /* GridView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GridView.h; sourceTree = "<group>"; };
+		9E65733210EB2550001AE02D /* GridView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GridView.m; sourceTree = "<group>"; };
 		9EC9170310E9438A00CC575F /* Quartz.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Quartz.framework; path = /System/Library/Frameworks/Quartz.framework; sourceTree = "<absolute>"; };
 		FC2F9C480F0E048000E822CC /* WiiRemote.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; name = WiiRemote.framework; path = "../WiiRemoteFramework-trunk/build/Debug/WiiRemote.framework"; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
@@ -121,6 +124,8 @@
 		080E96DDFE201D6D7F000001 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
+				9E65733110EB2550001AE02D /* GridView.h */,
+				9E65733210EB2550001AE02D /* GridView.m */,
 				531744990B240DD500579963 /* AppController.h */,
 				5317449A0B240DD500579963 /* AppController.m */,
 				53C573530B24870B00D36527 /* GraphView.h */,
@@ -325,6 +330,7 @@
 				539021E60B383F61004E3DE7 /* WidgetsEnableTransformer.m in Sources */,
 				535197AE0B39657F007184B2 /* WidgetsEnableTransformer2.m in Sources */,
 				5335B3480B3C73F800B21C9A /* PreferenceWindow.m in Sources */,
+				9E65733310EB2550001AE02D /* GridView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

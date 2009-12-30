@@ -15,8 +15,32 @@
 	value = _value;
 	tval = _tval;
 	
+	/* Bogus values to keep view consistant */
+	x = _value;
+	y = _tval.tv_sec;
+	
 	return self;
 }
+
+- (id)initWithCoordX:(float)_x Y:(float) _y time:(struct timeval)_tval{
+	x = _x;
+	y = _y;
+	
+	/* Bogus values to keep view consistant */
+	value = _y;
+	tval = _tval;
+	
+	return self;
+}
+
+- (float) getX {
+	return x;
+}
+
+- (float) getY {
+	return y;
+}
+
 - (float) value {
 	return value;
 }

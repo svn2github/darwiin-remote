@@ -7,6 +7,7 @@
 #import <WiiRemote/WiiRemote.h>
 #import <WiiRemote/WiiRemoteDiscovery.h>
 #import "GraphView.h"
+#import "GridView.h"
 #import "PreferenceWindow.h"
 #import "WidgetsEnableTransformer.h"
 #import "WidgetsEnableTransformer2.h"
@@ -37,12 +38,6 @@
 	IBOutlet PreferenceWindow* preferenceWindow;
 	IBOutlet NSWindow* enterNameWindow;
 	IBOutlet NSWindow* irWindow;
-	
-	IBOutlet GraphView* cogGraphView;
-	IBOutlet NSWindow* cogWindow;
-	IBOutlet NSButton* cogPlaybackButton;
-	IBOutlet NSButton* cogRecordButton;
-	IBOutlet NSButton* cogResetButton;
 	
 	IBOutlet NSButton* upButton;
 	IBOutlet NSButton* downButton;
@@ -133,6 +128,14 @@
 	WiiJoyStickCalibData nunchukJsCalib;
 	WiiAccCalibData wiiAccCalib, nunchukAccCalib;
 	
+	/* Center of Gravity Widget */
+	IBOutlet GridView* cogGridView;
+	IBOutlet NSWindow* cogWindow;
+	IBOutlet NSButton* cogPlaybackButton;
+	IBOutlet NSButton* cogRecordButton;
+	IBOutlet NSButton* cogResetButton;
+	IBOutlet NSTextField* cogSampleSize;
+	BOOL cogRecording;
 }
 
 - (void)setupInitialKeyMappings;
@@ -151,10 +154,10 @@
 - (IBAction)saveFile:(id)sender;
 - (IBAction)doDiscovery:(id)sender;
 
+/* Center of Gravity widget */
 - (IBAction)cogPlayback:(id)sender;
 - (IBAction)cogRecord:(id)sender;
 - (IBAction)cogReset:(id)sender;
-
 
 - (void)sendKeyboardEvent:(CGKeyCode)keyCode keyDown:(BOOL)keyDown;
 

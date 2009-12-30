@@ -247,10 +247,12 @@ static CGKeyCode GTMKeyCodeForCharCode(CGCharCode charCode) {
 1) If the application is unable to find your devices please make _sure_ to\n\
    delete assosiated Wii devices from your Bluetooth Preferences screen\n\
 2) Still unable? Press Find, _wait_ a few (like 5+) seconds and then try to sync\n\
-3) Waiting about 15s on non-Intel systems _may_ prevent having to refind the wiimote"];
+3) Waiting about 15s on non-Intel systems _may_ prevent having to refind the wiimote\n\
+4) If you like to use both BalanceBoard and WiiRemote make sure to sync with the BB first\n"];
 	
 	// By default no recording on startup
 	recordToFile = NO;
+	cogRecording = NO;
 	
 	point.x = 0;
 	point.y = 0;
@@ -300,9 +302,7 @@ static CGKeyCode GTMKeyCodeForCharCode(CGCharCode charCode) {
 	z0 = (z2 + z3) / 2.0;
 	**/
 	
-	
-	[self setupInitialKeyMappings];
-		
+	[self setupInitialKeyMappings];		
 }
 
 - (void)expansionPortChanged:(NSNotification *)nc{
@@ -1139,6 +1139,14 @@ static CGKeyCode GTMKeyCodeForCharCode(CGCharCode charCode) {
 		gettimeofday(&tval, &tzone);
 		t = localtime(&(tval.tv_sec));
 
+		/* Center Of Gravity Widget logic */
+		float cog_x = (pressureTR + pressureBR) - (pressureTL + pressureBL);
+		float cog_y = (pressureTL + pressureTR) - (pressureBL + pressureBR);
+		if (cogRecording) {
+			[cogGridView setData:cog_x y:cog_y];
+		}
+		[cogGridView setFocusPointX:cog_x Y:cog_y];
+		
 #ifdef BALANCEBOARD_TO_KEYS
 		/* Little hack (Proof Of Concept) of mapping */
 				
@@ -1558,6 +1566,7 @@ static CGKeyCode GTMKeyCodeForCharCode(CGCharCode charCode) {
 	
 	[graphView stopTimer];
 	[graphView2 stopTimer];
+	[cogGridView stopTimer];
 	[wii closeConnection];
 	
 	[appDelegate saveAction:nil];
@@ -1596,17 +1605,28 @@ static CGKeyCode GTMKeyCodeForCharCode(CGCharCode charCode) {
 	
 }
 
-- (IBAction)cogRecord:(id)sender {
-	static bool recording = FALSE;
-	if (recording) {
-		recording = FALSE;
-		[cogRecordButton setStringValue:@"Stop Recording"];
+- (IBAction)cogRecord:(id)sender{
+	if (cogRecording == NO) {
+		cogRecording = YES;
+		[cogRecordButton setTitle:@"Stop Recording"];
+		[cogGridView reset];
+		[cogGridView setSampleSize:[cogSampleSize floatValue]];	
 	} else {
-		recording = TRUE;
-		[cogRecordButton setStringValue:@"Start Recording"];
+		cogRecording = NO;
+		[cogRecordButton setTitle:@"Start Recording"];
 	}
 }
 
+- (IBAction)cogReset:(id)sender{
+	[cogGridView reset];
+}
+
+- (IBAction)cogPlayback:(id)sender{
+	//XXX: Implement
+	NSAlert* alert = [NSAlert new];
+	[alert setInformativeText:@"Not implemented yet"];
+	[alert runModal];
+}
 
 
 - (void)setupInitialKeyMappings{
