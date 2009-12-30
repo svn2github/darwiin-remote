@@ -171,7 +171,7 @@
 			float y = [p getY] / scale;
 			
 			/* Different colours depending on the 'age' of the point */
-			float age = 0.1;
+			float age = rand() / RAND_MAX;
 			glColor4f(1.0, 0.0, 0.0, age);			//redish
 			glRectf( x - pointsize* (rect.size.height / rect.size.width), y - pointsize, x + pointsize * (rect.size.height / rect.size.width), y + pointsize );
 		}	

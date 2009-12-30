@@ -301,7 +301,7 @@ static CGKeyCode GTMKeyCodeForCharCode(CGCharCode charCode) {
 	y0 = (y1 + y3) / 2.0;
 	z0 = (z2 + z3) / 2.0;
 	**/
-	
+	[cogRecordButton setNextState];
 	[self setupInitialKeyMappings];		
 }
 
@@ -1117,13 +1117,13 @@ static CGKeyCode GTMKeyCodeForCharCode(CGCharCode charCode) {
 
 
 
-- (void) pressureChanged:(WiiPressureSensorType)type pressureTR:(unsigned short) pressureTR pressureBR:(unsigned short) pressureBR 
-                                                         pressureTL:(unsigned short) pressureTL pressureBL:(unsigned short) pressureBL {
+- (void) pressureChanged:(WiiPressureSensorType)type pressureTR:(float) pressureTR pressureBR:(float) pressureBR 
+                                                         pressureTL:(float) pressureTL pressureBL:(float) pressureBL {
 	if (type == WiiBalanceBoardPressureSensor){
-		[bPressureTR setStringValue: [NSString stringWithFormat:@"%ikg", pressureTR]];
-		[bPressureBR setStringValue: [NSString stringWithFormat:@"%ikg", pressureBR]];
-		[bPressureTL setStringValue: [NSString stringWithFormat:@"%ikg", pressureTL]];
-		[bPressureBL setStringValue: [NSString stringWithFormat:@"%ikg", pressureBL]];
+		[bPressureTR setStringValue: [NSString stringWithFormat:@"%.2fkg", pressureTR]];
+		[bPressureBR setStringValue: [NSString stringWithFormat:@"%.2fkg", pressureBR]];
+		[bPressureTL setStringValue: [NSString stringWithFormat:@"%.2fkg", pressureTL]];
+		[bPressureBL setStringValue: [NSString stringWithFormat:@"%.2fkg", pressureBL]];
 		[bbQCView setValue:[NSNumber numberWithFloat: 0.1 + (pressureTR/5)] forInputKey:[NSString stringWithString:@"sizeTR"]];
 		[bbQCView setValue:[NSNumber numberWithFloat: 0.1 + (pressureBR/5)] forInputKey:[NSString stringWithString:@"sizeBR"]];
 		[bbQCView setValue:[NSNumber numberWithFloat: 0.1 + (pressureTL/5)] forInputKey:[NSString stringWithString:@"sizeTL"]];
@@ -1613,6 +1613,7 @@ static CGKeyCode GTMKeyCodeForCharCode(CGCharCode charCode) {
 		[cogGridView setSampleSize:[cogSampleSize floatValue]];	
 	} else {
 		cogRecording = NO;
+		[cogGridView stopTimer];
 		[cogRecordButton setTitle:@"Start Recording"];
 	}
 }
