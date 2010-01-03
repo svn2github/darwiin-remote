@@ -135,7 +135,14 @@
 	IBOutlet NSButton* cogRecordButton;
 	IBOutlet NSButton* cogResetButton;
 	IBOutlet NSTextField* cogSampleSize;
+	IBOutlet NSTextField* cogTextInfo;
+	IBOutlet NSTextField* cogRecordTime;
 	BOOL cogRecording;
+	BOOL cogCaliberation;
+	float cogAjustX;
+	float cogAjustY;
+	float cogRecordedTime;
+	NSTimer* cogRecordTimer;
 }
 
 - (void)setupInitialKeyMappings;
@@ -155,7 +162,9 @@
 - (IBAction)doDiscovery:(id)sender;
 
 /* Center of Gravity widget */
-- (IBAction)cogPlayback:(id)sender;
+- (void) cogStopRecord;
+- (void) cogRecordTimerUpdate:(NSTimer*)timer;
+- (IBAction)cogCaliberate:(id)sender;
 - (IBAction)cogRecord:(id)sender;
 - (IBAction)cogReset:(id)sender;
 

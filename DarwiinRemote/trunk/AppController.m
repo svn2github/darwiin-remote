@@ -252,7 +252,12 @@ static CGKeyCode GTMKeyCodeForCharCode(CGCharCode charCode) {
 	
 	// By default no recording on startup
 	recordToFile = NO;
+	
+	/* Center Of Gravity widget */
 	cogRecording = NO;
+	cogCaliberation = NO;
+	cogAjustX = 0;
+	cogAjustY = 0;
 	
 	point.x = 0;
 	point.y = 0;
@@ -1142,6 +1147,17 @@ static CGKeyCode GTMKeyCodeForCharCode(CGCharCode charCode) {
 		/* Center Of Gravity Widget logic */
 		float cog_x = (pressureTR + pressureBR) - (pressureTL + pressureBL);
 		float cog_y = (pressureTL + pressureTR) - (pressureBL + pressureBR);
+		
+		/* Make sure 'dodgy' BalanceBoards are synced well */
+		if (cogCaliberation) {
+			cogAjustX = cog_x * -1;
+			cogAjustY = cog_y * -1;
+			cogCaliberation = NO;
+			[cogTextInfo setStringValue:[NSString stringWithFormat:@"Caliberated ajust x:%.2fkg - y:%.2fkg",cogAjustX, cogAjustY]];
+		}
+		cog_x += cogAjustX;
+		cog_y += cogAjustY;
+		
 		if (cogRecording) {
 			[cogGridView setData:cog_x y:cog_y];
 		}
@@ -1605,28 +1621,57 @@ static CGKeyCode GTMKeyCodeForCharCode(CGCharCode charCode) {
 	
 }
 
+- (void) cogStopRecord{
+	//XXX: average displacement values
+	if (cogRecordTimer != nil) {
+		[cogRecordTimer invalidate];
+		cogRecordTimer = nil;
+	}
+	cogRecording = NO;
+	[cogGridView stopTimer];
+	[cogRecordButton setTitle:@"Start Recording"];
+	[cogTextInfo setStringValue:@"Average displacement x:TODO% y:TODO%"];	
+}
+
+- (void) cogRecordTimerUpdate:(NSTimer *)timer{
+	cogRecordedTime += [timer timeInterval];
+	[cogTextInfo setStringValue:[NSString stringWithFormat:@"Recording 0:00:%02.0f...",cogRecordedTime]];
+	 if (cogRecordedTime >= [cogRecordTime floatValue]) {
+		 [self cogStopRecord];
+	 }
+}	
+	 
+
 - (IBAction)cogRecord:(id)sender{
 	if (cogRecording == NO) {
 		cogRecording = YES;
 		[cogRecordButton setTitle:@"Stop Recording"];
+		[cogTextInfo setStringValue:@"Recording 0:00:00 ..."];
+		cogRecordedTime = 0;
+		cogRecordTimer = [NSTimer scheduledTimerWithTimeInterval:1 
+						  target:self selector:@selector(cogRecordTimerUpdate:) 
+						  userInfo:nil repeats:YES];
+
 		[cogGridView reset];
 		[cogGridView setSampleSize:[cogSampleSize floatValue]];	
 	} else {
-		cogRecording = NO;
-		[cogGridView stopTimer];
-		[cogRecordButton setTitle:@"Start Recording"];
+		[self cogStopRecord];
 	}
 }
 
 - (IBAction)cogReset:(id)sender{
+	cogAjustX = 0;
+	cogAjustY = 0;
+	[cogRecordButton setTitle:@"Start Recording"];
+	cogRecording = NO;
 	[cogGridView reset];
+	[cogTextInfo setStringValue:@"Reset - Press record to start..."];
+
 }
 
-- (IBAction)cogPlayback:(id)sender{
-	//XXX: Implement
-	NSAlert* alert = [NSAlert new];
-	[alert setInformativeText:@"Not implemented yet"];
-	[alert runModal];
+- (IBAction)cogCaliberate:(id)sender{
+	cogCaliberation = YES;
+	[cogTextInfo setStringValue:@"Caliberating..."];
 }
 
 
