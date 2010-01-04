@@ -255,7 +255,7 @@ static CGKeyCode GTMKeyCodeForCharCode(CGCharCode charCode) {
 	
 	/* Center Of Gravity widget */
 	cogRecording = NO;
-	cogCaliberation = NO;
+	cogCalibration = NO;
 	cogAjustX = 0;
 	cogAjustY = 0;
 	
@@ -1147,19 +1147,25 @@ static CGKeyCode GTMKeyCodeForCharCode(CGCharCode charCode) {
 		/* Center Of Gravity Widget logic */
 		float cog_x = (pressureTR + pressureBR) - (pressureTL + pressureBL);
 		float cog_y = (pressureTL + pressureTR) - (pressureBL + pressureBR);
+		float cog_weight = (pressureTR + pressureBR + pressureTL + pressureBL);
 		
 		/* Make sure 'dodgy' BalanceBoards are synced well */
-		if (cogCaliberation) {
+		if (cogCalibration) {
 			cogAjustX = cog_x * -1;
 			cogAjustY = cog_y * -1;
-			cogCaliberation = NO;
+			cogCalibration = NO;
 			[cogTextInfo setStringValue:[NSString stringWithFormat:@"Caliberated ajust x:%.2fkg - y:%.2fkg",cogAjustX, cogAjustY]];
 		}
 		cog_x += cogAjustX;
 		cog_y += cogAjustY;
-		
+
 		if (cogRecording) {
+			cogSamples += 1;
+			cogRawWeight += cog_weight;
+			cogRawX += cog_x;
+			cogRawY += cog_y;
 			[cogGridView setData:cog_x y:cog_y];
+			[cogWeight setStringValue:[NSString stringWithFormat:@"%.2f", cog_weight]];
 		}
 		[cogGridView setFocusPointX:cog_x Y:cog_y];
 		
@@ -1621,6 +1627,32 @@ static CGKeyCode GTMKeyCodeForCharCode(CGCharCode charCode) {
 	
 }
 
+- (IBAction)cogEnableSampleSize:(id)sender {
+	if ([cogSampleSizeButton state] == NSOnState) {
+		[cogSampleSize setEnabled:YES];
+	} else {
+		[cogSampleSize setEnabled:NO];
+	}
+}
+
+- (void) cogStartRecord{
+	cogRecording = YES;
+	cogSamples = cogRawWeight = cogRawX = cogRawY = 0;
+	[cogRecordButton setTitle:@"Stop Recording"];
+	[cogTextInfo setStringValue:@"Recording 0:00:00 ..."];
+	cogRecordedTime = 0;
+	cogRecordTimer = [NSTimer scheduledTimerWithTimeInterval:1 
+													  target:self selector:@selector(cogRecordTimerUpdate:) 
+													userInfo:nil repeats:YES];
+	
+	[cogGridView reset];
+	if ([cogSampleSizeButton state] == NSOnState) {
+		[cogGridView setSampleSize:[cogSampleSize floatValue]];
+	} else {
+		[cogGridView setSampleSize:[cogRecordTime floatValue]];
+	}
+}
+
 - (void) cogStopRecord{
 	//XXX: average displacement values
 	if (cogRecordTimer != nil) {
@@ -1630,7 +1662,15 @@ static CGKeyCode GTMKeyCodeForCharCode(CGCharCode charCode) {
 	cogRecording = NO;
 	[cogGridView stopTimer];
 	[cogRecordButton setTitle:@"Start Recording"];
-	[cogTextInfo setStringValue:@"Average displacement x:TODO% y:TODO%"];	
+	
+	/* Displacement is displayed kind of special, namely as percentage of the weight. 
+	 * Basically it shows how many weight you are putting on one side of your body extra.
+	 */
+	float cog_avg_weight = cogRawWeight / cogSamples;
+	float cog_displacement_x = (cogRawX / cogSamples) / cog_avg_weight * 100; 
+	float cog_displacement_y = (cogRawY / cogSamples) / cog_avg_weight * 100;
+
+	[cogTextInfo setStringValue:[NSString stringWithFormat:@"Average displacement X:%.2f%%     Y:%.2f%%",cog_displacement_x, cog_displacement_y]];	
 }
 
 - (void) cogRecordTimerUpdate:(NSTimer *)timer{
@@ -1640,20 +1680,28 @@ static CGKeyCode GTMKeyCodeForCharCode(CGCharCode charCode) {
 		 [self cogStopRecord];
 	 }
 }	
-	 
 
+- (void) cogRecordDelayTimerUpdate:(NSTimer *)timer{
+	cogRecordedTime -= [timer timeInterval];
+	[cogTextInfo setStringValue:[NSString stringWithFormat:@"Recording in %.0f sec...",cogRecordedTime]];
+	if (cogRecordedTime <= 0) {
+		[cogRecordTimer invalidate];
+		cogRecordTimer = nil;
+		[self cogStartRecord];
+	}
+}	
+	 
 - (IBAction)cogRecord:(id)sender{
 	if (cogRecording == NO) {
-		cogRecording = YES;
-		[cogRecordButton setTitle:@"Stop Recording"];
-		[cogTextInfo setStringValue:@"Recording 0:00:00 ..."];
-		cogRecordedTime = 0;
-		cogRecordTimer = [NSTimer scheduledTimerWithTimeInterval:1 
-						  target:self selector:@selector(cogRecordTimerUpdate:) 
-						  userInfo:nil repeats:YES];
-
-		[cogGridView reset];
-		[cogGridView setSampleSize:[cogSampleSize floatValue]];	
+		cogRecordedTime = [cogRecordDelay floatValue];
+		/* Kick the record self timer, allowing the user to step on and get relaxed */
+		if ([cogRecordDelay floatValue] > 0) {
+			cogRecordTimer = [NSTimer scheduledTimerWithTimeInterval:1 
+							target:self selector:@selector(cogRecordDelayTimerUpdate:) 
+							userInfo:nil repeats:YES];			
+		} else {
+			[self cogStartRecord];
+		}
 	} else {
 		[self cogStopRecord];
 	}
@@ -1662,16 +1710,15 @@ static CGKeyCode GTMKeyCodeForCharCode(CGCharCode charCode) {
 - (IBAction)cogReset:(id)sender{
 	cogAjustX = 0;
 	cogAjustY = 0;
-	[cogRecordButton setTitle:@"Start Recording"];
-	cogRecording = NO;
+	[self cogStopRecord];
 	[cogGridView reset];
 	[cogTextInfo setStringValue:@"Reset - Press record to start..."];
 
 }
 
-- (IBAction)cogCaliberate:(id)sender{
-	cogCaliberation = YES;
-	[cogTextInfo setStringValue:@"Caliberating..."];
+- (IBAction)cogCalibrate:(id)sender{
+	cogCalibration = YES;
+	[cogTextInfo setStringValue:@"Calibrating..."];
 }
 
 
