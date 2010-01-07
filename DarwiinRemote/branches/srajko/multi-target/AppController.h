@@ -15,6 +15,7 @@
 #import "KeyConfiguration_AppDelegate.h"
 
 @class PreferenceWindow;
+@class BBOSCSender;
 
 @interface AppController : NSObject
 {
@@ -133,24 +134,18 @@
 	IBOutlet NSWindow* cogWindow;
 	IBOutlet NSButton* cogPlaybackButton;
 	IBOutlet NSButton* cogRecordButton;
-	IBOutlet NSTextField* cogRecordDelay;
 	IBOutlet NSButton* cogResetButton;
 	IBOutlet NSTextField* cogSampleSize;
-	IBOutlet NSButton* cogSampleSizeButton;	
 	IBOutlet NSTextField* cogTextInfo;
 	IBOutlet NSTextField* cogRecordTime;
-	IBOutlet NSTextField* cogWeight;
 	BOOL cogRecording;
-	BOOL cogCalibration;
+	BOOL cogCaliberation;
 	float cogAjustX;
 	float cogAjustY;
 	float cogRecordedTime;
-	float cogRawX;
-	float cogRawY;
-	float cogSamples;
-	float cogRawWeight;
 	NSTimer* cogRecordTimer;
 
+	BBOSCSender * oscSender;
 }
 
 - (void)setupInitialKeyMappings;
@@ -170,15 +165,11 @@
 - (IBAction)doDiscovery:(id)sender;
 
 /* Center of Gravity widget */
-- (void) cogStartRecord;
 - (void) cogStopRecord;
 - (void) cogRecordTimerUpdate:(NSTimer*)timer;
-- (void) cogRecordDelayTimerUpdate:(NSTimer *)timer;
-- (IBAction)cogCalibrate:(id)sender;
+- (IBAction)cogCaliberate:(id)sender;
 - (IBAction)cogRecord:(id)sender;
 - (IBAction)cogReset:(id)sender;
-- (IBAction)cogEnableSampleSize:(id)sender;
-
 
 - (void)sendKeyboardEvent:(CGKeyCode)keyCode keyDown:(BOOL)keyDown;
 
