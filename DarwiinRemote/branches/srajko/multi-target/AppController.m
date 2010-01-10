@@ -1,10 +1,7 @@
 #import "AppController.h"
 #import <sys/time.h>
+#import "Plugin.h"
 
-#import <BBOSC/BBOSCMessage.h>
-#import <BBOSC/BBOSCSender.h>
-#import <BBOSC/BBOSCArgument.h>
-#import <BBOSC/BBOSCAddress.h>
 
 /* XXX: Convert proof of concept implementations to actual GUI friendy options*/
 //#define BALANCEBOARD_TO_KEYS 1
@@ -216,18 +213,18 @@ static CGKeyCode GTMKeyCodeForCharCode(CGCharCode charCode) {
 
 	NSSortDescriptor* descriptor = [[[NSSortDescriptor alloc] initWithKey:@"name" ascending:YES] autorelease];
 	configSortDescriptors = [[NSArray arrayWithObjects:descriptor, nil] retain];
-    
-    oscSender = [[BBOSCSender senderWithDestinationHostName:@"localhost" portNumber:4556] retain];
 
+	pluginArray = [[NSMutableArray alloc] init];
+	
 	return self;
 }
 
 - (void) dealloc
 {
+	[pluginArray release];
 	[wii release];
 	[discovery release];
 	[configSortDescriptors release];
-    [oscSender release];
 	[super dealloc];
 }
 
@@ -316,7 +313,10 @@ static CGKeyCode GTMKeyCodeForCharCode(CGCharCode charCode) {
 	z0 = (z2 + z3) / 2.0;
 	**/
 	[cogRecordButton setNextState];
-	[self setupInitialKeyMappings];		
+	[self setupInitialKeyMappings];
+    
+    // load plugins for this build
+    [self loadPlugins];
 }
 
 - (void)expansionPortChanged:(NSNotification *)nc{
@@ -546,7 +546,15 @@ static CGKeyCode GTMKeyCodeForCharCode(CGCharCode charCode) {
 
 
 - (void) buttonChanged:(WiiButtonType)type isPressed:(BOOL)isPressed{
-		 
+
+	// Call plugins
+	for(NSObject<Plugin> *plugin in pluginArray)
+	{
+		[plugin buttonChanged:type isPressed:isPressed];
+	}
+
+	// ...
+	
 	id mappings = [mappingController selection];
 	id map = nil;
 	if (type == WiiRemoteAButton){
@@ -1466,14 +1474,13 @@ static CGKeyCode GTMKeyCodeForCharCode(CGCharCode charCode) {
 		}		
 	}
 #endif //WIIREMOTE_MOTION_TO_KEYS
+
+	// Call plugins
 	
-    // OSC send
-    BBOSCMessage * newMessage = [BBOSCMessage messageWithBBOSCAddress:[BBOSCAddress addressWithString:@"/accelerometer"]];
-	[newMessage attachArgument:[BBOSCArgument argumentWithFloat:ax]];
-	[newMessage attachArgument:[BBOSCArgument argumentWithFloat:ay]];
-	[newMessage attachArgument:[BBOSCArgument argumentWithFloat:az]];
-    
-    [oscSender sendOSCPacket:newMessage];
+	for(NSObject<Plugin> *plugin in pluginArray)
+	{
+		[plugin accelerationChanged:type aX:ax aY:ay aZ:az];
+	}
 
 	if (mouseEventMode != 1)	//Must be after graph and file data or they don't happen if Wii doesn't control mouse.
 	return;
@@ -2142,6 +2149,10 @@ static CGKeyCode GTMKeyCodeForCharCode(CGCharCode charCode) {
 
 	NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
 	[mappingController setSelectionIndex:[[defaults objectForKey:@"selection"] intValue]];
+}
+
+- (void) loadPlugins
+{
 }
 
 @end

@@ -1,0 +1,3 @@
+/* Localized versions of Info.plist keys */
+
+NSHumanReadableCopyright = "© DarwiinRemote Team, 2008-2010.\n\nThe BBOSC framework is © Ben Britten and others\nused under the terms of the LGPL license (see http://www.gnu.org/licenses/lgpl.html)\nsource code available at http://code.google.com/p/bbosc/";

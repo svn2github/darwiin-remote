@@ -15,7 +15,6 @@
 #import "KeyConfiguration_AppDelegate.h"
 
 @class PreferenceWindow;
-@class BBOSCSender;
 
 @interface AppController : NSObject
 {
@@ -145,7 +144,8 @@
 	float cogRecordedTime;
 	NSTimer* cogRecordTimer;
 
-	BBOSCSender * oscSender;
+    // for plugins
+    NSMutableArray* pluginArray;
 }
 
 - (void)setupInitialKeyMappings;
@@ -180,6 +180,9 @@
 
 - (NSManagedObject*)createNewConfigration:(NSString*)name;
 
+// plugin loading code
+
+- (void) loadPlugins;
 
 #pragma mark -
 #pragma mark WiiRemoteDiscovery delegates
