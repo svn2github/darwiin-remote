@@ -106,7 +106,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		0805517410F68E12004041A7 /* DarwiinRemoteOSC.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DarwiinRemoteOSC.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		0805517410F68E12004041A7 /* DarwiinRemoteOSC Too.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "DarwiinRemoteOSC Too.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		0805520810F697A7004041A7 /* Plugin.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Plugin.h; sourceTree = "<group>"; };
 		083AACAC10F6D6E6008E5B5D /* English */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		083AACD010F6DBA2008E5B5D /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -255,7 +255,7 @@
 			isa = PBXGroup;
 			children = (
 				8D1107320486CEB800E47090 /* DarwiinRemote.app */,
-				0805517410F68E12004041A7 /* DarwiinRemoteOSC.app */,
+				0805517410F68E12004041A7 /* DarwiinRemoteOSC Too.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -334,9 +334,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		0805515010F68E12004041A7 /* DarwiinRemoteOSC */ = {
+		0805515010F68E12004041A7 /* DarwiinRemoteOSC Too */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 0805517110F68E12004041A7 /* Build configuration list for PBXNativeTarget "DarwiinRemoteOSC" */;
+			buildConfigurationList = 0805517110F68E12004041A7 /* Build configuration list for PBXNativeTarget "DarwiinRemoteOSC Too" */;
 			buildPhases = (
 				0805515110F68E12004041A7 /* Resources */,
 				0805515B10F68E12004041A7 /* Sources */,
@@ -347,10 +347,10 @@
 			);
 			dependencies = (
 			);
-			name = DarwiinRemoteOSC;
+			name = "DarwiinRemoteOSC Too";
 			productInstallPath = "$(HOME)/Applications";
 			productName = WiiRemote;
-			productReference = 0805517410F68E12004041A7 /* DarwiinRemoteOSC.app */;
+			productReference = 0805517410F68E12004041A7 /* DarwiinRemoteOSC Too.app */;
 			productType = "com.apple.product-type.application";
 		};
 		8D1107260486CEB800E47090 /* DarwiinRemote */ = {
@@ -385,7 +385,7 @@
 			projectRoot = "";
 			targets = (
 				8D1107260486CEB800E47090 /* DarwiinRemote */,
-				0805515010F68E12004041A7 /* DarwiinRemoteOSC */,
+				0805515010F68E12004041A7 /* DarwiinRemoteOSC Too */,
 				9EC9174A10E94AB200CC575F /* DarwiinRemote.dmg */,
 			);
 		};
@@ -550,7 +550,7 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				INFOPLIST_FILE = OSC/Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
-				PRODUCT_NAME = DarwiinRemoteOSC;
+				PRODUCT_NAME = "DarwiinRemoteOSC Too";
 				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
 				WRAPPER_EXTENSION = app;
 				ZERO_LINK = YES;
@@ -594,7 +594,7 @@
 				GCC_MODEL_TUNING = G5;
 				INFOPLIST_FILE = OSC/Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
-				PRODUCT_NAME = DarwiinRemoteOSC;
+				PRODUCT_NAME = "DarwiinRemoteOSC Too";
 				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
 				WRAPPER_EXTENSION = app;
 			};
@@ -737,7 +737,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		0805517110F68E12004041A7 /* Build configuration list for PBXNativeTarget "DarwiinRemoteOSC" */ = {
+		0805517110F68E12004041A7 /* Build configuration list for PBXNativeTarget "DarwiinRemoteOSC Too" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				0805517210F68E12004041A7 /* Debug */,
